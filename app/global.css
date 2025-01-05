@@ -89,6 +89,7 @@ html {
 
 .prose h1 {
   @apply text-4xl font-medium tracking-tight mt-6 mb-2;
+  view-transition-name: blog-title;
 }
 
 .prose h2 {
