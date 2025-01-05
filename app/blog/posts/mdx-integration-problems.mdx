@@ -1,0 +1,37 @@
+---
+title: '在 Next.js 中使用 MDX 的踩坑记录'
+publishedAt: '2025-01-05'
+summary: '分享在 Next.js 项目中集成 MDX 时遇到的各种问题及解决方案'
+---
+
+在搭建个人博客的过程中，我选择了 MDX 作为写作工具。MDX 能让我在 Markdown 中自由地使用 React 组件，这对于创建富有交互性的技术博客来说非常理想。
+
+虽然 Next.js 官方文档对 MDX 的集成介绍看起来简单明了，但实际操作中还是遇到了一些棘手的问题。分享一下解决方案。
+
+## 主要问题及解决方案
+
+### 1. 表格渲染问题
+
+使用 `next-mdx-remote` 时，默认情况下表格无法正常显示。需要通过自定义组件来解决这个问题。而 `remark-gfm v4.0.0` 无法和 `next-mdx-remote` 需要降级使用 `remark-gfm v3.0.0`
+或者使用 `remark-gfm v5.0.0 canary` 版本。
+
+### 2. Turbopack 兼容性问题
+
+如果你使用 Turbopack，需要在配置中添加：
+
+```js
+module.exports = {
+  transpilePackages: ['next-mdx-remote'],
+  experimental: {
+    mdxRs: true,
+  },
+};
+```
+
+### 3. next.js 14.x turbopack 错误
+
+当使用 `readFileSync` 时，稍微复杂一点就会提示 'readFileSync is too dynamically'
+
+目前只能升级到 `next.js 15.x` 才能解决这个问题。
+
+
