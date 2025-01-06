@@ -149,3 +149,12 @@ table {
 .title {
   text-wrap: balance;
 }
+
+.blog-title {
+  view-transition-name: blog-title;
+  width: fit-content;
+}
+
+.container {
+  view-transition-name: container-move;
+}

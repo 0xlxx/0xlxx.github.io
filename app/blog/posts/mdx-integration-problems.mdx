@@ -12,8 +12,7 @@ summary: '分享在 Next.js 项目中集成 MDX 时遇到的各种问题及解�
 
 ### 1. 表格渲染问题
 
-使用 `next-mdx-remote` 时，默认情况下表格无法正常显示。需要通过自定义组件来解决这个问题。而 `remark-gfm v4.0.0` 无法和 `next-mdx-remote` 需要降级使用 `remark-gfm v3.0.0`
-或者使用 `remark-gfm v5.0.0 canary` 版本。
+使用 next-mdx-remote 时，默认情况下表格无法正常显示。需要通过自定义组件来解决这个问题。而 remark-gfm v4.0.0 无法和 next-mdx-remote 一起使用，需要降级使用 remark-gfm v3.0.0 或者使用 remark-gfm v5.0.0 canary 版本。
 
 ### 2. Turbopack 兼容性问题
 
@@ -32,6 +31,6 @@ module.exports = {
 
 当使用 `readFileSync` 时，稍微复杂一点就会提示 'readFileSync is too dynamically'
 
-目前只能升级到 `next.js 15.x` 才能解决这个问题。
+目前只能升级到 next.js 15.x 才能解决这个问题。
 
 
