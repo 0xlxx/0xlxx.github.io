@@ -3,7 +3,7 @@ import { BlogPosts } from 'app/components/posts'
 export default function Page() {
   return (
     <section>
-      <h1 className="mb-8 text-2xl font-semibold tracking-tighter [view-transition-name:blog-title]">
+      <h1 className="mb-8 text-2xl font-semibold tracking-tighter [view-transition-name:page-title]">
         XinXin Li
       </h1>
       <p className="mb-4">

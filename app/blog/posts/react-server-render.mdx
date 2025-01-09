@@ -1,0 +1,254 @@
+---
+title: React服务端渲染
+publishedAt: 2025-01-09
+summary: React服务端渲染
+slug: react-server-side-rendering
+---
+
+## 客户端渲染
+
+回顾一下，在浏览器当中一个网页是如何显示出来的
+
+当浏览器向服务器发送请求获取 HTML 文件时，HTML 文件通常包含 `<link>` 和 `<script>` 元素，这些元素分别指向了外部的 CSS 样式表文件和 JavaScript 脚本文件。
+
+这些文件被解析的顺序如下：
+
+- 浏览器首先解析 HTML 文件，并从中识别出所有的 `<link>` 和 `<script>` 元素，获取它们指向的外部文件的链接。
+- 继续解析 HTML 文件的同时，浏览器根据外部文件的链接向服务器发送请求，获取并解析 CSS 文件和 JavaScript 脚本文件。
+- 接着浏览器会给解析后的 HTML 文件生成一个 DOM 树，会给解析后的 CSS 文件生成一个 CSSOM 树，并且会编译和执行解析后的 JavaScript 脚本文件。
+- 伴随着构建 DOM 树、应用 CSSOM 树的样式、以及执行 JavaScript 脚本文件，浏览器会在屏幕上绘制出网页的界面；用户看到网页界面也就可以跟网页进行交互了。
+
+客户端渲染和服务端渲染都符合上述的过程，区别在于客户端渲染的 HTML 文件中是空白的，大部分内容是通过 JavaScript 修改 DOM 树生成的。
+
+也就是当用户看到一个完整网页之前，客户端渲染会经历如下步骤
+
+![client render](/images/react/csr.png)
+
+一个典型的客户端渲染网页如下所示：
+
+```html
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="modulepreload" crossorigin href="/assets/1f58954.js">
+    <link rel="modulepreload" crossorigin href="/assets/18400eb.js">
+    <link rel="modulepreload" crossorigin href="/assets/1edb978.js">
+    <link rel="modulepreload" crossorigin href="/assets/19ea55a.js">
+    <link rel="modulepreload" crossorigin href="/assets/1e1c3d6.js">
+    <link rel="modulepreload" crossorigin href="/assets/1f50164.js">
+    <link rel="modulepreload" crossorigin href="/assets/189b608.js">
+    <link rel="modulepreload" crossorigin href="/assets/17f1009.js">
+    <!-- ... -->
+    <link rel="stylesheet" href="/assets/1d09918.css">
+    <link rel="stylesheet" href="/assets/164e345.css">
+    <link rel="stylesheet" href="/assets/11584ae.css">
+    <link rel="stylesheet" href="/assets/1391c67.css">
+    <link rel="stylesheet" href="/assets/10163ac.css">
+    <!-- ... -->
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
+```
+
+网页必须等待所有的JavaScript文件和CSS文件下载完成，才能开始渲染页面。
+
+## 客户端渲染的问题在哪
+
+1. 慢
+  由于只有一个空白的html文件，只有当所有打包之后的JavaScript文件下载完成，才开始渲染页面。因此在**低网速**和**低性能**设备上首屏渲染的速度更慢。而且会出现 **白屏**的情况
+
+2. SEO
+  SEO是指搜索引擎优化，是指通过了解搜索引擎的运作规则，调整网站内部和外部的优化，提高网站在搜索引擎中的自然排名。 由于大部分搜索引擎的爬虫是直接抓取 HTML 页面的，尽管搜索引擎可以执行同步的JavaScript，但是由于ajax等技术的发展。网页的部分内容是异步动态渲染的，这就会导致搜索引擎无法抓取到完整的网页内容
+  ![google-search](/images/react/google-search.png)
+
+## 定义服务端渲染
+
+和客户端渲染不同，服务端渲染选择在服务器上直接组装好html文件，提供用户下载。用户只要下载完成html文件，经过解析之后就能看到界面
+
+![php](/images/react/php.png)
+
+服务端渲染的流程如下：
+
+![server render](/images/react/ssr.png)
+
+可以看到和客户端的主要区别在于，服务端一开始得到的就是一个在服务器上**组装好的**的html文件。
+
+因此，服务端渲染的优势就是客户端渲染的劣势
+
+## React 服务端渲染实现
+
+[react-dom/server](https://react.dev/reference/react-dom/server)
+
+React提供了一个`react-dom/server`模块，用于在服务器端将 React Node 渲染为静态Html文件
+
+```ts
+import { renderToString } from "react-dom/server"
+
+app.get('/', async (ctx) => {
+
+  // 将JSX编译为JavaScript
+  await build();
+
+  // 将React组件渲染为HTML
+  const Page = (await import("./build/page.js")).default;
+  const html = renderToString(createElement(Page));
+
+  // 发送给客户端
+  return ctx.html(html)
+})
+```
+
+## 流式渲染
+
+React 提供了 `renderToPipeableStream`和`renderToReadableStream` 方法将 React 组件渲染为流式数据
+
+前者`pipeable stream`是 Node.js 中特有的流。而`Readable Stream`是 [Web Streams API](https://streams.spec.whatwg.org/)
+
+下面展示如何将一个React组件渲染为流式数据
+
+```tsx
+// page.tsx
+import { Album } from "./album";
+import { Suspense } from "react";
+export default function Page() {
+  return (
+    <html>
+      <h1>Pop Music</h1>
+
+      <input type="text" />
+
+      <Suspense fallback="loading">
+        <Album />
+      </Suspense>
+    </html>
+  );
+}
+```
+
+以上是一个简单的 React 组件，它包含了一个`Album`组件，`Album`组件是一个异步组件，其中会通过网络请求一些数据，在数据请求完成之前，Album 组件会被挂起，显示一个loading的文本
+
+```tsx
+export async function Album() {
+  const response = await fetch("https://jsonplaceholder.typicode.com/albums");
+  const albums = await response.json();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  return (
+    <div>
+      <h1>Albums</h1>
+      <ul>
+        {albums.map((album: any) => (
+          <li key={album.id}>{album.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+在 `<Suspense>`组件之外的内容，我们称之为**Shell**， 用户会第一时间看到 Shell 中的内容。在所有的shell内容准备好之后，会调用 `onShellReady`, 将流式数据传递给客户端
+
+```ts
+app.get('/', async (ctx) => {
+  // 编译 jsx
+  await build();
+
+  // 导入组件
+  const Page = (await import("./build/page.js")).default;
+
+  // 创建一个 react 元素
+  const comp = createElement(Page);
+
+  // 将组件渲染为流式数据
+  const { pipe } = renderToPipeableStream(comp, {
+    onShellReady() {
+      // 等待所有的shell内容准备好之后，将流式数据通过 pipe 传递给客户端
+      pipe(...)
+    },
+  })
+})
+```
+
+尽管目前Node.js已经支持 Web Streams API 但是不知道为什么在Node.js环境中，`react-dom/server`没有导出`renderToReadableStream()`方法。所以这里需要将 **pipeable stream** 转换为 **readable stream**
+
+```ts
+import { Readable, Transform } from 'node:stream';
+
+app.get('/', async (ctx) => {
+  // 编译 jsx
+  await build();
+
+  // 导入组件
+  const Page = (await import("./build/page.js")).default;
+
+  // 创建一个 transform stream
+  const transform = new Transform({
+    transform(chunk, encoding, callback) {
+      this.push(chunk.toString())
+      callback();
+    },
+  })
+
+  // 创建一个React组件
+  const comp = createElement(Page);
+
+  // 将组件渲染为流式数据
+  const { pipe } = renderToPipeableStream(comp, {
+    onShellReady() {
+      pipe(transform)
+    },
+  })
+
+  // 将node stream 转换为 web stream 发送给客户端
+  const stream  = Readable.toWeb(transform) as ReadableStream<BodyData>;
+
+  return new Response(stream, {
+    "headers": {
+      "Content-Type": "text/html",
+      "Transfer-Encoding": "chunked"
+    }
+  })
+})
+```
+
+使用 curl 命令测试
+
+```bash
+curl -v http://localhost:3000
+
+```
+
+可以明显的观察到，首页我们收到了 Shell，然后当`<Album>`组件准备好之后，我们收到了`<Album>`组件的内容。不需要等待所有数据获取完毕就能看到页面
+
+## 水合
+
+以上只是渲染了 React → HTML的过程，但是页面还不具有交互性。为了让页面具有交互性，需要进行 "水合"，也就是将给DOM节点绑定各种事件以及添加状态。
+
+在`react-dom/client`中提供了`hydrateRoot`方法，用于将服务端渲染的内容与客户端渲染的内容进行同步
+
+```tsx
+import { hydrateRoot } from 'react-dom/client';
+import App from './App.js';
+
+hydrateRoot(
+  document.getElementById('root'),
+  <App />
+);
+
+```
+
+## 参考
+
+- [React 18 中的 Suspense SSR 架构](https://luckyoneday.github.io/post/9-translate-lazy-suspense/)
+- [react-dom/server](https://react.dev/reference/react-dom/server)
+- [react-dom/client](https://react.dev/reference/react-dom/client)
+- [hydrateRoot](https://react.dev/reference/react-dom/client/hydrateRoot)
+
+## 完整代码
+
+- [react-ssr](https://github.com/lxxorz/react-ssr.git)

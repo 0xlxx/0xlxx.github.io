@@ -1,0 +1,178 @@
+---
+title: 'server-side events'
+publishedAt: '2025-01-09'
+summary: '介绍 server-side events'
+---
+
+## 什么是 Server-Sent Events
+
+sse 是服务器向客户端单向推送数据的一种网络通信方式。和普通的网络请求不同，Sse使得服务器可以主动的向客户端推送数据。
+
+## 实现
+
+### 服务器
+
+以 Node.js 为例，先开启一个服务器
+
+```js
+import url from "node:url"
+import http from "node:http"
+
+http.createServer(async (req, res) => {
+  const path = url.parse(req.url, true).pathname
+
+  switch(path) {
+    case '/sse':
+      // TODO
+      break;
+    default:
+      res.writeHead(404);
+      res.end();
+  }
+}).listen(4000)
+```
+
+sse 是基于http的协议，需要使用`http`模块。以及设置http协议的一系列响应头
+
+```js
+/**
+ * 设置sse响应头
+ */
+function writeHead(res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  })
+}
+```
+
+在sse通信当中，一个事件的数据格式如下
+
+```sh
+data: <message>
+```
+
+```js
+function pushEvent(res) {
+  const n = Math.random()
+  res.write(`data: ${n}\n\n`)
+
+  setTimeout(() => {
+    pushEvent(res)
+  }, 1000)
+}
+```
+
+使用 `curl` 测试
+
+```sh
+❯ curl localhost:4000/sse -H Accept:text/event-stream
+data: 0.07594925576940681
+
+data: 0.07938056377355451
+
+data: 0.963962071526266
+
+data: 0.2641787087581593
+
+data: 0.769208007283928
+
+data: 0.8353195575112164
+```
+
+### 客户端
+
+浏览器客户端通过 `EventSource`接口接受服务器推送的数据
+
+```js
+const event_source = new EventSource('http://localhost:4000/sse');
+
+event_source.addEventListener('message', data => {
+  // ...
+})
+```
+
+> 如果服务端发送的事件没有指定事件名，则默认的事件名是 `message`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  .container {
+    display: grid;
+    place-items: center;
+  }
+</style>
+
+<body>
+  <div class="container">
+    <button id="stop">toggle</button>
+    <ul class="list"></ul>
+  </div>
+  <script type="module" defer>
+    const event_source = new EventSource('http://localhost:4000/sse');
+    const btn = document.querySelector('#stop');
+
+    btn.addEventListener('click', () => {
+      event_source.close();
+    })
+    event_source.addEventListener('message', data => {
+      const list = document.querySelector('.list');
+      const li = document.createElement('li');
+      li.textContent = data.data;
+      list.appendChild(li);
+    })
+  </script>
+</body>
+</html>
+```
+
+至此一个简单的sse服务端和客户端搭建完成，如果推送自定义事件，在服务端数据中可以添加事件名
+
+```sh
+event: <event-name>
+data: <message>
+```
+
+```js
+function pushEvent(res) {
+  const n = Math.random()
+  res.write(`event: random\n`)
+  res.write(`data: ${n}\n\n`)
+
+  setTimeout(() => {
+    pushEvent(res)
+  }, 1000)
+}
+```
+
+## 细节
+
+1. 在`EventSource()`构造函数当中，传递`withCredentials`参数，可以设置是否携带cookie
+2. 服务端发送的数据格式为`data: <message>`，每个事件之间需要空行分隔
+3. 服务端发送的事件可以添加事件名，格式为`event: <event-name>`
+4. 服务端发送的事件可以添加id，格式为`id: <id>`
+5. 服务端发送的事件可以添加重试时间，格式为`retry: <time>`
+
+## 使用场景
+
+1. 服务器向客户端单向推送数据
+2. 推送 **文本数据**
+
+## 限制
+
+sse 是基于http网络协议，进行一次通行需要占用一个链接。在http/1.1中，chrome和firefox等浏览器只能同时打开6个链接
+
+## source
+
+- [server-sent-events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
+
+## code
+
+- [lxxorz/sse](https://github.com/lxxorz/sse)

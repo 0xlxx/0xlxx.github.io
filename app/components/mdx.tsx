@@ -4,6 +4,9 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { highlight } from 'sugar-high'
 import React from 'react'
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -105,7 +108,12 @@ export function CustomMDX(props) {
       {...props}
       options={{
         mdxOptions: {
-          remarkPlugins: [remarkGfm],
+          remarkPlugins: [[remarkMath, { singleDollar: true }]],
+          rehypePlugins: [[rehypeKatex, {
+            output: 'mathml',
+            throwOnError: false,
+            strict: false
+          }]],
         },
         format: 'mdx',
       }}

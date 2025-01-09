@@ -1,0 +1,292 @@
+---
+title: 'postgres 基础操作'
+publishedAt: '2025-01-09'
+summary: 'postgres 基础操作'
+---
+
+## 准备
+
+进阶到高级部分之前，建议先使用 postgresql online playground 进行练习，这样可以更好的理解后续的内容
+
+例如:
+[postgres online playground](https://www.db-fiddle.com/)
+[sqliteviz](https://sqliteviz.com/app/#/workspace?hide_schema=1)
+
+其他推荐课程 postgres online [tutorial](https://www.postgresqltutorial.com/)
+
+## SQL Basics
+
+### 查询
+
+  ```sql
+  SELECT *
+  FROM table_name;
+  ```
+
+`*` 代表所有列，如果是一个非常大的数据库，查询出所有的列可能会导致性能问题，所以一般来说，我们可以指定列名来查询
+
+  ```sql
+  SELECT column_name FROM table_name;
+  ```
+
+### 返回唯一值
+
+通常数据库当中，有许多重复的值，如果我们只想要返回唯一的值，可以使用 `DISTINCT` 关键字
+
+  ```sql
+  SELECT DISTINCT column_name FROM table_name;
+  ```
+
+### 查询条件
+
+通过 `WHERE` 关键字，我们可以添加查询条件
+
+  ```sql
+  SELECT * FROM table_name WHERE column_name = value;
+  ```
+
+  ```sql
+    SELECT  job_postings_fact.job_title_short, job_postings_fact.salary_year_avg
+    FROM job_postings_fact
+    WHERE job_postings_fact.salary_rate > 82500
+    order by job_postings_fact.salary_year_avg desc
+    LIMIT 100
+  ```
+
+### 通配符
+
+#### LIKE
+
+`LIKE` 和 `ILIKE` 是最常见的通配符匹配操作符。其中 `LIKE` 区分大小写，而 `ILIKE` 不区分大小写。
+
+在 PostgreSQL 中，通配符查询通常用于模式匹配和全文搜索。通配符允许用户在查询字符串时使用特殊字符来代表一个或多个字符，从而可以实现更灵活的搜索。以下是 PostgreSQL 中常用的通配符查询方法：
+
+- `%` 匹配任意字符
+- `_` 匹配单个字符
+
+example: 查询所有职位名称中包含 `Senior` 的数据
+
+```sql
+SELECT
+    jpc.job_title_short,
+    jpc.salary_year_avg
+FROM job_postings_fact as jpc
+WHERE jpc.job_title_short LIKE '%Senior%'
+```
+
+### 排序
+
+通过 `ORDER BY` 关键字，可以对查询结果进行排序
+
+  ```sql
+  SELECT column1
+  FROM table_name
+  ORDER BY column_name [ASC|DESC];
+  ```
+
+### 分组
+
+通常多个数据可能会有相同的值，我们可以使用 `GROUP BY` 关键字对数据进行分组
+
+  ```sql
+  SELECT column1, COUNT(column2)
+  FROM table_name
+  GROUP BY column1;
+  ```
+
+example: 根据职位名称进行分组，查询每个职位的数据条数
+
+```sql
+SELECT
+ jpf.job_title_short,
+    count(*) as sum
+FROM job_postings_fact as jpf
+GROUP BY jpf.job_title_short
+```
+
+as 参考 [alias](#alias)
+
+### 过滤分组
+
+通过 `HAVING` 关键字，可以对分组后的数据进行过滤
+
+  ```sql
+  SELECT column1, COUNT(column2)
+  FROM table_name
+  GROUP BY column1
+  HAVING COUNT(column2) > 1;
+  ```
+
+### 限制结果数量
+
+有时候，我们只想查看前几行数据，可以使用 `LIMIT` 关键字，比如查看前 5 行数据
+
+通过 `LIMIT` 关键字，可以限制查询结果的数量
+
+  ```sql
+  SELECT * FROM table_name LIMIT 5;
+  ```
+
+### 比较运算
+
+- `<>` or `NOT` 不等于
+
+```sql
+WHERE
+  job_via <> 'Data Scientist'
+
+```
+
+另外还有
+'>' 大于
+
+`>=` 大于等于
+
+`<=` 小于等于
+
+`<` 小于
+
+等运算符
+
+### 区间查询
+
+如果把值限定在某个区间，可以使用 'AND'
+
+```sql
+WHERE
+  salary_year_avg > 82500 AND salary_year_avg < 100000
+```
+
+或者使用 `BETWEEN`
+
+```sql
+WHERE salary_year_avg BETWEEN 82500 AND 100000
+```
+
+example: 列出平均年薪在指定区间的数据
+
+```sql
+SELECT
+ jpf.job_id, jpf.job_title_short,
+    jpf.job_via, jpf.salary_year_avg
+FROM job_postings_fact as jpf
+WHERE jpf.salary_year_avg BETWEEN 82500 AND 101029;
+```
+
+### 逻辑运算
+
+- `AND` 逻辑与
+- `OR` 逻辑或
+- `NOT` 逻辑非
+
+example: 查询平均年薪大于 82500 并且职位名称不是 Data Scientist 的数据
+
+```sql
+SELECT
+    jpf.job_id, jpf.job_title_short,
+    jpf.job_via, jpf.salary_year_avg
+FROM job_postings_fact as jpf
+WHERE jpf.salary_year_avg > 82500 AND jpf.job_via <> 'Data Scientist';
+```
+
+#### 运算优先级
+
+可以使用括号来改变运算的优先级
+
+example: 查询平均年薪大于 82500 并且职位名称不是 Data Scientist 的数据，或者职位名称是 Data Engineer 的数据
+
+```sql
+SELECT
+    jpf.job_id, jpf.job_title_short,
+    jpf.job_via, jpf.salary_year_avg
+FROM job_postings_fact as jpf
+WHERE (jpf.salary_year_avg > 82500 AND jpf.job_via <> 'Data Scientist') OR jpf.job_title_short = 'Data Engineer';
+```
+
+### 算术运算
+
+- `+` 加法
+- `-` 减法
+- `*` 乘法
+- `/` 除法
+- `%` 取模
+
+example: 计算平均年薪的 10% 的数据
+
+```sql
+SELECT
+    jpf.job_id, jpf.job_title_short,
+    jpf.job_via, jpf.salary_year_avg,
+    jpf.salary_year_avg * 0.1 as ten_percent
+FROM job_postings_fact as jpf
+```
+
+`as` 参考 [alias](#alias)
+
+### alias
+
+如果拥有一张非常复杂的数据表，我们可以使用别名，帮助我们更好的理解数据
+
+```sql
+SELECT column_name AS alias_name
+```
+
+example: 查询`job_postings_fact` 表中的 `job_title_short` 列，并将其命名为 `title`
+
+```sql
+SELECT
+    jpf.job_title_short as title
+FROM job_postings_fact as jpf
+```
+
+### 联表查询
+
+#### INNER JOIN
+
+`INNER JOIN` 用于返回两个表中有相同值的行
+
+```sql
+SELECT column_name(s)
+FROM table1
+INNER JOIN table2
+ON table1.column_name = table2.column_name;
+```
+
+example: 查询 `job_postings_fact` 表和 `company_dim` 表中的 `job_id`, `job_title_short`, `name` 列
+
+```sql
+SELECT
+    jpf.job_id,
+    jpf.job_title_short,
+    cd.name
+FROM job_postings_fact as jpf
+INNER JOIN company_dim as cd
+ON jpf.company_id = cd.company_id;
+```
+
+#### LEFT JOIN
+
+`LEFT JOIN` 用于返回左表中的所有行，即使右表中没有匹配的行
+
+```sql
+SELECT column_name(s)
+FROM table1
+LEFT JOIN table2
+ON table1.column_name = table2.column_name;
+```
+
+example: 查询 `job_postings_fact` 表和 `company_dim` 表中的 `job_id`, `job_title_short`, `name` 列
+
+```sql
+SELECT
+    jpf.job_id,
+    jpf.job_title_short,
+    cd.name
+FROM job_postings_fact as jpf
+LEFT JOIN company_dim as cd
+ON jpf.company_id = cd.company_id;
+```
+
+## Install
+
+[postgresql download](https://www.postgresql.org/download/)

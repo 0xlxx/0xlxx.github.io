@@ -1,0 +1,574 @@
+---
+title: 理解React服务端组件
+publishedAt: 2025-01-09
+summary: 介绍 React 服务端组件
+  - 译
+---
+
+> 原文地址：[Making Sense of React Server Components](https://www.joshwcomeau.com/react/server-components/)
+
+有件事让我感觉自己老了：今年React庆祝了它的第十个生日！
+
+自从 React 首次被引入到困惑的开发者社区以来，它经历了几次演变。当 React 团队发现了一个更好的解决方案时，他们会毫不犹豫地采用它。
+
+几个月前，React 团队推出了 React 服务端组件，这是最新的范式转变。这是有史以来第一次，React 组件可以完全在服务器上运行。
+
+关于这个问题在网上有很多混乱。很多人对这是什么、它是如何工作的、它的好处是什么以及它如何与诸如服务器端渲染之类的东西结合在一起有很多问题。
+
+我一直在做很多关于 React 服务端组件的实验，并回答了很多我自己的问题。我不得不承认，我对这些东西的兴奋程度远远超出了我的预期。这真的很酷！
+
+所以，我的目标是帮助你解开这些东西的神秘面纱，回答你可能对 React 服务端组件有的很多问题！
+
+> 目标受众
+> 本教程主要是为那些已经在使用 React 的开发者编写的，他们对 React 服务端组件感到好奇。你不需要成为 React 专家，但如果你刚开始学习 React，这可能会让你感到困惑。
+
+## 一个关于服务器端渲染的快速入门
+
+在谈论「服务端组件」之前，理解「服务器端渲染」是有帮助的。如果你已经熟悉了 SSR （服务端渲染）。可以跳到下一节。
+
+当我第一次在2015年开始使用React时，大多数React设置都使用了“客户端”渲染策略。用户将收到一个看起来像这样的HTML文件：
+
+```html
+<!doctype html>
+<html>
+  <body>
+    <div id="root"></div>
+    <script src="/static/js/bundle.js"></script>
+  </body>
+</html>
+```
+
+bundle.js 脚本包括我们需要挂载和运行应用程序的所有内容，包括 React、其他第三方依赖项以及我们编写的所有代码。
+
+一旦JS被下载并解析，React就会开始工作，为我们整个应用程序创造所有的DOM节点，并将其放在那个空的`<div id="root">`中。
+
+这种方法的问题在于，做所有这些工作需要时间。而在这一切发生的时候，用户一直盯着一个空白的白屏。这个问题随着时间的推移而变得更糟：我们发布的每一个新功能都会向我们的JavaScript包添加更多kb内容，从而延长用户等待的时间。（有一些技术可以帮助我们减少这个问题，例如代码分割和懒加载，但是通常情况下， Js bundle 往往会越来越大）
+
+服务端渲染旨在改善这种体验。服务器不再发送一个空的HTML文件，而是渲染我们的应用程序以生成实际的HTML。用户收到一个完整的HTML文档。
+
+html 文件仍会包含 `<script>` 标签，因为我们仍然需要 React 在客户端上运行，以处理任何交互。但是我们在浏览器中配置 React 以稍微不同的方式工作：它不再从头开始创造所有的 DOM 节点，而是采用现有的 HTML。这个过程被称为水合（hydration）。
+
+我喜欢 react 核心团队成员 Dan Abramov 对此的解释：
+
+> 水合就像用交互和时间处理器来浇灌干燥的html
+
+一旦 js 包被下载，react 会快速地扫描整个应用程序，构建一个虚拟的UI轮廓，并将其应用到真实的DOM，附加事件处理程序，触发任何的副作用等等
+
+因此，简而言之，这就是 SSR。服务器生成初始的HTML，这样用户就不必在下载和解析JS包的时候盯着一个空白的白屏。客户端 React 接着服务器端 React 的工作，使用 DOM 并且添加交互
+
+一个涵盖性术语
+
+> 当我们谈论服务器端渲染时，我们通常会想象一个流程，看起来像这样：
+
+用户访问 myWebsite.com。
+一个 Node.js 服务器接收到请求，并立即渲染 React 应用程序，生成 HTML。
+刚刚生成的 HTML 被发送到客户端。
+
+这是实现服务器端渲染的一种可能方式，但不是唯一的方式。另一种选择是在构建应用程序时生成 HTML。
+
+通常，React 应用程序需要被编译，将 JSX 转换为普通的 JavaScript，并捆绑所有的模块。如果在这个过程中，我们“预渲染”了所有不同路由的 HTML 呢？
+
+这通常被称为静态站点生成（SSG）。这是服务器端渲染的一个子变体。
+
+在我看来，“服务器端渲染”是一个涵盖了几种不同渲染策略的总称。它们都有一个共同点：初始渲染发生在像 Node.js 这样的服务器运行时中，使用 ReactDOMServer API。这实际上并不重要，无论这是在需求时还是在编译时发生。无论如何，这都是服务器端渲染。
+
+## 来回传输
+
+让我们谈谈在 React 中的数据获取。通常，我们有两个独立的应用程序通过网络进行通信：
+
+- 客户端 React 应用程序
+- 服务器端 REST API
+- 使用像 React Query 或 SWR 或 Apollo 这样的东西，客户端会向后端发出网络请求，然后后端会从数据库中获取数据并将其发送回来。
+
+我们可以用一张图来可视化这个流程：
+![date-fetching-in-react](/images/date-fetching-in-react.png)
+
+第一张展示了使用客户端渲染策略的流程。它从客户端接收一个 HTML 文件开始。这个文件没有任何内容，但它确实有一个或多个 `<script>` 标签。
+
+一旦JS被下载并解析，我们的 React 应用程序将启动，创建一堆 DOM 节点并填充 UI。但是一开始，我们没有任何实际的数据，所以我们只能渲染外壳（标题、页脚、一般布局）和加载状态。
+
+你可能经常看到这种模式。例如，UberEats 从渲染一个外壳开始，同时获取它需要填充实际餐厅的数据：
+
+![uber-eats-loading-state](/images/uber-eats-loading-state.png)
+
+用户直到网络请求解析并且react重新渲染，用真实的内容替换加载UI。
+
+这是一个进步（一个外壳比一个空白的白屏更好） 但最终，它并没有真正显著地提高用户体验。用户访问我们的应用程序不是为了看到一个加载屏幕，而是为了看到内容（餐厅、酒店列表、搜索结果、消息等）。
+
+为了真正的了解用户体验的差异，让我们在图表中添加一些网络性能指标。在这两个流程之间切换，注意标志的变化：
+
+![csr](/images/csr.png)
+
+![ssr](/images/ssr.png)
+
+每个标志代表一个常用的网络性能指标。这是一个简单的解释：
+
+1. _First Paint_ — 用户不再盯着一个空白的白屏。一般的布局已经被渲染，但内容仍然缺失。这有时被称为 FCP（First Contentful Paint）。
+
+2. _Page Interactive_ — React 已经被下载，我们的应用程序已经被渲染/水合。交互元素现在完全响应。这有时被称为 TTI（Time To Interactive）。
+
+3. _Content Paint_ — 页面现在包括用户关心的内容。我们已经从数据库中提取数据并在 UI 中渲染。这有时被称为 LCP（Largest Contentful Paint）。
+
+通过在服务器做最初的渲染，我们能够更快的获得初始的“外壳”。这可以使加载体验感觉更快一些，因为它提供了一种渐进的感觉，事情正在发生
+
+并且，在一些情况下，这回是一个有意义的提升。例如，用户可能仅仅只想等待导航栏加载完成，这样他们就可以点击导航链接。
+
+但是这个流程感觉有点傻吧？当我看 SSR 图表时，我忍不住注意到请求是从服务器开始的。为什么不在初始请求期间进行数据库工作，而不是需要第二次网络请求呢？
+
+换句话说，为什么不像这样做？
+![ssr-opt](/images/ssr-opt.png)
+
+将我们的数据库查询作为初始请求的的一部分，发送完全渲染的UI给用户。而不是在客户端和服务器之间来回切换，
+
+但是 额， 我们应该如何做到这一点呢？
+
+为了让这个工作，我们需要能够给 React 一块代码，它只在服务器上运行，来进行数据库查询。但是这在 React 中并不是一个选项...即使在服务器端渲染中，我们的所有组件都在服务器和客户端上渲染。
+
+React生态已经为这个问题提供了很多解决方案。像 Next.js 和 Gatsby 这样的元框架已经创建了自己的方式来在服务器上独立运行代码。
+
+例如，这是使用 Next.js（使用传统的“Pages”路由）的情况：
+
+```jsx
+import db from 'imaginary-db'
+// This code only runs on the server:
+export async function getServerSideProps() {
+  const link = db.connect(
+    'localhost',
+    'root',
+    'passw0rd'
+  )
+  const data = await db.query(
+    link,
+    'SELECT * FROM products'
+  )
+  return {
+    props: { data },
+  }
+}
+// This code runs on the server + on the client
+export default function Homepage({
+  data,
+}) {
+  return (
+    <>
+      <h1>Trending Products</h1>
+      {data.map((item) => (
+        <article key={item.id}>
+          <h2>{item.title}</h2>
+          <p>{item.description}</p>
+        </article>
+      ))}
+    </>
+  )
+}
+```
+
+让我们来看看：当服务器接收到请求时，getServerSideProps 函数被调用。它返回一个 props 对象。这些 props 然后被传递到组件中，首先在服务器上渲染，然后在客户端上水合。
+
+这里的聪明之处在于 getServerSideProps 不会在客户端重新运行。事实上，这个函数甚至不包含在我们的 JavaScript 包中！
+
+这种方法超前了时代。老实说，这真的很棒。但是这种方法也有一些缺点：
+
+这种策略只适用于路由级别，对于树的顶部的组件。我们不能在任何组件中这样做。
+
+每个元框架都有自己的方法。Next.js 有一种方法，Gatsby 有另一种方法，Remix 有另一种方法。这并没有被标准化。
+
+我们所有的 React 组件都将始终在客户端上水合，即使没有必要这样做。
+
+多年来，React 团队一直在悄悄地研究这个问题，试图提出一个官方的解决方案。他们的解决方案被称为 React 服务端组件。
+
+## 介绍 React 服务端组件
+
+在高层次上，React 服务端组件是一个全新范式的名称。在这个新世界中，我们可以创建只在服务器上运行的组件。这使我们可以做一些事情，比如在我们的 React 组件中直接编写数据库查询！
+
+这儿是一个“服务端组件”的示例：
+
+```jsx
+import db from 'imaginary-db'
+async function Homepage() {
+  const link = db.connect(
+    'localhost',
+    'root',
+    'passw0rd'
+  )
+  const data = await db.query(
+    link,
+    'SELECT * FROM products'
+  )
+  return (
+    <>
+      <h1>Trending Products</h1>
+      {data.map((item) => (
+        <article key={item.id}>
+          <h2>{item.title}</h2>
+          <p>{item.description}</p>
+        </article>
+      ))}
+    </>
+  )
+}
+export default Homepage
+```
+
+作为一个使用 React 多年的人，这段代码一开始看起来对我来说绝对是疯狂的。😅
+
+“但是等等！”，我的直觉尖叫道。“函数组件不能是异步的！我们不允许在渲染中直接有副作用！”
+
+关键在于理解：**服务器组件从来不会重渲染**。他们仅仅在服务器上运行一次来生成UI。渲染的值被发送到客户端并立即锁定。就 React 而言，这个输出是不可变的，永远不会改变。
+
+这意味着大部分React的API和服务器组件不兼容。例如我们不能使用“状态”，因为状态可以改变，但是服务端组件不能重新渲染。并且我们不能使用“effects”，因为“effects”只在渲染后在客户端上运行，而服务端组件永远不会到达客户端。
+
+这也意味着在规则方面我们有更多的灵活性。例如，在传统的React中，我们需要将副作用放在useEffect回调或事件处理程序中，这样它们就不会在每次渲染时重复。但是如果组件只运行一次，我们就不必担心这个！
+
+服务端组件本身非常简单，但是“React 服务端组件”范式要复杂得多。这是因为我们仍然有常规的组件，它们如何组合在一起可能会非常令人困惑。
+
+在这个新范式中，我们熟悉的“传统”React组件被称为客户端组件。老实说，我不喜欢这个名字。
+
+“客户端组件”这个名字暗示这些组件只在客户端上渲染，但实际上并不是这样。客户端组件在客户端和服务器上都会渲染。
+
+![render-table](/images/render-table.png)
+
+## 服务端组件的好处
+
+我知道这些术语很混乱，所以这是我如何总结的：
+
+- React 服务端组件是这个新范式的名称。
+
+- 在这个新范式中，我们熟悉和喜爱的“标准”React组件已经被重新命名为客户端组件。这是一个新的名字，用于描述一个旧的东西。
+
+- 这个新范式引入了一种新类型的组件，服务端组件。这些新组件仅在服务器上渲染。他们的代码不包含在JS包中，因此他们永远不会水合或重新渲染。
+
+这是一个很大的变化！这个新范式的好处是什么呢？
+
+> **注意**
+>
+> 让我们澄清另一个常见的混淆：React 服务端组件不是服务器端渲染的替代品。你不应该把 React 服务端组件看作是“SSR 版本 2.0”。
+>
+> 相反，我更愿意把它看作是两个完美契合的独立的拼图，两种互补的风味。
+>
+> 我们仍然依赖服务器端渲染来生成初始的HTML。React 服务端组件是在此基础上构建的，允许我们省略某些组件在客户端的JavaScript包中，确保它们只在服务器上运行。
+>
+> 事实上，即使没有服务器端渲染，也可以使用 React 服务端组件，尽管在实践中，如果你将它们一起使用，你会得到更好的结果。React 团队已经构建了一个没有 SSR 的最小 RSC 演示，如果你想看一个例子。
+
+## 兼容的环境
+
+所以，通常情况下，当一个新的 React 功能出现时，我们可以通过将 React 依赖项升级到最新版本来在我们的现有项目中开始使用它。一个快速的 npm install react@latest，我们就可以开始了。
+
+不幸的是，React 服务端组件并不是这样工作的。
+
+我的理解是，React 服务端组件需要与 React 之外的一堆东西紧密集成，比如打包工具、服务器和路由器。
+
+当我写这篇文章时，只有一种方法可以开始使用 React 服务端组件，那就是使用 Next.js 13.4+，使用他们全新的重新架构的“App Router”。
+
+希望在未来，更多基于 React 的框架将开始整合 React 服务端组件。一个核心的 React 功能只在一个特定的工具中可用，这感觉很尴尬！React 文档有一个“前沿框架”部分，列出了支持 React 服务端组件的框架；我打算不时地查看这个页面，看看是否有新的选择。
+
+## 指定客户端组件
+
+在这个新的“React 服务端组件”范式中，默认情况下，所有组件都被假定为服务端组件。我们必须“选择”客户端组件。
+
+我们通过指定一个全新的指令来做到这一点：
+
+```jsx
+'use client'
+import React from 'react'
+function Counter() {
+  const [count, setCount] =
+    React.useState(0)
+  return (
+    <button
+      onClick={() =>
+        setCount(count + 1)
+      }
+    >
+      Current value: {count}
+    </button>
+  )
+}
+export default Counter
+```
+
+'use client'这个独立的字符串在顶部，是我们向 React 发出的信号，表明这个文件中的组件是客户端组件，它们应该包含在我们的JS包中，以便它们可以在客户端重新渲染。
+
+这似乎是一种非常奇怪的指定我们正在创建的组件类型的方式，但是这种事情有一个先例：在JavaScript中选择进入“严格模式”的“use strict”指令。
+
+我们不会指定 `'use server'` 指令在我们服务端组件；在 react 服务端组件范式当中，组件被默认就是服务端组件。事实上，`'use server'` 用于「server actions」，这是一个完全不同的功能，超出了这篇博客文章的范围。
+
+> **哪些组件应该是客户端组件？**
+>
+> 你可能担心：我应该怎么决定一个给定的组件应该是一个服务端组件还是一个客户端组件？
+>
+> 通常，如果一个组件可以是服务端组件，它就应该是一个服务端组件。服务端组件往往理解起来更容易和简单。也有一些性能上的好处：因为服务端不在客户端上运行，他们的代码不会包含在我们的JavaScript包中。React 服务端组件范式的一个好处是它有可能提高页面交互（TTI）指标。
+>
+> 话虽如此，我们也不应该将消除尽可能错的客户端组件作为我们的任务！我们不应该尝试优化最小数量的客户端组件。值得记住的是，直到现在，每个 React 应用程序中的每个 React 组件都是客户端组件。
+>
+> 当你开始使用 React 服务端组件时，你可能会发现这是相当直观的。我们的一些组件需要在客户端上运行，因为它们使用状态变量或效果。你可以在这些组件上加一个'use client'指令。否则，你可以把它们作为服务端组件。
+
+## 边界
+
+当我开始熟悉 React 服务端组件时，我遇到的第一个问题是：当 props 改变时会发生什么？
+
+例如，假设我们有一个这样的服务端组件：
+
+```jsx
+function HitCounter({ hits }) {
+  return (
+    <div>Number of hits: {hits}</div>
+  )
+}
+```
+
+我们假设在初始的服务器端渲染中，hits 等于 0。那么这个组件将产生以下标记：
+
+```html
+<div>Number of hits: 0</div>
+```
+
+但是如果 hits 的值改变会发生什么呢？假设它是一个状态变量，它从 0 改变为 1。HitCounter 需要重新渲染，但它不能重新渲染，因为它是一个服务端组件！
+
+问题是，服务端组件在孤立的情况下并没有什么意义。我们必须放大，采取更全面的视角，考虑我们应用程序的结构。
+
+假设我们有以下组件树：
+
+![component-tree](/images/component-tree.png)
+
+如果所有的这些组件都是服务端组件，那么这一切都是有意义的。没有一个 props 会改变，因为没有一个组件会重新渲染。
+
+但是我们假设 Article 组件拥有 hits 状态变量。为了使用状态，我们需要将其转换为客户端组件：
+
+![to-client-comp](/images/to-client-comp.png)
+
+你发现这里的问题了吗？当`Article`重新渲染时，任何拥有的组件也会重新渲染，包括`HitCounter`和`Discussion`。然而，如果这些是服务端组件，他们不能重新渲染。
+
+为了组织这种可能的情况，react 团队添加了一个规则：客户端组件仅仅可以`import`其他客户端组件。'use client'指令意味着这些`HitCounter`和`Discussion`实例需要变成客户端组件。
+
+React 服务端组件最大的“我草”时刻之一是意识到这个新范式是关于创建客户端边界的。在实践中，这是发生的：
+
+![boundary](/images/boundary.png)
+
+当我们在`Article`组件添加`use client`指令，我们就创建了一个“客户端边界”。在这个边界内的所有组件都会被隐式转换为客户端组件。即使像`HitCounter`这样的组件没有`use client`指令，在这种特定情况下，他们仍然会在客户端上水合/渲染。
+
+## 解决方案
+
+当我第一次了解到客户端组件不能渲染服务端组件时，我觉得这对我来说很有限制性。如果我需要在应用程序的高层使用状态怎么办？这是否意味着一切都需要成为客户端组件？
+
+事实证明，在许多情况下，我们可以通过重构我们的应用程序来解决这个问题，以便所有者（译者注：指的是父组件）发生变化。
+
+这是一个很难解释的事情，所以让我们用一个例子来说明：
+
+```jsx
+'use client'
+import {
+  DARK_COLORS,
+  LIGHT_COLORS,
+} from '@/constants.js'
+import Header from './Header'
+import MainContent from './MainContent'
+function Homepage() {
+  const [colorTheme, setColorTheme] =
+    React.useState('light')
+  const colorVariables =
+    colorTheme === 'light'
+      ? LIGHT_COLORS
+      : DARK_COLORS
+  return (
+    <body style={colorVariables}>
+      <Header />
+      <MainContent />
+    </body>
+  )
+}
+```
+
+在这一步，我们需要使用React `state` 来允许用户切换暗模式/亮模式。这需要程序树的高层发生，这样我们就可以将我们的CSS变量令牌应用到`<body>`标签上。
+
+为了使用`state`我们需要让`Homepage`成为一个客户端组件。并且因为这是我们程序的顶部，这意味者所有的其他组件。`Header` 和 `MainContent` 也会隐式成为客户端组件。
+
+为了解决这个，让我们将颜色管理的东西放到自己的组件中，移动到自己的文件中：
+
+```jsx
+// /components/ColorProvider.js
+'use client'
+import {
+  DARK_COLORS,
+  LIGHT_COLORS,
+} from '@/constants.js'
+function ColorProvider({ children }) {
+  const [colorTheme, setColorTheme] =
+    React.useState('light')
+  const colorVariables =
+    colorTheme === 'light'
+      ? LIGHT_COLORS
+      : DARK_COLORS
+  return (
+    <body style={colorVariables}>
+      {children}
+    </body>
+  )
+}
+```
+
+回到`Homage`,我们像这样使用这个新的组件
+
+```jsx
+// /components/Homepage.js
+import Header from './Header'
+import MainContent from './MainContent'
+import ColorProvider from './ColorProvider'
+function Homepage() {
+  return (
+    <ColorProvider>
+      <Header />
+      <MainContent />
+    </ColorProvider>
+  )
+}
+```
+
+我们可以移除`use client`指令，因为`Homepage`现在是一个服务端组件。`Header` 和 `MainContent` 也是服务端组件，因为他们在`ColorProvider`中。
+
+但是稍等， `ColorProvider`一个客户端组件，是一个`Header`和`MainContent`的父组件。无论如何，它仍然在树的更高层，对吧？
+
+当它涉及到客户端边界时，然而，父/子关系并不重要。`Homepage`是导入和渲染`Header`和`MainContent`的组件。这意味着`Homepage`决定了这些组件的`props`是什么。
+
+这是一件让人费解的事情。即使有多年的 React 经验，我仍然觉得这非常令人困惑 😅。要培养对此的直觉，需要进行相当多的练习。
+
+更准确地说，'use client' 指令是在文件/模块级别起作用的。在客户端组件文件中导入的任何模块也必须是客户端组件。毕竟，当捆绑器捆绑我们的代码时，它会遵循这些导入！
+
+> **改变颜色主题？**
+>
+> 在我上面的例子中，你可能已经注意到没有办法改变颜色主题。`setColorTheme`从来没有被调用。
+>
+> 我想尽可能保持简洁，所以我略去了一些东西。一个完整的例子将使用React上下文使setter函数对任何后代可用。只要消费上下文的组件是一个客户端组件，一切都很好！
+
+## 窥探内部机制
+
+让我们瞧瞧一些更低级别的东西。当我们使用一个服务端组件时，输出是什么样的？实际上生成了什么？
+
+让我们从一个超级简单的 React 应用程序开始：
+
+```jsx
+function Homepage() {
+  return <p>Hello world!</p>
+}
+```
+
+在rsc范式中，所有的组件都默认是服务端组件。因为我们没有明确地将这个组件标记为客户端组件（或者在客户端边界内渲染它），它只会在服务器上渲染。
+
+当我们在浏览器访问这个应用是，我们会收到一个看起来像这样的html文档：
+
+```jsx
+<!DOCTYPE html>
+<html>
+ <body>
+  <p>Hello world!</p>
+  <script src="/static/js/bundle.js"></script>
+  <script>
+   self.__next['$Homepage-1'] = {
+    type: 'p',
+    props: null,
+    children: "Hello world!",
+   };
+  </script>
+ </body>
+</html>
+```
+
+> **注意**
+>
+> 一些灵活性
+> 为了更容易理解，我已经在这里重构了一些东西。例如，这些真正产生的js是一个使用JSON序列化的RSC数组，作为一个优化来减少这个HTML文档的文件大小。
+> 我也已经剥离了所有非关键部分的HTML（比如`<head>`）。
+
+我们的HTML文档包括了我们的React应用程序生成的UI，“Hello world!”段落。这要归功于服务器端渲染，并不是直接归功于React服务端组件。
+
+在这之下，我们有一个 `<script>` 标签，加载我们的 JS 捆绑包。该捆绑包包括诸如 React 这样的依赖项，以及应用程序中使用的任何客户端组件。由于我们的主页组件是一个服务器端组件，因此该组件的代码不包含在此捆绑包中。
+
+最后，我们有第二个带有一些内联 JS 的 `<script>`标签：
+
+```jsx
+self.__next['$Homepage-1'] = {
+  type: 'p',
+  props: null,
+  children: 'Hello world!',
+}
+```
+
+这是真正有趣的部分。实质上，我们在这儿做的是告诉React“hey， 我知道你缺少Homepage组件的代码，但是不用担心：这是它渲染的内容”。
+
+通常，当React在客户端上水合时，它会快速渲染所有的组件，构建应用程序的虚拟表示。对于服务端组件，它无法这样做，因为代码不包含在JS捆绑包中
+
+因此，我们发送渲染值，服务器生成的虚拟表示。当React在客户端加载时，它会重用该描述，而不是重新生成它。
+
+这就是上面的`ColorProvider`示例能够工作的原因。`Header`和`MainContent`的输出通过`children`属性传递给`ColorProvider`组件。`ColorProvider`可以随意重新渲染，但这些数据是静态的，被服务器锁定。
+
+这意味着我们的JS捆绑包虽然变得更小，但是 html 文件会变得更大。我们不再让组件的定义放在js当中，而是将组件的返回值内敛到一个`<script>`标签中。平均来说，我们仍然会发送更少的数据到网络，但是值得记住的是，服务端组件并不是完全免费的。我还要指出，html文件被分成了块并流式传输，所以浏览器可以快速绘制UI，而不必等待`<script>`标签中的所有内容
+
+如果你好奇看到服务端组件是如何序列化和发送到网络的，可以查看开发者Alvar Lagerlöf的[RSC devtools](/images/https://www.alvar.dev/blog/creating-devtools-for-react-server-components)
+
+> 服务端组件的不要求一个服务器
+> **服务端组件不要求一个服务器**
+>
+> 在这篇文章的早期，我提到SSR是一个针对多种不同渲染策略的涵盖性术语，包括：
+>
+> 静态：HTML在应用程序构建时生成，在部署过程中。（译者注：这也称为ssg）
+> 动态：HTML是“按需”生成的，当用户请求页面时。
+> React 服务端组件与这两种渲染策略兼容。当我们的服务端组件在Node.js运行时渲染时，它们返回的JavaScript对象将被创建。这可以在请求时或在构建时发生。
+
+这意味着是使用rsc可以不需要一个服务器！我们可以生成一堆静态HTML文件，并将它们托管在任何地方。事实上，这是Next.js App Router中默认情况下发生的。除非我们真的需要“按需”发生的事情，所有这些工作都是提前完成的，在构建过程中。
+
+> **完全不需要React**
+>
+> 你可能担心：如果我们不在应用当中包含任何客户端组件，我们真的需要下载react吗？我们可以使用rsc去构建一个真的静态的没有js的网站吗？
+>
+> 关键在于，RSC尽在Next.js框架架中可用，这个框架有一堆代码需要在客户端运行，来管理诸如路由这样的事情。
+>
+> 令人费解的是，这实际上会产生更好的用户体验；Next的路由器，例如，会比典型的`<a>`标签更快地处理链接点击，因为它不需要加载一个完整的新HTML文档。
+
+## 高级部分
+
+rsc 是第一个在React中运行服务器独占代码的“官方”方式。正如我之前提到的，这在更广泛的React生态系统中并不是一个新事物；自2016年以来，我们就能在Next.js中运行服务器独占代码！
+
+最大的区别是我们以前从未有过一种方法在我们的组件中运行服务器独占代码。
+
+**最明显的好处是性能。服务端组件不会包含在我们的JS捆绑包中，这减少了需要下载的JavaScript的数量，以及需要水合的组件的数量**：
+
+![pre-rsc](/images/pre-rsc.png)
+![post-rsc](/images/post-rsc.png)
+
+老实说，尽管这可能对我来说是最没那么激动的事情了，大多数next.js应用在 Page Interactive时间方面已经够快了
+
+如果你遵循语义化html原则，在react进行水合之前，你的大多数应用应该能够工作。Links可以点击。表格可以提交，手风琴可以展开和收起（使用`<details>`和`<summary>`)。对于大多数项目，React花一些时间取水合其实还好。
+
+但是我在这儿发现一些真的很酷的事：我们不在必须做出同样的妥协，在功能和包大小之间
+
+例如，大多数技术博客引入了一些高亮库。在这个博客，我使用了prism。代码像这样：
+
+```js
+function exampleJavaScriptFunction(
+  param
+) {
+  return 'Hello world!'
+}
+```
+
+一个合适的语法高亮库，支持所有流行的编程语言，将会有几兆字节，远远超过了可以放在JS捆绑包中的大小。结果，我们不得不做出妥协，剪裁掉那些不是关键的语言和功能
+
+但是，假设我们在服务端组件中进行语法高亮。在这种情况下，库代码实际上不会包含在我们的JS捆绑包中。结果，我们不必做出任何妥协，我们可以使用所有的功能。
+
+这是Bright背后的大想法，这是一个现代的语法高亮包，设计用于与React服务端组件一起使用
+
+![Bright](/images/Bright.png)
+
+这是我对React服务端组件感到兴奋的原因。那些在JS捆绑包中成本太高的东西现在可以免费在服务器上运行，不会增加我们的捆绑包的大小，从而产生更好的用户体验。
+
+这不仅仅是关于性能和用户体验。在使用RSC一段时间后，我真的很欣赏服务端组件是多么的轻松。我们永远不必担心依赖数组、过时的闭包、记忆化，或者任何其他复杂的事情。
+
+最终，这仍然是早期阶段。React服务端组件几个月前才从beta版中出来！我真的很期待在未来几年里事情的发展，因为社区继续创新新的解决方案，比如Bright，利用这个新的范式。作为一个React开发者，这是一个令人兴奋的时刻！
+
+## 完整的图片
+
+rsc 是一个令人兴奋的发展，但实际上它只是“现代React”拼图的一部分。
+
+当我们将React服务端组件与Suspense和新的流式SSR架构相结合时，事情变得非常有趣。它允许我们做一些疯狂的事情，比如这样：
+
+![with-Suspense](/images/with-suspense.png)
