@@ -1,36 +1,104 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin '@tailwindcss/typography';
 
-:root {
-  --sh-class: #2d5e9d;
-  --sh-identifier: #354150;
-  --sh-sign: #8996a3;
-  --sh-string: #007f7a;
-  --sh-keyword: #e02518;
-  --sh-comment: #a19595;
-  --sh-jsxliterals: #6266d1;
-  --sh-property: #e25a1c;
-  --sh-entity: #e25a1c;
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-radius: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --sh-class: #4c97f8;
-    --sh-identifier: white;
-    --sh-keyword: #f47067;
-    --sh-string: #0fa295;
+    /* Base colors - 明亮清新的背景和文字 */
+    --background: oklch(0.98 0 0);
+    --foreground: oklch(0.25 0.015 250);
+
+    /* Muted - 柔和的背景色调 */
+    --muted: oklch(0.93 0.01 250);
+    --muted-foreground: oklch(0.55 0.015 250);
+
+    /* Border - 精致的边框 */
+    --border: oklch(0.85 0.01 250);
+
+    /* Syntax highlighting - 优化的代码高亮 */
+    --sh-class: oklch(0.55 0.12 250);
+    --sh-identifier: oklch(0.45 0.05 250);
+    --sh-sign: oklch(0.65 0.05 250);
+    --sh-string: oklch(0.5 0.12 140);
+    --sh-keyword: oklch(0.6 0.15 30);
+    --sh-comment: oklch(0.65 0.02 250);
+    --sh-jsxliterals: oklch(0.6 0.12 280);
+    --sh-property: oklch(0.55 0.15 30);
+    --sh-entity: oklch(0.55 0.15 30);
   }
-  html {
-    color-scheme: dark;
+
+  .dark {
+    /* Base colors - 深邃的暗色背景 */
+    --background: oklch(0.18 0.015 250);
+    --foreground: oklch(0.95 0.01 0);
+
+    /* Muted - 柔和的暗色调 */
+    --muted: oklch(0.25 0.02 250);
+    --muted-foreground: oklch(0.75 0.015 250);
+
+    /* Border - 优雅的暗色边框 */
+    --border: oklch(0.3 0.02 250);
+
+    /* Syntax highlighting - 暗色主题代码高亮 */
+    --sh-class: oklch(0.75 0.15 220);
+    --sh-identifier: oklch(0.9 0.01 0);
+    --sh-keyword: oklch(0.75 0.15 30);
+    --sh-string: oklch(0.7 0.12 140);
+    --sh-sign: oklch(0.7 0.05 250);
+    --sh-comment: oklch(0.6 0.02 250);
+    --sh-jsxliterals: oklch(0.7 0.12 280);
+    --sh-property: oklch(0.7 0.15 30);
+    --sh-entity: oklch(0.7 0.15 30);
   }
 }
 
+/* Base styles */
+:root {
+  color-scheme: light;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Smooth transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Base HTML styles */
 html {
   min-width: 360px;
 }
 
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
+/* Theme transition */
+* {
+  transition-property: color, background-color, border-color;
+  transition-duration: 200ms;
+  transition-timing-function: ease-out;
 }

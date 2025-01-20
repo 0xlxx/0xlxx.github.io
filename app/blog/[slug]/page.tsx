@@ -39,11 +39,7 @@ export async function generateMetadata(props) {
       type: 'article',
       publishedTime,
       url: `${baseUrl}/blog/${post.slug}`,
-      images: [
-        {
-          url: ogImage,
-        },
-      ],
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -63,7 +59,7 @@ export default async function Blog(props) {
   }
 
   return (
-    <section>
+    <section className="space-y-8">
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -86,20 +82,17 @@ export default async function Blog(props) {
           }),
         }}
       />
-      <h1
-        id="post-title"
-        className="post-title font-semibold text-6xl tracking-tighter"
-      >
-        <VTItem prefix={post.slug}>
-          {post.metadata.title}
-        </VTItem>
-      </h1>
-      <div className="flex justify-between items-center mt-2 mb-8 text-sm">
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+      <div className="space-y-4">
+        <h1 className="text-foreground font-semibold text-4xl md:text-5xl lg:text-6xl tracking-tighter">
+          <VTItem prefix={post.slug}>
+            {post.metadata.title}
+          </VTItem>
+        </h1>
+        <p className="text-muted-foreground text-sm">
           {formatDate(post.metadata.publishedAt)}
         </p>
       </div>
-      <article className="prose prose-lg dark:prose-invert">
+      <article className="prose prose-lg dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-muted-foreground">
         <CustomMDX source={post.content} />
       </article>
     </section>

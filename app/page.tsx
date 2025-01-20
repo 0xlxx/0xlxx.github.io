@@ -1,18 +1,17 @@
 import { BlogPosts } from 'app/components/posts'
-import Script from 'next/script'
 
 export default function Page() {
   return (
-    <section>
-      <h1 className="mb-8 text-2xl font-semibold tracking-tighter [view-transition-name:page-title]">
-        XinXin Li
-      </h1>
-      <p className="mb-4">
-       {`I'm a web developer and optimist. Currently working on Web3D and AI related projects. I'm also interested in visualization technology.`}
-      </p>
-      <div className="my-8">
-        <BlogPosts />
+    <section className="space-y-8">
+      <div className="space-y-4">
+        <h1 className="text-foreground text-2xl font-semibold tracking-tighter [view-transition-name:page-title]">
+          XinXin Li
+        </h1>
+        <p className="text-muted-foreground">
+          {`I'm a web developer and optimist. Currently working on Web3D and AI related projects. I'm also interested in visualization technology.`}
+        </p>
       </div>
+      <BlogPosts />
     </section>
   )
 }
