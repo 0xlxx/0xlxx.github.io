@@ -1,10 +1,10 @@
 # 反向代理到本地 3000 端口
-h.h.bjorn.men {
+bjorn.men {
     reverse_proxy 0.0.0.0:3000
     encode gzip
 }
 
 # 重定向到 https
-http://h.h.bjorn.men {
+http://bjorn.men {
   redir https://{host}{uri}
 }
