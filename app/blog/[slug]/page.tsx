@@ -59,7 +59,7 @@ export default async function Blog(props) {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-8 grid place-items-center px-4 py-20">
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -92,7 +92,7 @@ export default async function Blog(props) {
           {formatDate(post.metadata.publishedAt)}
         </p>
       </div>
-      <article className="prose prose-lg dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-muted-foreground">
+      <article className="prose prose-lg prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-muted-foreground">
         <CustomMDX source={post.content} />
       </article>
     </section>

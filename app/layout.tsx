@@ -11,16 +11,16 @@ import { Providers } from './providers'
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'Next.js Portfolio Starter',
-    template: '%s | Next.js Portfolio Starter',
+    default: 'XinXin Li',
+    template: '%s | XinXin Li',
   },
-  description: 'This is my portfolio.',
+  description: 'Web developer and optimist.',
   openGraph: {
-    title: 'My Portfolio',
-    description: 'This is my portfolio.',
+    title: 'XinXin Li',
+    description: 'Web developer and optimist.',
     url: baseUrl,
-    siteName: 'My Portfolio',
-    locale: 'en_US',
+    siteName: 'XinXin Li',
+    locale: 'zh_CN',
     type: 'website',
   },
   robots: {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
 }
 
-const cx = (...classes) => classes.filter(Boolean).join(' ')
+const cx = (...classes: string[]) => classes.filter(Boolean).join(' ')
 
 export default function RootLayout({
   children,
@@ -46,24 +46,24 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html
-        lang="en"
+        lang="zh"
         suppressHydrationWarning
         className={cx(
-          'text-black bg-white dark:text-white dark:bg-black',
+          'scroll-smooth antialiased',
           GeistSans.variable,
           GeistMono.variable
         )}
       >
-        <body className="antialiased">
-          <Providers
-
-          >
-            <div className="page-container">
-              <main className="max-w-xl mx-4 lg:mx-auto flex-auto min-w-0 flex flex-col px-2 md:px-0">
-                <Navbar />
+        <body className="min-h-screen bg-background text-foreground">
+          <Providers>
+            <div className="relative flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1 animate-in">
                 {children}
-                <Footer />
               </main>
+              <div className="sticky bottom-0 w-full border-t border-border grid place-items-center composer-effect">
+                <Footer />
+              </div>
             </div>
           </Providers>
         </body>

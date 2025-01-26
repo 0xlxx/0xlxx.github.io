@@ -22,45 +22,46 @@ function ArrowIcon() {
 
 export default function Footer() {
   return (
-    <footer className="mb-16">
-      <motion.ul
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="font-sm mt-8 flex flex-col space-y-2 md:flex-row md:space-x-6 md:space-y-0"
-      >
-        <motion.li
-          whileHover={{ x: 4 }}
-          whileTap={{ scale: 0.95 }}
+    <div className="container py-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <motion.ul
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center space-x-4"
         >
-          <a
-            className="group flex items-center text-muted-foreground hover:text-foreground transition-colors"
-            rel="noopener noreferrer"
-            target="_blank"
-            href="/rss"
-          >
-            <ArrowIcon />
-            <p className="ml-2 h-7">RSS</p>
-          </a>
-        </motion.li>
-        <motion.li
-          whileHover={{ x: 4 }}
-          whileTap={{ scale: 0.95 }}
+          <motion.li whileHover={{ x: 2 }} whileTap={{ scale: 0.97 }}>
+            <a
+              className="group inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+              rel="noopener noreferrer"
+              target="_blank"
+              href="/rss"
+            >
+              <ArrowIcon />
+              <span className="ml-1.5">RSS</span>
+            </a>
+          </motion.li>
+          <motion.li whileHover={{ x: 2 }} whileTap={{ scale: 0.97 }}>
+            <a
+              className="group inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+              rel="noopener noreferrer"
+              target="_blank"
+              href="https://github.com/lxxorz"
+            >
+              <ArrowIcon />
+              <span className="ml-1.5">GitHub</span>
+            </a>
+          </motion.li>
+        </motion.ul>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="text-xs text-muted-foreground mt-4 sm:mt-0"
         >
-          <a
-            className="group flex items-center text-muted-foreground hover:text-foreground transition-colors"
-            rel="noopener noreferrer"
-            target="_blank"
-            href="https://github.com/lxxorz"
-          >
-            <ArrowIcon />
-            <p className="ml-2 h-7">GitHub</p>
-          </a>
-        </motion.li>
-      </motion.ul>
-      <p className="mt-8 text-muted-foreground">
-        © {new Date().getFullYear()} MIT Licensed
-      </p>
-    </footer>
+          © {new Date().getFullYear()} MIT Licensed
+        </motion.p>
+      </div>
+    </div>
   )
 }

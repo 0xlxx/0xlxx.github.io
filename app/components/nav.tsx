@@ -43,40 +43,31 @@ const navItems = {
 
 export function Navbar() {
   return (
-    <motion.aside
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="mb-16 tracking-tight"
+    <nav
+      className="composer-effect w-full tracking-tight sticky top-0 z-20 flex items-center justify-center px-4 py-3 border-b border-border "
+      id="nav"
     >
-      <div className="lg:sticky lg:top-20">
-        <nav
-          className="flex items-center justify-between px-4 py-3 rounded-2xl bg-muted/50 backdrop-blur-sm border border-border/50"
-          id="nav"
-        >
-          <div className="flex items-center gap-1">
-            {Object.entries(navItems).map(([path, { name, icon }]) => {
-              return (
-                <Link
-                  key={path}
-                  href={path}
-                  className="group"
-                >
-                  <motion.div
-                    className="relative px-4 py-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {icon}
-                    <span>{name}</span>
-                  </motion.div>
-                </Link>
-              )
-            })}
-          </div>
-          <ThemeSwitcher />
-        </nav>
+      <div className="container flex items-center gap-1 ">
+        {Object.entries(navItems).map(([path, { name, icon }]) => {
+          return (
+            <Link
+              key={path}
+              href={path}
+              className="group z-30"
+            >
+              <motion.div
+                className="relative px-4 py-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {icon}
+                <span>{name}</span>
+              </motion.div>
+            </Link>
+          )
+        })}
       </div>
-    </motion.aside>
+      <ThemeSwitcher />
+    </nav>
   )
 }
