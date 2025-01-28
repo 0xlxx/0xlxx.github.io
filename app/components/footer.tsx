@@ -59,7 +59,7 @@ export default function Footer() {
           transition={{ duration: 0.3, delay: 0.1 }}
           className="text-xs text-muted-foreground mt-4 sm:mt-0"
         >
-          © {new Date().getFullYear()} MIT Licensed
+          © {new Date().getFullYear()} CC BY 4.0 Licensed
         </motion.p>
       </div>
     </div>
