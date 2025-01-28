@@ -29,7 +29,7 @@ export function ThemeSwitcher() {
         onClick={() => setTheme(isDark ? 'light' : 'dark')}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        className="relative w-9 h-9 flex items-center justify-center rounded-lg bg-muted"
+        className="relative w-9 h-9 flex items-center justify-center rounded-lg bg-muted cursor-pointer"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         transition={{

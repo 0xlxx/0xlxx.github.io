@@ -108,7 +108,7 @@ export function CustomMDX(props) {
       {...props}
       options={{
         mdxOptions: {
-          remarkPlugins: [[remarkMath, { singleDollar: true }]],
+          remarkPlugins: [[remarkMath, { singleDollar: true }], remarkGfm],
           rehypePlugins: [[rehypeKatex, {
             output: 'mathml',
             throwOnError: false,
