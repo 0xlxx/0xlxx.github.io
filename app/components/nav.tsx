@@ -3,48 +3,26 @@
 import Link from 'next/link'
 import { ThemeSwitcher } from './theme-switcher'
 import { motion } from 'motion/react'
-
+import { Icon } from '@iconify-icon/react'
 const navItems = {
   '/': {
-    name: '首页',
-    icon: (
-      <svg
-        className="w-4 h-4"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        <polyline points="9 22 9 12 15 12 15 22" />
-      </svg>
-    ),
+    name: 'home',
+    icon: <Icon size={20} icon="mdi:home" />,
   },
   '/blog': {
-    name: '博客',
-    icon: (
-      <svg
-        className="w-4 h-4"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-      </svg>
-    ),
+    name: 'blog',
+    icon: <Icon size={20} icon="mdi:book" />,
+  },
+  '/value': {
+    name: '',
+    icon: <Icon size={20} icon="mdi:heart"/>,
   },
 }
 
 export function Navbar() {
   return (
     <nav
-      className="composer-effect w-full tracking-tight sticky top-0 z-20 flex items-center justify-center px-4 py-3 border-b border-border "
+      className="composer-effect w-full tracking-tight flex items-center justify-center px-4 py-3 border-b border-border"
       id="nav"
     >
       <div className="container flex items-center gap-1 ">

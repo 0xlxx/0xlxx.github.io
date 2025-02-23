@@ -109,9 +109,11 @@
 
 /* Layout System */
 .page-layout {
+  height: 100vh;
   display: grid;
   grid-template-rows: min-content minmax(0px, 1fr) min-content;
   grid-template-columns: 100%;
+  overflow: hidden;
 }
 
 /* Animation utilities */
@@ -184,4 +186,10 @@
     radial-gradient(transparent 1px, var(--background) 1px);
   background-size: 4px 4px;
   backdrop-filter: saturate(50%) blur(4px);
+}
+
+iconify-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
 }

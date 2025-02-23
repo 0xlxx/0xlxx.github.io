@@ -36,5 +36,8 @@
       "@types/react": "19.0.2",
       "@types/react-dom": "19.0.2"
     }
+  },
+  "devDependencies": {
+    "@iconify-icon/react": "^2.3.0"
   }
 }

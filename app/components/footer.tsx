@@ -49,10 +49,11 @@ export default function Footer() {
               href="https://github.com/lxxorz"
             >
               <ArrowIcon />
-              <span className="ml-1.5">GitHub</span>
+              <span className="ml-1.5">Github</span>
             </a>
           </motion.li>
         </motion.ul>
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

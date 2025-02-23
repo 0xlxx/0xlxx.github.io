@@ -56,12 +56,14 @@ export default function RootLayout({
       >
         <body className="min-h-screen bg-background text-foreground">
           <Providers>
-            <div className="relative flex min-h-screen flex-col">
-              <Navbar />
-              <main className="flex-1 animate-in">
+            <div className="page-layout">
+              <div className="w-full z-20 overflow-hidden">
+                <Navbar />
+              </div>
+              <main className="flex-1 animate-in overflow-auto">
                 {children}
               </main>
-              <div className="sticky bottom-0 w-full border-t border-border grid place-items-center composer-effect">
+              <div className="w-full border-t border-border grid place-items-center composer-effect overflow-hidden">
                 <Footer />
               </div>
             </div>
