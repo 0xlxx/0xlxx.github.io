@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Icon } from "@iconify-icon/react"
 
 // Vertex shader source
 const vertexShaderSource = `
@@ -133,8 +134,10 @@ function createProgram(gl: WebGLRenderingContext, vertexSource: string, fragment
 }
 
 export default function SDFDemo() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -226,10 +229,53 @@ export default function SDFDemo() {
     };
   }, []);
 
+  // Handle fullscreen toggle
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+
+    if (!isFullscreen) {
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  // Listen for fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
-    />
+    <div ref={containerRef} className="relative w-full h-full">
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+      />
+      
+      {/* Fullscreen button */}
+      <button
+        onClick={toggleFullscreen}
+        className="absolute top-2 left-2 z-10 p-2 bg-black/50 rounded-md text-white/80 hover:text-white hover:bg-black/70 transition-colors"
+        aria-label={isFullscreen ? "退出全屏" : "全屏显示"}
+      >
+        <Icon 
+          icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"} 
+          width="20" 
+          height="20" 
+        />
+      </button>
+    </div>
   );
 }

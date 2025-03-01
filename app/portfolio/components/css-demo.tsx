@@ -1,10 +1,40 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Icon } from "@iconify-icon/react"
 
 export default function CSSDemo() {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Handle fullscreen toggle
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+
+    if (!isFullscreen) {
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  // Listen for fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -31,7 +61,7 @@ export default function CSSDemo() {
       container.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
-  
+
   return (
     <div 
       ref={containerRef}
@@ -41,6 +71,19 @@ export default function CSSDemo() {
         '--y': '50%',
       } as React.CSSProperties}
     >
+      {/* Fullscreen button */}
+      <button
+        onClick={toggleFullscreen}
+        className="absolute top-2 left-2 z-10 p-2 bg-black/50 rounded-md text-white/80 hover:text-white hover:bg-black/70 transition-colors"
+        aria-label={isFullscreen ? "退出全屏" : "全屏显示"}
+      >
+        <Icon 
+          icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"} 
+          width="20" 
+          height="20" 
+        />
+      </button>
+      
       {/* Card container with interactive glow effect */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div 

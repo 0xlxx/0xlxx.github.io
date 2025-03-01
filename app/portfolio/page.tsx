@@ -6,6 +6,8 @@ import { Icon } from '@iconify-icon/react'
 import Link from 'next/link'
 import SDFDemo from './components/sdf-demo'
 import CSSDemo from './components/css-demo'
+import BloomDemo from './components/bloom-demo'
+import ParticleDemo from './components/particle-demo'
 
 // Categories for the portfolio
 const categories = [
@@ -29,6 +31,20 @@ const portfolioItems = [
     description: '使用纯CSS实现的响应式卡片设计',
     category: 'css',
     component: <CSSDemo />
+  },
+  {
+    id: 3,
+    title: '选择性泛光效果',
+    description: '使用Three.js和UnrealBloomPass实现的选择性泛光效果',
+    category: '3d',
+    component: <BloomDemo />
+  },
+  {
+    id: 4,
+    title: '粒子系统',
+    description: '交互式粒子系统，支持鼠标交互和参数调整',
+    category: '3d',
+    component: <ParticleDemo />
   }
 ]
 
@@ -48,7 +64,7 @@ export default function PortfolioPage() {
             作品集
           </h1>
           <p className="text-muted-foreground">
-            这里展示了我的CSS作品和3D作品集合，包括各种视觉效果和交互设计。
+            这里展示了我的CSS作品和3D作品集合，包括各种视觉效果和交互设计。每个作品都支持全屏显示和参数调整。
           </p>
         </div>
 
