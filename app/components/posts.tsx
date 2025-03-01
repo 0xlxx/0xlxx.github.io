@@ -23,7 +23,7 @@ export function BlogPosts() {
             <div className="w-full flex flex-col md:flex-row space-x-0 md:space-x-2">
               <p
                 className="text-muted-foreground min-w-[100px] tabular-nums"
-                style={{ viewTransitionName: `post-link-${post.slug}` }}
+                // style={{ viewTransitionName: `post-link-${post.slug}` }}
               >
                 {formatDate(post.metadata.publishedAt, false)}
               </p>
@@ -63,7 +63,7 @@ export function BlogPostsBlock() {
               <time
                 dateTime={post.metadata.publishedAt}
                 className="block text-sm text-muted-foreground"
-                style={{ viewTransitionName: `post-link-${post.slug}` }}
+                // style={{ viewTransitionName: `post-link-${post.slug}` }}
               >
                 {formatDate(post.metadata.publishedAt)}
               </time>

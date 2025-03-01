@@ -54,7 +54,7 @@ export default function RootLayout({
           GeistMono.variable
         )}
       >
-        <body className="min-h-screen bg-background text-foreground">
+        <body className="min-h-screen bg-background text-foreground relative">
           <Providers>
             <div className="page-layout">
               <div className="w-full z-20 overflow-hidden">

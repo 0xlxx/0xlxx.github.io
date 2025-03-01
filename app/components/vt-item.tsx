@@ -11,7 +11,7 @@ export function VTItem(props: VTItemProps) {
 
   return (
     <span
-      style={{ viewTransitionName: `${props.prefix}-${getTransitionName(props.children)}` }}
+      // style={{ viewTransitionName: `${props.prefix}-${getTransitionName(props.children)}` }}
     >
       {props.children}
     </span>

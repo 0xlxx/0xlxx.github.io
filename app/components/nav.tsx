@@ -25,19 +25,15 @@ export function Navbar() {
       className="composer-effect w-full tracking-tight flex items-center justify-center px-4 py-3 border-b border-border"
       id="nav"
     >
-      <div className="container flex items-center gap-1 ">
-        {Object.entries(navItems).map(([path, { name, icon }]) => {
+      <div className="container flex gap-1 ">
+        {Object.entries(navItems).map(([url, { name, icon }]) => {
           return (
             <Link
-              key={path}
-              href={path}
-              className="group z-30"
+              key={url}
+              href={url}
+              className="z-30"
             >
-              <motion.div
-                className="relative px-4 py-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <motion.div className={`relative text-muted-foreground  h-6 px-4 py-2 rounded-xl  transition-colors flex items-center gap-2 ${url === '/value' ? 'hover:text-purple-300 hover:scale-130 transition-transform origin-center' : 'hover:text-primary'}`}>
                 {icon}
                 <span>{name}</span>
               </motion.div>

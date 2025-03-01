@@ -4,6 +4,11 @@ import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { motion, MotionConfig } from 'motion/react'
 
+const colors = [
+  '#facc15',
+  '#1f2937',
+]
+
 export function ThemeSwitcher() {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
@@ -44,7 +49,7 @@ export function ThemeSwitcher() {
           initial={false}
           animate={{
             scale: isHovered ? 0.9 : 1,
-            rotate: isDark ? 0 : 180
+            rotate: isDark ? 0 : 0
           }}
           transition={{
             type: 'spring',
@@ -58,8 +63,8 @@ export function ThemeSwitcher() {
           <motion.svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
+            fill={isDark ? colors[0] : colors[1]}
+            stroke={isDark ? colors[0] : colors[1]}
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -83,8 +88,8 @@ export function ThemeSwitcher() {
           <motion.svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
+            fill={isDark ? colors[1] : colors[0]}
+            stroke={isDark ? colors[1] : colors[0]}
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -92,7 +97,7 @@ export function ThemeSwitcher() {
             animate={{
               opacity: isDark ? 0 : 1,
               scale: isDark ? 0.5 : 1,
-              rotate: isDark ? -90 : 0
+              rotate: isDark ? 0 : 0
             }}
             transition={{
               duration: 0.15,

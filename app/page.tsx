@@ -1,21 +1,27 @@
 import { BlogPosts } from 'app/components/posts'
-
+import { Icon } from '@iconify-icon/react'
+import Link from 'next/link'
+import SDF from './components/sdf'
 export default function Page() {
   return (
     <div className="container mx-auto">
-      <section className="grid gap-8 py-20 md:gap-16 lg:grid-cols-[1fr_2fr]">
-        <div className="space-y-8 animate-in slide-in-from-bottom">
-          <div className="space-y-6">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl [view-transition-name:page-title]">
-              XinXin Li
+      <section className="flex flex-col gap-8 py-20 md:gap-16 items-center">
+        <div className="animate-in slide-in-from-bottom">
+          <div className='prose'>
+            <h1 className=" tracking-tight [view-transition-name:page-title]">
+              Bjorn Li
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {`I'm a web developer and optimist. Currently working on Web3D and AI related projects. I'm also interested in visualization technology.`}
+            <p className="text-muted-foreground">
+              {`Hey , I'm a web developer and optimist. Currently working on Web3D and AI related projects. I'm also interested in visualization technology.`}
             </p>
+
+              <h2>Find me on</h2>
+              <ul className="flex flex-col grid grid-cols-4">
+                <li className='flex gap-4'><Icon icon="mdi:github"  width={24}/> <Link href="https://github.com/lxxorz">Github</Link></li>
+                <li className='flex gap-4'><Icon icon="mdi:web" width={24}/> <Link href="https://observablehq.com/@lxxorz">Observable</Link></li>
+              </ul>
+            <SDF />
           </div>
-        </div>
-        <div className="animate-in slide-in-from-bottom [--animation-delay:200ms]">
-          <BlogPosts />
         </div>
       </section>
     </div>
