@@ -13,6 +13,10 @@ const navItems = {
     name: 'blog',
     icon: <Icon size={20} icon="mdi:book" />,
   },
+  '/portfolio': {
+    name: 'portfolio',
+    icon: <Icon size={20} icon="mdi:briefcase" />,
+  },
   '/value': {
     name: '',
     icon: <Icon size={20} icon="mdi:heart"/>,

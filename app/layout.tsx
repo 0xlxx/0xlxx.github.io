@@ -11,15 +11,15 @@ import { Providers } from './providers'
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'XinXin Li',
-    template: '%s | XinXin Li',
+    default: 'Bjorn Li',
+    template: '%s | Bjorn Li',
   },
   description: 'Web developer and optimist.',
   openGraph: {
-    title: 'XinXin Li',
+    title: 'Bjorn Li',
     description: 'Web developer and optimist.',
     url: baseUrl,
-    siteName: 'XinXin Li',
+    siteName: 'Bjorn Li',
     locale: 'zh_CN',
     type: 'website',
   },

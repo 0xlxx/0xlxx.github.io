@@ -7,7 +7,7 @@ export default function Page() {
     <div className="container mx-auto">
       <section className="flex flex-col gap-8 py-20 md:gap-16 items-center">
         <div className="animate-in slide-in-from-bottom">
-          <div className='prose'>
+          <div className='prose dark:prose-invert'>
             <h1 className=" tracking-tight [view-transition-name:page-title]">
               Bjorn Li
             </h1>
