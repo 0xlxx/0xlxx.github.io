@@ -1,9 +1,12 @@
 @import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+
 @plugin '@tailwindcss/typography';
 
 @layer components;
 @layer utilities;
-
 @import "./style/components.css" layer(components);
 @import "./style/utilities.css" layer(utilities);
 

@@ -4,6 +4,7 @@ const nextConfig = {
   experimental: {
     mdxRs: true,
     ppr: true,
+    viewTransition: true,
   }
 }
 

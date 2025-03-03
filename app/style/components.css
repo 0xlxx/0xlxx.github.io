@@ -1,14 +1,4 @@
 @layer components {
-.prose-custom {
-  @apply prose-lg prose-slate dark:prose-invert
-    prose-headings:text-foreground
-    prose-p:text-muted-foreground
-    prose-a:text-primary hover:prose-a:text-primary/80
-    prose-strong:text-foreground
-    prose-code:text-muted-foreground
-    max-w-none;
-}
-
 .composer-effect {
   background-color: transparent;
   background-image:

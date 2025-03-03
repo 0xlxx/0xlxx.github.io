@@ -1,23 +1,21 @@
-import { notFound } from 'next/navigation'
-import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getBlogPosts } from 'app/blog/utils'
-import { baseUrl } from 'app/sitemap'
-import { VTItem } from 'app/components/vt-item'
-
+import { notFound } from "next/navigation";
+import { CustomMDX } from "app/components/mdx";
+import { formatDate, getBlogPosts } from "app/blog/utils";
+import { baseUrl } from "app/sitemap";
 export async function generateStaticParams() {
-  let posts = getBlogPosts()
+  let posts = getBlogPosts();
 
   return posts.map((post) => ({
     slug: post.slug,
-  }))
+  }));
 }
 
 export async function generateMetadata(props) {
   const params = await props.params;
   const slug = decodeURIComponent(params.slug);
-  let post = getBlogPosts().find((post) => post.slug === slug)
+  let post = getBlogPosts().find((post) => post.slug === slug);
   if (!post) {
-    return
+    return;
   }
 
   let {
@@ -25,10 +23,10 @@ export async function generateMetadata(props) {
     publishedAt: publishedTime,
     summary: description,
     image,
-  } = post.metadata
+  } = post.metadata;
   let ogImage = image
     ? image
-    : `${baseUrl}/og?title=${encodeURIComponent(title)}`
+    : `${baseUrl}/og?title=${encodeURIComponent(title)}`;
 
   return {
     title,
@@ -36,26 +34,26 @@ export async function generateMetadata(props) {
     openGraph: {
       title,
       description,
-      type: 'article',
+      type: "article",
       publishedTime,
       url: `${baseUrl}/blog/${post.slug}`,
       images: [{ url: ogImage }],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
       images: [ogImage],
     },
-  }
+  };
 }
 
 export default async function Blog(props) {
   const params = await props.params;
   const slug = decodeURIComponent(params.slug);
-  let post = getBlogPosts().find((post) => post.slug === slug)
+  let post = getBlogPosts().find((post) => post.slug === slug);
   if (!post) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -65,8 +63,8 @@ export default async function Blog(props) {
         suppressHydrationWarning
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
@@ -76,17 +74,15 @@ export default async function Blog(props) {
               : `/og?title=${encodeURIComponent(post.metadata.title)}`,
             url: `${baseUrl}/blog/${post.slug}`,
             author: {
-              '@type': 'Person',
-              name: 'My Portfolio',
+              "@type": "Person",
+              name: "My Portfolio",
             },
           }),
         }}
       />
       <div className="space-y-4">
         <h1 className="text-foreground font-semibold text-4xl md:text-5xl lg:text-6xl tracking-tighter">
-          <VTItem prefix={post.slug}>
-            {post.metadata.title}
-          </VTItem>
+          {post.metadata.title}
         </h1>
         <p className="text-muted-foreground text-sm">
           {formatDate(post.metadata.publishedAt)}
@@ -96,5 +92,5 @@ export default async function Blog(props) {
         <CustomMDX source={post.content} />
       </article>
     </section>
-  )
+  );
 }

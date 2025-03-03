@@ -1,7 +1,9 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { Icon } from "@iconify-icon/react"
+import { useFullscreen } from "../../hooks/useFullscreen"
+import { useWebGL } from "../../hooks/useWebGL"
 
 // Vertex shader source
 const vertexShaderSource = `
@@ -94,102 +96,14 @@ const fragmentShaderSource = `
   }
 `;
 
-// Helper function to create and compile a shader
-function createShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
-  const shader = gl.createShader(type);
-  if (!shader) return null;
-
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error('An error occurred compiling the shader: ' + gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
-    return null;
-  }
-
-  return shader;
-}
-
-// Helper function to create and link a program
-function createProgram(gl: WebGLRenderingContext, vertexSource: string, fragmentSource: string): WebGLProgram | null {
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-
-  if (!vertexShader || !fragmentShader) return null;
-
-  const program = gl.createProgram();
-  if (!program) return null;
-
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
-    return null;
-  }
-
-  return program;
-}
-
 export default function SDFDemo() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { containerRef, isFullscreen, toggleFullscreen } = useFullscreen();
 
-  useEffect(() => {
-    if (!canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const gl = canvas.getContext('webgl');
-
-    if (!gl) {
-      console.error('WebGL not supported');
-      return;
-    }
-
-    // Set canvas size
-    const resizeCanvas = () => {
-      const { width, height } = canvas.getBoundingClientRect();
-      canvas.width = width * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // Create shader program
-    const program = createProgram(gl, vertexShaderSource, fragmentShaderSource);
-    if (!program) return;
-
-    // Create a buffer for the vertex positions
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-    // Create a square that covers the entire canvas
-    const positions = [
-      -1.0, -1.0,
-       1.0, -1.0,
-      -1.0,  1.0,
-       1.0,  1.0,
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-    // Get attribute and uniform locations
-    const positionAttributeLocation = gl.getAttribLocation(program, 'aVertexPosition');
-    const resolutionUniformLocation = gl.getUniformLocation(program, 'uResolution');
-    const timeUniformLocation = gl.getUniformLocation(program, 'uTime');
-
-    // Animation loop
-    let startTime = Date.now();
-
-    const render = () => {
-      // Calculate time
-      const currentTime = Date.now();
-      const elapsedTime = (currentTime - startTime) / 1000.0; // Convert to seconds
+  // Render function for WebGL
+  const handleRender = (gl: WebGLRenderingContext, program: WebGLProgram, elapsedTime: number) => {
+    try {
+      const canvas = gl.canvas as HTMLCanvasElement;
 
       // Clear the canvas
       gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -198,9 +112,13 @@ export default function SDFDemo() {
       // Use the shader program
       gl.useProgram(program);
 
+      // Get attribute and uniform locations
+      const positionAttributeLocation = gl.getAttribLocation(program, 'aVertexPosition');
+      const resolutionUniformLocation = gl.getUniformLocation(program, 'uResolution');
+      const timeUniformLocation = gl.getUniformLocation(program, 'uTime');
+
       // Set the vertex position attribute
       gl.enableVertexAttribArray(positionAttributeLocation);
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
       // Set the uniforms
@@ -209,53 +127,24 @@ export default function SDFDemo() {
 
       // Draw the square
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-      // Request next frame
-      animationRef.current = requestAnimationFrame(render);
-    };
-
-    render();
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-
-      // Clean up WebGL resources
-      gl.deleteProgram(program);
-      gl.deleteBuffer(positionBuffer);
-    };
-  }, []);
-
-  // Handle fullscreen toggle
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-
-    if (!isFullscreen) {
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("WebGL render error:", message);
+      setErrorMessage(`WebGL render error: ${message}`);
     }
   };
 
-  // Listen for fullscreen change events
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+  // Use the WebGL hook
+  const { canvasRef, error } = useWebGL({
+    vertexShaderSource,
+    fragmentShaderSource,
+    onRender: handleRender
+  });
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
+  // Update error state if WebGL hook reports an error
+  if (error && !errorMessage) {
+    setErrorMessage(error);
+  }
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
@@ -263,17 +152,33 @@ export default function SDFDemo() {
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
       />
-      
+
+      {/* Error message display */}
+      {errorMessage && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white p-4 z-20">
+          <div className="bg-red-900/80 p-4 rounded-lg max-w-md">
+            <h3 className="text-xl font-bold mb-2">Error</h3>
+            <p>{errorMessage}</p>
+            <button
+              className="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-md"
+              onClick={() => setErrorMessage(null)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Fullscreen button */}
       <button
         onClick={toggleFullscreen}
         className="absolute top-2 left-2 z-10 p-2 bg-black/50 rounded-md text-white/80 hover:text-white hover:bg-black/70 transition-colors"
         aria-label={isFullscreen ? "退出全屏" : "全屏显示"}
       >
-        <Icon 
-          icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"} 
-          width="20" 
-          height="20" 
+        <Icon
+          icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"}
+          width="20"
+          height="20"
         />
       </button>
     </div>

@@ -1,0 +1,12 @@
+
+.card-container {
+  transition: transform 0.1s ease-out;
+}
+
+.card-container:hover .card {
+  transform: translateZ(10px);
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}

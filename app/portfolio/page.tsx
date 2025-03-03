@@ -8,20 +8,32 @@ import SDFDemo from './components/sdf-demo'
 import CSSDemo from './components/css-demo'
 import BloomDemo from './components/bloom-demo'
 import ParticleDemo from './components/particle-demo'
+import PathMorphingDemo from './components/path-morphing-demo'
+import ShaderToyDemo from './components/shadertoy-demo'
 
 // Categories for the portfolio
 const categories = [
   { id: 'all', name: '全部', icon: 'mdi:view-grid' },
   { id: 'css', name: 'CSS 作品', icon: 'mdi:language-css3' },
   { id: '3d', name: '3D 作品', icon: 'mdi:cube-outline' }
-]
+] as const;
+
+type Category = typeof categories[number]['id']
+
+interface PortfolioItem {
+  id: number
+  title: string
+  description: string
+  category: Category
+  component: React.ReactNode
+}
 
 // Portfolio items
 const portfolioItems = [
   {
     id: 1,
-    title: '流体动画',
-    description: '使用WebGL实现的SDF流体动画效果',
+    title: 'SDF Shapes',
+    description: '使用有向距离场构造二维形状',
     category: '3d',
     component: <SDFDemo />
   },
@@ -34,37 +46,38 @@ const portfolioItems = [
   },
   {
     id: 3,
-    title: '选择性泛光效果',
+    title: 'Selective Bloom',
     description: '使用Three.js和UnrealBloomPass实现的选择性泛光效果',
     category: '3d',
     component: <BloomDemo />
   },
-  {
-    id: 4,
-    title: '粒子系统',
-    description: '交互式粒子系统，支持鼠标交互和参数调整',
-    category: '3d',
-    component: <ParticleDemo />
-  }
+
+  // {
+  //   id: 5,
+  //   title: '路径形变',
+  //   description: '通过计算 svg path 插值来实现 path morphing 动画',
+  //   category: 'css',
+  //   component: <PathMorphingDemo />
+  // }
 ]
 
 export default function PortfolioPage() {
   const [activeCategory, setActiveCategory] = useState('all')
-  
+
   // Filter items based on active category
-  const filteredItems = activeCategory === 'all' 
-    ? portfolioItems 
+  const filteredItems = activeCategory === 'all'
+    ? portfolioItems
     : portfolioItems.filter(item => item.category === activeCategory)
 
   return (
     <div className="container mx-auto py-16">
       <section className="animate-in slide-in-from-bottom">
         <div className="prose dark:prose-invert mb-12">
-          <h1 className="tracking-tight [view-transition-name:page-title]">
+          <h1 className="tracking-tight">
             作品集
           </h1>
           <p className="text-muted-foreground">
-            这里展示了我的CSS作品和3D作品集合，包括各种视觉效果和交互设计。每个作品都支持全屏显示和参数调整。
+            Some demos I've worked on
           </p>
         </div>
 
@@ -81,7 +94,7 @@ export default function PortfolioPage() {
               }`}
             >
               <Icon icon={category.icon} size={20} />
-              <span>{category.name}</span>
+              <span className='capitalize'>{category.name}</span>
             </button>
           ))}
         </div>
@@ -105,8 +118,8 @@ export default function PortfolioPage() {
                 <p className="text-muted-foreground mb-4">{item.description}</p>
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 text-xs rounded-full ${
-                    item.category === 'css' 
-                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                    item.category === 'css'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                       : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
                   }`}>
                     {item.category === 'css' ? 'CSS' : '3D'}

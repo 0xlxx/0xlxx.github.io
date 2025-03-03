@@ -5,7 +5,6 @@ import { GeistMono } from 'geist/font/mono'
 import { Navbar } from './components/nav'
 import Footer from './components/footer'
 import { baseUrl } from './sitemap'
-import { ViewTransitions } from 'next-view-transitions'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
@@ -44,7 +43,6 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ViewTransitions>
       <html
         lang="zh"
         suppressHydrationWarning
@@ -70,6 +68,5 @@ export default function RootLayout({
           </Providers>
         </body>
       </html>
-    </ViewTransitions>
   )
 }
