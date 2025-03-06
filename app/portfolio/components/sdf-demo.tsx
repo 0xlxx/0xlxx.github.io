@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { Icon } from "@iconify-icon/react"
 import { useFullscreen } from "../../hooks/useFullscreen"
 import { useWebGL } from "../../hooks/useWebGL"
+import FullscreenButton from "./fullscreen-button"
 
 // Vertex shader source
 const vertexShaderSource = `
@@ -169,18 +170,9 @@ export default function SDFDemo() {
         </div>
       )}
 
-      {/* Fullscreen button */}
-      <button
-        onClick={toggleFullscreen}
-        className="absolute top-2 left-2 z-10 p-2 bg-black/50 rounded-md text-white/80 hover:text-white hover:bg-black/70 transition-colors"
-        aria-label={isFullscreen ? "退出全屏" : "全屏显示"}
-      >
-        <Icon
-          icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"}
-          width="20"
-          height="20"
-        />
-      </button>
+      <div className="absolute top-2 left-2">
+        <FullscreenButton isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+      </div>
     </div>
   );
 }

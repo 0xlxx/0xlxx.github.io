@@ -9,6 +9,7 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import GUI from "lil-gui"
 import { Icon } from "@iconify-icon/react"
 import { useFullscreen } from "../../hooks/useFullscreen"
+import FullscreenButton from "./fullscreen-button"
 
 // 简化的天体数据
 const celestialData = [
@@ -367,7 +368,7 @@ export default function BloomDemo() {
         const earth = celestialBodiesRef.current[1]
         if (earth) {
           // 公转
-          const earthOrbitSpeed = celestialData[1].orbitSpeed
+          const earthOrbitSpeed = celestialData[1].orbitSpeed!
           const earthAngle = delta * earthOrbitSpeed
           const earthX = earth.position.x
           const earthZ = earth.position.z
@@ -382,7 +383,7 @@ export default function BloomDemo() {
         // 月球绕地球公转
         const moon = celestialBodiesRef.current[2]
         if (moon) {
-          moon.rotation.y += delta * celestialData[2].orbitSpeed
+          moon.rotation.y += delta * celestialData[2].orbitSpeed!
         }
       }
 
@@ -442,17 +443,8 @@ export default function BloomDemo() {
         ref={containerRef}
         className="w-full h-full bg-gray-900 overflow-hidden"
       ></div>
-      <div className="absolute bottom-4 right-4 flex space-x-2">
-        <button
-          onClick={toggleFullscreen}
-          className="p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
-          aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-        >
-          <Icon
-            icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"}
-            className="w-5 h-5 text-white"
-          />
-        </button>
+      <div className="absolute top-4 left-4">
+        <FullscreenButton isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
       </div>
     </div>
   )

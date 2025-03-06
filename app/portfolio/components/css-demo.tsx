@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Icon } from "@iconify-icon/react";
 import { useFullscreen } from "../../hooks/useFullscreen";
+import FullscreenButton from "./fullscreen-button";
 
 export default function CSSDemo() {
   const { toggleFullscreen, isFullscreen, containerRef } = useFullscreen();
@@ -45,18 +46,10 @@ export default function CSSDemo() {
         } as React.CSSProperties
       }
     >
-      {/* Fullscreen button */}
-      <button
-        onClick={toggleFullscreen}
-        className="absolute top-2 left-2 z-10 p-2 bg-black/50 rounded-md text-white/80 hover:text-white hover:bg-black/70 transition-colors"
-        aria-label={isFullscreen ? "退出全屏" : "全屏显示"}
-      >
-        <Icon
-          icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"}
-          width="20"
-          height="20"
-        />
-      </button>
+
+      <div className="absolute top-2 left-2 z-99">
+        <FullscreenButton isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+      </div>
 
       {/* Card container with interactive glow effect */}
       <div className="absolute inset-0 flex items-center justify-center">

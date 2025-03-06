@@ -7,9 +7,7 @@ import Link from 'next/link'
 import SDFDemo from './components/sdf-demo'
 import CSSDemo from './components/css-demo'
 import BloomDemo from './components/bloom-demo'
-import ParticleDemo from './components/particle-demo'
 import PathMorphingDemo from './components/path-morphing-demo'
-import ShaderToyDemo from './components/shadertoy-demo'
 
 // Categories for the portfolio
 const categories = [

@@ -1,8 +1,9 @@
 import { Icon } from "@iconify-icon/react";
 import Link from "next/link";
+
 export default function Page() {
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto text-stroke">
       <section className="flex flex-col gap-8 py-20 md:gap-16 items-center">
         <div className="animate-in slide-in-from-bottom">
           <div className="prose dark:prose-invert">
@@ -12,7 +13,7 @@ export default function Page() {
             </p>
 
             <h2>Find me on</h2>
-            <ul className="flex flex-col grid grid-cols-4">
+            <ul className="flex flex-col">
               <li className="flex gap-4">
                 <Icon icon="mdi:github" width={24} />{" "}
                 <Link href="https://github.com/lxxorz">Github</Link>
