@@ -9,7 +9,7 @@ interface WebGLHookOptions {
 }
 
 interface WebGLHookReturn {
-  canvasRef: React.RefObject<HTMLCanvasElement>
+  canvasRef: React.RefObject<HTMLCanvasElement | null>
   error: string | null
 }
 

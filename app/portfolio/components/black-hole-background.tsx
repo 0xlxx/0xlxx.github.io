@@ -198,3 +198,4 @@ export default function PulseBackground({ className }: { className?: string }) {
     </div>
   );
 }
+``
