@@ -6,6 +6,7 @@ import { useFullscreen } from "../../hooks/useFullscreen"
 import FullscreenButton from "./fullscreen-button"
 import { motion } from "motion/react"
 import { GUI } from "lil-gui"
+import { cn } from "../../utils"
 
 // Vertex shader source
 const vertexShaderSource = `
@@ -30,11 +31,11 @@ const fragmentShaderSource = `
     // Normalized pixel coordinates (from 0 to 1)
     vec2 uv = vUv;
 
-    // Center coordinates
-    vec2 center = vec2(0.5, 0.5);
+    // Center coordinates (moved to the right)
+    vec2 center = vec2(0.6, 0.5);
 
     // Black hole effect
-    vec2 p = (vUv * 2.0 - 1.0) * (uResolution.xy / uResolution.y);
+    vec2 p = ((vUv - vec2(0.01, 0.01)  * sin(uTime * 0.2)) * 2.0 - 1.0) * (uResolution.xy / uResolution.y);
     float light = (sin(uTime * 3.0) + 1.0) * 0.125 * 0.5 + 0.5;
     float brightness = uIntensity * light / abs(length(p) - uRadius + uDistortion/(p.x-p.y));
 
@@ -57,7 +58,7 @@ const fragmentShaderSource = `
   }
 `;
 
-export default function PulseBackground() {
+export default function PulseBackground({ className }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -65,7 +66,6 @@ export default function PulseBackground() {
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
   const requestRef = useRef<number | null>(null);
   const guiRef = useRef<GUI | null>(null);
-  const { containerRef, isFullscreen, toggleFullscreen } = useFullscreen();
 
   // Parameters for the black hole effect
   const [params] = useState({
@@ -190,14 +190,11 @@ export default function PulseBackground() {
   }, [params]);
 
   return (
-    <div ref={containerRef} className="w-screen h-screen bg-black absolute left-0 top-0 pointer-events-none -z-1">
+    <div  className={cn("w-screen h-screen bg-black absolute left-0 top-0 pointer-events-none -z-1", className)}>
       <canvas
         ref={canvasRef}
         className="absolute w-full h-full"
       />
-      <div className="absolute top-4 left-4">
-        <FullscreenButton isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
-      </div>
     </div>
   );
 }

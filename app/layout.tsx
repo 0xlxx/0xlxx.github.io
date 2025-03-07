@@ -1,11 +1,10 @@
 import './global.css'
 import type { Metadata } from 'next'
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
 import { Navbar } from './components/nav'
 import Footer from './components/footer'
 import { baseUrl } from './sitemap'
 import { Providers } from './providers'
+import {inter} from "./font"
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -48,11 +47,10 @@ export default function RootLayout({
         suppressHydrationWarning
         className={cx(
           'scroll-smooth antialiased',
-          GeistSans.variable,
-          GeistMono.variable
+          inter.className
         )}
       >
-        <body className="min-h-screen bg-transparent text-foreground relative">
+        <body className="min-h-screen bg-transparent text-foreground relative font-sans">
           <Providers>
             <div className="page-layout">
               <div className="w-full z-20 overflow-hidden">
