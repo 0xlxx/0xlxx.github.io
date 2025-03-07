@@ -72,7 +72,7 @@ export default function PortfolioPage() {
       <section className="animate-in slide-in-from-bottom">
         <div className="prose dark:prose-invert mb-12">
           <h1 className="tracking-tight">
-            作品集
+            Portfolio
           </h1>
           <p className="text-muted-foreground">
             Some demos I've worked on

@@ -35,7 +35,8 @@ const fragmentShaderSource = `
 
     // Black hole effect
     vec2 p = (vUv * 2.0 - 1.0) * (uResolution.xy / uResolution.y);
-    float brightness = uIntensity / abs(length(p) - uRadius + uDistortion/(p.x-p.y));
+    float light = (sin(uTime * 3.0) + 1.0) * 0.125 * 0.5 + 0.5;
+    float brightness = uIntensity * light / abs(length(p) - uRadius + uDistortion/(p.x-p.y));
 
     // Add some time-based animation for subtle movement
     float angle = uTime * 0.2;
@@ -151,7 +152,7 @@ export default function PulseBackground() {
     const animate = (time: number) => {
       if (materialRef.current && rendererRef.current && sceneRef.current && cameraRef.current) {
         // Update time uniform
-        materialRef.current.uniforms.uTime.value = time * 0.001; // Convert to seconds
+        materialRef.current.uniforms.uTime.value = time / 1000; // Convert to seconds
 
         // Render
         rendererRef.current.render(sceneRef.current, cameraRef.current);

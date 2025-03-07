@@ -6,8 +6,6 @@ import { Navbar } from './components/nav'
 import Footer from './components/footer'
 import { baseUrl } from './sitemap'
 import { Providers } from './providers'
-import PulseBackground from "app/portfolio/components/pulse-background";
-
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -55,7 +53,6 @@ export default function RootLayout({
         )}
       >
         <body className="min-h-screen bg-transparent text-foreground relative">
-        <PulseBackground />
           <Providers>
             <div className="page-layout">
               <div className="w-full z-20 overflow-hidden">

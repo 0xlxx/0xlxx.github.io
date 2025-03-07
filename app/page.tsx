@@ -1,9 +1,11 @@
 import { Icon } from "@iconify-icon/react";
 import Link from "next/link";
+import PulseBackground from "app/portfolio/components/pulse-background";
 
 export default function Page() {
   return (
-    <div className="container mx-auto text-stroke">
+    <div className="container mx-auto text-stroke h-full">
+      <PulseBackground />
       <section className="flex flex-col gap-8 py-20 md:gap-16 items-center">
         <div className="animate-in slide-in-from-bottom">
           <div className="prose dark:prose-invert">
