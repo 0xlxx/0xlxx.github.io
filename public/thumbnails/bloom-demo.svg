@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+    <rect width="800" height="450" fill="#8b5cf620" />
+    <rect x="0" y="0" width="800" height="450" fill="url(#grid)" />
+    <defs>
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#8b5cf610" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <g transform="translate(400, 225) scale(8)">
+      <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-5-7h10v2H7v-2zm0-3h10v2H7v-2zm0-3h10v2H7v-2z" fill="#8b5cf6" />
+    </g>
+    <text x="400" y="350" font-family="system-ui, sans-serif" font-size="24" text-anchor="middle" fill="#8b5cf6">
+      BLOOM DEMO
+    </text>
+  </svg>

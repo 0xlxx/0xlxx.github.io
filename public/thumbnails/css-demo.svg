@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+    <rect width="800" height="450" fill="#3b82f620" />
+    <rect x="0" y="0" width="800" height="450" fill="url(#grid)" />
+    <defs>
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3b82f610" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <g transform="translate(400, 225) scale(8)">
+      <path d="M5 3l-.65 3.34h13.59L17.5 8.5H3.92l-.66 3.33h13.59l-.76 3.81-5.48 1.81-4.75-1.81.33-1.64H2.85l-.79 4 7.85 3 9.05-3 1.2-6.03.24-1.21L21.94 3z" fill="#3b82f6" />
+    </g>
+    <text x="400" y="350" font-family="system-ui, sans-serif" font-size="24" text-anchor="middle" fill="#3b82f6">
+      CSS DEMO
+    </text>
+  </svg>

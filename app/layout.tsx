@@ -4,7 +4,7 @@ import { Navbar } from './components/nav'
 import Footer from './components/footer'
 import { baseUrl } from './sitemap'
 import { Providers } from './providers'
-import {inter} from "./font"
+import { inter } from "./font"
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -42,29 +42,74 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-      <html
-        lang="zh"
-        suppressHydrationWarning
-        className={cx(
-          'scroll-smooth antialiased',
-          inter.className
-        )}
-      >
-        <body className="min-h-screen bg-transparent text-foreground relative font-sans">
-          <Providers>
-            <div className="page-layout">
-              <div className="w-full z-20 overflow-hidden">
-                <Navbar />
-              </div>
-              <main className="flex-1 animate-in overflow-auto">
-                {children}
-              </main>
-              <div className="w-full border-t border-border grid place-items-center composer-effect overflow-hidden">
-                <Footer />
-              </div>
+    <html
+      lang="zh"
+      suppressHydrationWarning
+      className={cx(
+        'scroll-smooth antialiased',
+        inter.className
+      )}
+    >
+      <head>
+        {/* Preload critical resources */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Add viewport meta tag for responsive design */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+      </head>
+      <body className="min-h-screen bg-transparent text-foreground font-sans">
+        <Providers>
+          <div className="page-layout relative flex flex-col min-h-screen">
+            <div className="sticky top-0 w-full z-20 backdrop-blur-sm bg-background/80">
+              <Navbar />
             </div>
-          </Providers>
-        </body>
-      </html>
+            <main className="flex-1 overflow-x-hidden">
+              {children}
+            </main>
+            <div className="w-full border-t border-border overflow-hidden">
+              <Footer />
+            </div>
+          </div>
+        </Providers>
+
+        {/* Add Motion initialization script */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+          // Initialize Motion animations on page load
+          document.addEventListener('DOMContentLoaded', () => {
+            // Detect if user prefers reduced motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            if (!prefersReducedMotion) {
+              // Apply page transition animations
+              const pageTransition = () => {
+                const nav = document.querySelector('nav');
+                if (!nav) return; // Safety check
+
+                const navItems = nav.querySelectorAll('a');
+                if (!navItems || navItems.length === 0) return; // Safety check
+
+                navItems.forEach(item => {
+                  item.addEventListener('click', (e) => {
+                    const href = item.getAttribute('href');
+                    if (href && href.startsWith('/') && !e.ctrlKey && !e.metaKey) {
+                      e.preventDefault();
+                      document.body.classList.add('page-transition');
+                      setTimeout(() => {
+                        window.location.href = href;
+                      }, 300);
+                    }
+                  });
+                });
+              };
+
+              // Initialize page transitions with a small delay to ensure DOM is ready
+              setTimeout(pageTransition, 100);
+            }
+          });
+        ` }} />
+      </body>
+    </html>
   )
 }

@@ -1,68 +1,89 @@
 'use client'
 
-import { motion } from 'motion/react'
-
-function ArrowIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-muted-foreground group-hover:text-foreground transition-colors"
-    >
-      <path
-        d="M2.07102 11.3494L0.963068 10.2415L9.2017 1.98864H2.83807L2.85227 0.454545H11.8438V9.46023H10.2955L10.3097 3.09659L2.07102 11.3494Z"
-        fill="currentColor"
-      />
-    </svg>
-  )
-}
+import { animate, stagger } from 'motion'
+import { useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { Icon } from '@iconify-icon/react'
 
 export default function Footer() {
+  const footerRef = useRef<HTMLDivElement>(null)
+  
+  useEffect(() => {
+    if (typeof window === 'undefined' || !footerRef.current) return
+    
+    // Animate footer links with stagger
+    const links = footerRef.current.querySelectorAll('.footer-link')
+    if (links.length) {
+      animate(
+        links,
+        { opacity: [0, 1], y: [5, 0] },
+        { delay: stagger(0.05), duration: 0.4, easing: [0.22, 0.03, 0.26, 1] }
+      )
+    }
+    
+    // Animate copyright text
+    const copyright = footerRef.current.querySelector('.copyright')
+    if (copyright) {
+      animate(
+        copyright,
+        { opacity: [0, 1] },
+        { duration: 0.5, delay: 0.2 }
+      )
+    }
+  }, [])
+  
   return (
-    <div className="container py-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <motion.ul
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex items-center space-x-4"
-        >
-          <motion.li whileHover={{ x: 2 }} whileTap={{ scale: 0.97 }}>
-            <a
-              className="group inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-              rel="noopener noreferrer"
-              target="_blank"
-              href="/rss"
-            >
-              <ArrowIcon />
-              <span className="ml-1.5">RSS</span>
-            </a>
-          </motion.li>
-          <motion.li whileHover={{ x: 2 }} whileTap={{ scale: 0.97 }}>
-            <a
-              className="group inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-              rel="noopener noreferrer"
-              target="_blank"
-              href="https://github.com/lxxorz"
-            >
-              <ArrowIcon />
-              <span className="ml-1.5">Github</span>
-            </a>
-          </motion.li>
-        </motion.ul>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="text-xs text-muted-foreground mt-4 sm:mt-0"
-        >
-          © {new Date().getFullYear()} CC BY 4.0 Licensed
-        </motion.p>
+    <footer 
+      ref={footerRef}
+      className="border-t border-border py-8 mt-12"
+    >
+      <div className="container px-4 sm:px-6 lg:px-8 mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          {/* Links */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-foreground">Links</h3>
+              <div className="flex items-center space-x-4">
+                <Link 
+                  href="/rss" 
+                  className="footer-link group inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Icon icon="mdi:rss" className="mr-1.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span>RSS</span>
+                </Link>
+                
+                <Link 
+                  href="https://github.com/lxxorz" 
+                  className="footer-link group inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Icon icon="mdi:github" className="mr-1.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span>Github</span>
+                </Link>
+                
+                <Link 
+                  href="https://observablehq.com/@lxxorz" 
+                  className="footer-link group inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Icon icon="mdi:web" className="mr-1.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span>Observable</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+          
+          {/* Copyright */}
+          <div className="copyright text-sm text-muted-foreground">
+            <p> {new Date().getFullYear()} Bjorn Li · CC BY 4.0 Licensed</p>
+            <p className="text-xs mt-1">Built with Next.js, Three.js, and Motion</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </footer>
   )
 }
