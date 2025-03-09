@@ -444,7 +444,7 @@ export default function BloomDemo() {
         className="w-full h-full bg-gray-900 overflow-hidden"
       ></div>
       <div className="absolute top-4 left-4">
-        <FullscreenButton isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+        <FullscreenButton isFullscreen={isFullscreen} onClick={toggleFullscreen} />
       </div>
     </div>
   )

@@ -1,7 +1,6 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { Icon } from "@iconify-icon/react"
 import { useFullscreen } from "../../hooks/useFullscreen"
 import { useWebGL } from "../../hooks/useWebGL"
 import FullscreenButton from "./fullscreen-button"
@@ -171,7 +170,7 @@ export default function SDFDemo() {
       )}
 
       <div className="absolute top-2 left-2">
-        <FullscreenButton isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+        <FullscreenButton isFullscreen={isFullscreen} onClick={toggleFullscreen} />
       </div>
     </div>
   );

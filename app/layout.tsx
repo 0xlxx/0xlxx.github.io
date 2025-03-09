@@ -61,54 +61,17 @@ export default function RootLayout({
       <body className="min-h-screen bg-transparent text-foreground font-sans">
         <Providers>
           <div className="page-layout relative flex flex-col min-h-screen">
-            <div className="sticky top-0 w-full z-20 backdrop-blur-sm bg-background/80">
+            <div className="fixed top-0 w-full z-20">
               <Navbar />
             </div>
             <main className="flex-1 overflow-x-hidden">
               {children}
             </main>
-            <div className="w-full border-t border-border overflow-hidden">
+            <div className="fixed bottom-0 w-full z-20">
               <Footer />
             </div>
           </div>
         </Providers>
-
-        {/* Add Motion initialization script */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-          // Initialize Motion animations on page load
-          document.addEventListener('DOMContentLoaded', () => {
-            // Detect if user prefers reduced motion
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-            if (!prefersReducedMotion) {
-              // Apply page transition animations
-              const pageTransition = () => {
-                const nav = document.querySelector('nav');
-                if (!nav) return; // Safety check
-
-                const navItems = nav.querySelectorAll('a');
-                if (!navItems || navItems.length === 0) return; // Safety check
-
-                navItems.forEach(item => {
-                  item.addEventListener('click', (e) => {
-                    const href = item.getAttribute('href');
-                    if (href && href.startsWith('/') && !e.ctrlKey && !e.metaKey) {
-                      e.preventDefault();
-                      document.body.classList.add('page-transition');
-                      setTimeout(() => {
-                        window.location.href = href;
-                      }, 300);
-                    }
-                  });
-                });
-              };
-
-              // Initialize page transitions with a small delay to ensure DOM is ready
-              setTimeout(pageTransition, 100);
-            }
-          });
-        ` }} />
       </body>
     </html>
   )

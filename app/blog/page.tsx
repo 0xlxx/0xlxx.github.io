@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function Page() {
   return (
-    <div className="bg-background ">
+    <div className="bg-background overflow-x-hidden ">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <section className="py-16 md:py-24">
           <div className="relative">

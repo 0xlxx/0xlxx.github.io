@@ -81,36 +81,36 @@ export default function BlackHoleBackground({ className }: { className?: string 
   });
 
   // Update accent color based on theme
-  useEffect(() => {
-    if (!materialRef.current) return;
-    
-    // Set theme-specific colors
-    if (theme === 'dark') {
-      // Blue-purple glow for dark theme
-      params.accentColor.r = 0.1;
-      params.accentColor.g = 0.2;
-      params.accentColor.b = 0.5;
-    } else {
-      // Warm orange-gold glow for light theme
-      params.accentColor.r = 0.5;
-      params.accentColor.g = 0.3;
-      params.accentColor.b = 0.1;
-    }
-    
-    // Update shader uniform
-    materialRef.current.uniforms.uAccentColor.value.set(
-      params.accentColor.r,
-      params.accentColor.g,
-      params.accentColor.b
-    );
-    
-    // Update GUI if it exists
-    if (guiRef.current) {
-      guiRef.current.controllers.forEach(controller => {
-        controller.updateDisplay();
-      });
-    }
-  }, [theme, params]);
+  // useEffect(() => {
+  //   if (!materialRef.current) return;
+
+  //   // Set theme-specific colors
+  //   if (theme === 'dark') {
+  //     // Blue-purple glow for dark theme
+  //     params.accentColor.r = 0.1;
+  //     params.accentColor.g = 0.2;
+  //     params.accentColor.b = 0.5;
+  //   } else {
+  //     // Warm orange-gold glow for light theme
+  //     params.accentColor.r = 0.5;
+  //     params.accentColor.g = 0.3;
+  //     params.accentColor.b = 0.1;
+  //   }
+
+  //   // Update shader uniform
+  //   materialRef.current.uniforms.uAccentColor.value.set(
+  //     params.accentColor.r,
+  //     params.accentColor.g,
+  //     params.accentColor.b
+  //   );
+
+  //   // Update GUI if it exists
+  //   if (guiRef.current) {
+  //     guiRef.current.controllers.forEach(controller => {
+  //       controller.updateDisplay();
+  //     });
+  //   }
+  // }, [theme, params]);
 
   // Setup animation for UI elements
   useEffect(() => {
@@ -174,28 +174,28 @@ export default function BlackHoleBackground({ className }: { className?: string 
     scene.add(mesh);
 
     // Setup GUI controls
-    const gui = new GUI({ title: 'Black Hole Settings', container: containerRef.current });
-    gui.add(params, 'intensity', 0.01, 0.5).onChange((value: number) => {
-      if (materialRef.current) {
-        materialRef.current.uniforms.uIntensity.value = value;
-      }
-    });
-    gui.add(params, 'radius', 0.1, 1.0).onChange((value: number) => {
-      if (materialRef.current) {
-        materialRef.current.uniforms.uRadius.value = value;
-      }
-    });
-    gui.add(params, 'distortion', 0.001, 0.05).onChange((value: number) => {
-      if (materialRef.current) {
-        materialRef.current.uniforms.uDistortion.value = value;
-      }
-    });
+    // const gui = new GUI({ title: 'Black Hole Settings', container: containerRef.current! });
+    // gui.add(params, 'intensity', 0.01, 0.5).onChange((value: number) => {
+    //   if (materialRef.current) {
+    //     materialRef.current.uniforms.uIntensity.value = value;
+    //   }
+    // });
+    // gui.add(params, 'radius', 0.1, 1.0).onChange((value: number) => {
+    //   if (materialRef.current) {
+    //     materialRef.current.uniforms.uRadius.value = value;
+    //   }
+    // });
+    // gui.add(params, 'distortion', 0.001, 0.05).onChange((value: number) => {
+    //   if (materialRef.current) {
+    //     materialRef.current.uniforms.uDistortion.value = value;
+    //   }
+    // });
 
     // Add color controls
-    const colorFolder = gui.addFolder('Accent Color');
-    colorFolder.add(params.accentColor, 'r', 0, 1).name('Red').onChange(updateAccentColor);
-    colorFolder.add(params.accentColor, 'g', 0, 1).name('Green').onChange(updateAccentColor);
-    colorFolder.add(params.accentColor, 'b', 0, 1).name('Blue').onChange(updateAccentColor);
+    // const colorFolder = gui.addFolder('Accent Color');
+    // colorFolder.add(params.accentColor, 'r', 0, 1).name('Red').onChange(updateAccentColor);
+    // colorFolder.add(params.accentColor, 'g', 0, 1).name('Green').onChange(updateAccentColor);
+    // colorFolder.add(params.accentColor, 'b', 0, 1).name('Blue').onChange(updateAccentColor);
 
     function updateAccentColor() {
       if (materialRef.current) {
@@ -207,8 +207,8 @@ export default function BlackHoleBackground({ className }: { className?: string 
       }
     }
 
-    gui.close(); // Start with closed panel
-    guiRef.current = gui;
+    // gui.close(); // Start with closed panel
+    // guiRef.current = gui;
 
     // Efficient resize handler with debounce
     let resizeTimeout: NodeJS.Timeout;
@@ -282,7 +282,7 @@ export default function BlackHoleBackground({ className }: { className?: string 
 
   return (
     <div ref={fullscreenRef} className={cn("relative w-full h-full bg-black", className)}>
-      <div
+      {/* <div
         ref={containerRef}
         className="absolute top-4 left-4 z-10"
       >
@@ -291,7 +291,7 @@ export default function BlackHoleBackground({ className }: { className?: string 
           onClick={toggleFullscreen}
           className="bg-background/80 backdrop-blur-sm hover:bg-background/90 transition-colors"
         />
-      </div>
+      </div> */}
       <canvas
         ref={canvasRef}
         className="absolute w-full h-full"

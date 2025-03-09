@@ -34,24 +34,17 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border antialiased;
   }
-  
-  html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  
+
+
   /* Responsive typography */
   @media (max-width: 640px) {
     html {
       font-size: 14px;
     }
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -60,58 +53,6 @@
     min-height: 100vh;
     /* Improve text rendering */
     -webkit-text-size-adjust: 100%;
-  }
-  
-  /* Improved focus styles for accessibility */
-  :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-  
-  /* Smooth transitions for theme changes */
-  body {
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  /* Page transition animations */
-  .page-transition {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  
-  /* Optimize images */
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-  
-  /* Improved link styles */
-  a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.2s ease, text-decoration 0.2s ease;
-  }
-  
-  /* Responsive container padding */
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  @media (min-width: 640px) {
-    .container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
-  
-  @media (min-width: 1024px) {
-    .container {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
   }
 
   :root {
@@ -184,35 +125,7 @@
     --sh-property: oklch(0.7 0.15 30);
     --sh-entity: oklch(0.7 0.15 30);
   }
-  
-  /* Typography improvements */
-  h1, h2, h3, h4, h5, h6 {
-    line-height: 1.2;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  h2 {
-    font-size: 2rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-  }
-  
-  h3 {
-    font-size: 1.5rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  p {
-    margin-bottom: 1rem;
-  }
-  
+
   /* Responsive grid layout */
   .page-layout {
     display: grid;

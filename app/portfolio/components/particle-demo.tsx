@@ -30,7 +30,7 @@ interface ParticleSystemSettings {
   mouseForce: number
 }
 
-export default function ParticleDemo({ className }: { className?: string }): JSX.Element {
+export default function ParticleDemo({ className }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number | null>(null)
@@ -142,7 +142,7 @@ export default function ParticleDemo({ className }: { className?: string }): JSX
           const dx = p.x - mouseRef.current.x
           const dy = p.y - mouseRef.current.y
           const distance = Math.sqrt(dx * dx + dy * dy)
-          
+
           if (distance < 100) {
             const force = (100 - distance) / 100 * settings.mouseForce
             p.vx += (dx / distance) * force
@@ -170,13 +170,13 @@ export default function ParticleDemo({ className }: { className?: string }): JSX
       ctx.beginPath()
       for (let i = 0; i < particlesRef.current.length; i++) {
         const p1 = particlesRef.current[i]
-        
+
         for (let j = i + 1; j < particlesRef.current.length; j++) {
           const p2 = particlesRef.current[j]
           const dx = p1.x - p2.x
           const dy = p1.y - p2.y
           const distance = Math.sqrt(dx * dx + dy * dy)
-          
+
           if (distance < settings.connectionDistance) {
             ctx.beginPath()
             ctx.strokeStyle = `rgba(150, 150, 150, ${(1 - distance / settings.connectionDistance) * settings.connectionOpacity})`
@@ -191,7 +191,7 @@ export default function ParticleDemo({ className }: { className?: string }): JSX
       // Draw particles
       for (const p of particlesRef.current) {
         const opacity = 1 - (p.life / p.maxLife)
-        
+
         ctx.beginPath()
         ctx.fillStyle = p.color.includes('rgba') ? p.color : p.color.replace(')', `, ${opacity})`).replace('rgb', 'rgba')
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
@@ -227,7 +227,7 @@ export default function ParticleDemo({ className }: { className?: string }): JSX
     canvas.addEventListener('mouseleave', handleMouseLeave)
 
     // Setup GUI controls
-    const gui = new GUI({ title: 'Particle Settings', container: containerRef.current })
+    const gui = new GUI({ title: 'Particle Settings', container: containerRef.current! })
     gui.add(settings, 'particleCount', 10, 300, 10).name('Particle Count').onChange(createParticles)
     gui.add(settings, 'particleSize', 1, 10, 0.5).name('Particle Size')
     gui.add(settings, 'particleLifespan', 50, 300, 10).name('Lifespan')
@@ -240,11 +240,11 @@ export default function ParticleDemo({ className }: { className?: string }): JSX
         p.color = getParticleColor(Math.random())
       }
     })
-    
+
     const mouseFolder = gui.addFolder('Mouse Interaction')
     mouseFolder.add(settings, 'mouseInteraction').name('Enabled')
     mouseFolder.add(settings, 'mouseForce', 0.1, 2, 0.1).name('Force')
-    
+
     gui.close() // Start with closed panel
     guiRef.current = gui
 
@@ -257,11 +257,11 @@ export default function ParticleDemo({ className }: { className?: string }): JSX
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
       }
-      
+
       if (guiRef.current) {
         guiRef.current.destroy()
       }
-      
+
       window.removeEventListener('resize', resizeCanvas)
       canvas.removeEventListener('mousemove', handleMouseMove)
       canvas.removeEventListener('mouseenter', handleMouseEnter)

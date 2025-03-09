@@ -1,18 +1,20 @@
 "use client"
 import { Icon } from "@iconify-icon/react"
 import { motion } from 'motion/react'
+import { cn } from "../../utils"
 
 interface FullscreenButtonProps {
   isFullscreen: boolean
-  toggleFullscreen: () => void
+  onClick: () => void
+  className?: string
 }
 
-export default function FullscreenButton({ isFullscreen, toggleFullscreen }: FullscreenButtonProps) {
+export default function FullscreenButton({ isFullscreen, onClick, className }: FullscreenButtonProps) {
   return (
     <motion.button
       type="button"
-      onClick={toggleFullscreen}
-      className="group cursor-pointer z-10 flex items-center justify-center p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border shadow-md hover:bg-accent transition-colors duration-200 text-xl"
+      onClick={onClick}
+      className={cn("group cursor-pointer z-10 flex items-center justify-center p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border shadow-md hover:bg-accent transition-colors duration-200 text-xl", className)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

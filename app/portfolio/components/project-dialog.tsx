@@ -22,36 +22,10 @@ export default function ProjectDialog({
   category,
   isOpen,
   onOpenChange
-}: ProjectDialogProps): JSX.Element {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [isLoaded, setIsLoaded] = useState<boolean>(false)
-  
-  // Handle animations when dialog opens
-  useEffect(() => {
-    if (isOpen && contentRef.current) {
-      // Set loaded state to true when dialog opens
-      setIsLoaded(true)
-      
-      // Animate dialog content elements
-      const headerElements = contentRef.current.querySelectorAll('.animate-item')
-      if (headerElements && headerElements.length) {
-        animate(
-          headerElements,
-          { opacity: [0, 1], y: [10, 0] },
-          { delay: stagger(0.1), duration: 0.4, easing: [0.22, 0.03, 0.26, 1] }
-        )
-      }
-    }
-    
-    // Reset loaded state when dialog closes
-    if (!isOpen) {
-      setIsLoaded(false)
-    }
-  }, [isOpen])
-  
+}: ProjectDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto" ref={contentRef}>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
         <DialogHeader className="mb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -68,12 +42,12 @@ export default function ProjectDialog({
             </div>
           </div>
         </DialogHeader>
-        
+
         {/* Project content - only render when dialog is open for performance */}
         <div className="relative aspect-video w-full bg-muted rounded-lg overflow-hidden">
-          {isLoaded && children}
+          {children}
         </div>
-        
+
         <div className="mt-4 text-sm text-muted-foreground animate-item">
           <div className="flex items-center gap-2">
             <Icon icon="mdi:information-outline" />

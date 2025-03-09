@@ -48,7 +48,7 @@ export default function CSSDemo() {
     >
 
       <div className="absolute top-2 left-2 z-99">
-        <FullscreenButton isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+        <FullscreenButton isFullscreen={isFullscreen} onClick={toggleFullscreen} />
       </div>
 
       {/* Card container with interactive glow effect */}

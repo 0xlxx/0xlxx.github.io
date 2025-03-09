@@ -9,6 +9,7 @@ import CSSDemo from './components/css-demo'
 import BloomDemo from './components/bloom-demo'
 import ParticleDemo from './components/particle-demo'
 import ProjectDialog from './components/project-dialog'
+import PathMorphingDemo from './components/path-morphing-demo'
 
 // Categories for the portfolio
 const categories = [
@@ -33,7 +34,7 @@ const portfolioItems: PortfolioItem[] = [
   {
     id: 1,
     title: 'SDF Shapes',
-    description: '使用有向距离场构造二维形状，支持全屏查看和参数调整',
+    description: '使用有向距离场构造二维形状',
     category: '3d',
     component: <SDFDemo />,
     thumbnail: '/thumbnails/sdf-demo.jpg'
@@ -41,7 +42,7 @@ const portfolioItems: PortfolioItem[] = [
   {
     id: 2,
     title: '响应式卡片',
-    description: '使用纯CSS实现的响应式卡片设计，支持全屏查看',
+    description: '使用纯CSS实现的响应式卡片设计',
     category: 'css',
     component: <CSSDemo />,
     thumbnail: '/thumbnails/css-demo.jpg'
@@ -49,22 +50,30 @@ const portfolioItems: PortfolioItem[] = [
   {
     id: 3,
     title: 'Selective Bloom',
-    description: '使用Three.js和UnrealBloomPass实现的选择性泛光效果，支持全屏查看和参数调整',
+    description: '使用Three.js和UnrealBloomPass实现的选择性泛光效果',
     category: '3d',
     component: <BloomDemo />,
     thumbnail: '/thumbnails/bloom-demo.jpg'
   },
   {
     id: 4,
-    title: '粒子系统',
-    description: '交互式粒子系统，支持鼠标交互、参数调整和全屏查看',
+    title: 'Particle System',
+    description: '交互式粒子系统',
     category: '3d',
     component: <ParticleDemo />,
     thumbnail: '/thumbnails/particle-demo.jpg'
+  },
+  {
+    id: 5,
+    title: "Path Morphing",
+    description: "使用CSS实现的路径变形动画",
+    category: 'css',
+    component: <PathMorphingDemo />,
+    thumbnail: '/thumbnails/path-morphing-demo.jpg'
   }
 ]
 
-export default function PortfolioPage(): JSX.Element {
+export default function PortfolioPage() {
   const [activeCategory, setActiveCategory] = useState<Category>('all')
   const [activeItem, setActiveItem] = useState<PortfolioItem | null>(null)
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
@@ -133,17 +142,17 @@ export default function PortfolioPage(): JSX.Element {
             >
               <div className="aspect-video w-full bg-muted relative overflow-hidden">
                 {item.thumbnail ? (
-                  <div 
+                  <div
                     className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
                     style={{ backgroundImage: `url(${item.thumbnail})` }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted">
-                    <Icon 
-                      icon={item.category === 'css' ? 'mdi:language-css3' : 'mdi:cube-outline'} 
-                      className="text-muted-foreground/30" 
-                      width={48} 
-                      height={48} 
+                    <Icon
+                      icon={item.category === 'css' ? 'mdi:language-css3' : 'mdi:cube-outline'}
+                      className="text-muted-foreground/30"
+                      width={48}
+                      height={48}
                     />
                   </div>
                 )}
