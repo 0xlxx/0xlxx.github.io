@@ -5,66 +5,14 @@ import * as THREE from "three"
 import { animate } from "motion"
 import { useTheme } from "next-themes"
 import { cn } from "../../utils"
-
-// 顶点着色器源码
-const vertexShaderSource = `
-  varying vec2 vUv;
-
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-// 片段着色器源码
-const fragmentShaderSource = `
-  uniform float uTime;
-  uniform vec2 uResolution;
-  uniform vec3 uDarkColor;
-  uniform vec3 uLightColor;
-  uniform bool uIsDarkMode;
-  varying vec2 vUv;
-
-  void main() {
-    // 归一化坐标
-    vec2 r = uResolution.xy;
-    vec2 FC = gl_FragCoord.xy;
-
-    // 计算中心点
-    vec2 center = r;
-
-    // 将坐标缩放为更小的范围，使效果更集中，并将坐标偏移到中心点
-    vec2 p = (FC.xy - center) / (r.y * 0.5); // 使用中心点作为缩放参考点，增加缩放系数使效果变大
-
-    vec2 l;
-    vec2 v = p * (1.0 - (l += abs(0.7 - dot(p, p)))) / 0.2;
-
-    // 初始化输出颜色
-    vec4 o = vec4(0.0);
-
-    // 主要着色器循环
-    for(float i = 0.0; i < 8.0; i++) {
-      i += 1.0;
-      o += (sin(v.xyyx) + 1.0) * abs(v.x - v.y) * 0.2;
-      v += cos(v.yx * i + vec2(0.0, i) + uTime) / i + 0.7;
-    }
-
-    // 应用颜色变换
-    o = tanh(exp(p.y * vec4(1.0, -1.0, -2.0, 0.0)) * exp(-4.0 * l.x) / o);
-
-    // 根据主题应用不同的颜色调整
-    vec3 finalColor;
-    if (uIsDarkMode) {
-      // 暗色模式 - 深色背景，明亮的图案
-      finalColor = mix(uDarkColor, vec3(o.rgb), o.rgb * 1.2);
-    } else {
-      // 亮色模式 - 浅色背景，深色图案
-      finalColor = mix(uLightColor, vec3(1.0) - o.rgb, o.rgb * 0.8);
-    }
-
-    gl_FragColor = vec4(finalColor, 1.0);
-  }
-`;
+import {
+  updateShaderTime,
+  createShaderMaterial,
+  updateShaderResolution,
+  updateShaderTheme,
+  updateShaderDevicePixelRatio,
+  disposeShaderMaterial
+} from "./materials/shader-material"
 
 interface ShaderBackgroundProps {
   className?: string;
@@ -122,31 +70,26 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
     });
 
     // 设置像素比例并限制以提高性能
-    renderer.setPixelRatio(window.devicePixelRatio);
+    const pixelRatio = window.devicePixelRatio;
+    renderer.setPixelRatio(pixelRatio);
 
     // 初始化渲染器尺寸
-    updateRendererSize(renderer);
+    const { width, height } = updateRendererSize(renderer);
     rendererRef.current = renderer;
 
     // 创建填满屏幕的平面几何体
     const geometry = new THREE.PlaneGeometry(2, 2);
 
-    // 创建着色器材质
-    const material = new THREE.ShaderMaterial({
-      vertexShader: vertexShaderSource,
-      fragmentShader: fragmentShaderSource,
-      uniforms: {
-        uTime: { value: 0 },
-        uResolution: { value: new THREE.Vector2() },
-        uDarkColor: { value: new THREE.Vector3(params.darkColor.r, params.darkColor.g, params.darkColor.b) },
-        uLightColor: { value: new THREE.Vector3(params.lightColor.r, params.lightColor.g, params.lightColor.b) },
-        uIsDarkMode: { value: resolvedTheme === 'dark' }
-      },
+    // 创建着色器材质，使用封装好的函数
+    const material = createShaderMaterial({
+      darkColor: params.darkColor,
+      lightColor: params.lightColor,
+      speed: params.speed,
+      isDarkMode: resolvedTheme === 'dark',
+      resolution: new THREE.Vector2(width, height),
+      devicePixelRatio: pixelRatio
     });
     materialRef.current = material;
-
-    // 更新分辨率 uniform
-    updateResolutionUniform();
 
     // 创建网格并添加到场景
     const mesh = new THREE.Mesh(geometry, material);
@@ -156,15 +99,18 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
 
+    // 立即触发一次 resize 事件以确保正确的初始尺寸
+    handleResize();
+
     // 启动动画循环
     let startTime = Date.now();
     const animate = () => {
       if (!materialRef.current) return;
 
-      // 计算时间并更新 uniform
+      // 计算时间并更新 uniform，使用封装好的函数
       const currentTime = Date.now();
       const elapsedTime = (currentTime - startTime) / 1000; // 转换为秒
-      materialRef.current.uniforms.uTime.value = elapsedTime * params.speed;
+      updateShaderTime(materialRef.current, elapsedTime, params.speed);
 
       // 渲染场景
       if (rendererRef.current && sceneRef.current && cameraRef.current) {
@@ -186,7 +132,7 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
       window.removeEventListener('orientationchange', handleResize);
       renderer.dispose();
       geometry.dispose();
-      material.dispose();
+      disposeShaderMaterial(material); // 使用封装好的函数释放资源
     };
   }, []); // 移除依赖项，避免重新创建场景
 
@@ -194,38 +140,42 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
   useEffect(() => {
     if (!materialRef.current) return;
 
-    // 更新着色器 uniforms
-    materialRef.current.uniforms.uIsDarkMode.value = resolvedTheme === 'dark';
+    // 更新着色器 uniforms，使用封装好的函数
+    updateShaderTheme(materialRef.current, resolvedTheme === 'dark');
   }, [resolvedTheme]);
 
   // 更新渲染器尺寸的函数
-  function updateRendererSize(renderer: THREE.WebGLRenderer) {
-    if (!canvasRef.current || !containerRef.current) return;
+  function updateRendererSize(renderer: THREE.WebGLRenderer): { width: number, height: number } {
+    if (!canvasRef.current || !containerRef.current) return { width: 0, height: 0 };
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    // 使用 clientWidth 和 clientHeight 代替 window.innerWidth 和 window.innerHeight
+    // 这样可以获取到更准确的容器尺寸
+    const container = containerRef.current;
+    const width = container.clientWidth || window.innerWidth;
+    const height = container.clientHeight || window.innerHeight;
 
     renderer.setSize(width, height, false);
-  }
-
-  // 更新分辨率 uniform 的函数
-  function updateResolutionUniform() {
-    if (!materialRef.current || !rendererRef.current) return;
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    materialRef.current.uniforms.uResolution.value.set(width, height);
+    return { width, height };
   }
 
   // 处理窗口大小变化
-  function handleResize() {
+  function handleResize(): void {
     if (!rendererRef.current) return;
 
     // 使用 requestAnimationFrame 以避免在同一帧中多次更新
     requestAnimationFrame(() => {
-      updateRendererSize(rendererRef.current!);
-      updateResolutionUniform();
+      if (!rendererRef.current) return;
+
+      const pixelRatio = window.devicePixelRatio;
+      rendererRef.current.setPixelRatio(pixelRatio);
+
+      const { width, height } = updateRendererSize(rendererRef.current);
+
+      // 确保材质的分辨率也被更新
+      if (materialRef.current) {
+        updateShaderResolution(materialRef.current, width, height);
+        updateShaderDevicePixelRatio(materialRef.current, pixelRatio);
+      }
 
       // 强制渲染一帧以确保更新
       if (sceneRef.current && cameraRef.current && rendererRef.current) {
