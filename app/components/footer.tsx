@@ -3,7 +3,7 @@ import { Icon } from "@iconify-icon/react";
 
 export default function Footer() {
   return (
-    <footer className="bg-background/80 backdrop-blur-sm py-2">
+    <footer className="bg-background/20 backdrop-blur-sm py-2">
       <div className="container px-4 sm:px-6 lg:px-8 mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           {/* Links */}
@@ -54,10 +54,10 @@ export default function Footer() {
           </div>
 
           {/* Copyright */}
-          <div className="copyright text-sm text-muted-foreground">
+          <div className="copyright text-sm text-muted-foreground prose dark:prose-invert">
             <p> {new Date().getFullYear()} Bjorn Li · CC BY 4.0 Licensed</p>
             <p className="text-xs mt-1">
-              Built with Next.js, Three.js, and Motion
+              shader effect from <a href="https://x.com/XorDev" target="_blank" rel="noopener noreferrer">XorDev</a>
             </p>
           </div>
         </div>

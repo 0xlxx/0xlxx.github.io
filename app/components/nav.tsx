@@ -1,32 +1,26 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ThemeSwitcher } from './theme-switcher'
+import { Home, BookOpen, Briefcase, Heart, Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Icon } from '@iconify-icon/react'
-import MdiHome from '@iconify-icons/mdi/home'
-import MdiBook from '@iconify-icons/mdi/book'
-import MdiBriefcase from '@iconify-icons/mdi/briefcase'
-import MdiHeart from '@iconify-icons/mdi/heart'
-import MdiClose from '@iconify-icons/mdi/close'
-import MdiMenu from '@iconify-icons/mdi/menu'
+import { ThemeSwitcher } from './theme-switcher'
 
 const navItems = {
   '/': {
     name: 'home',
-    icon: <Icon inline size={20} icon={MdiHome} />,
+    icon: <Home size={20} />,
   },
   '/blog': {
     name: 'blog',
-    icon: <Icon inline size={20} icon={MdiBook} />,
+    icon: <BookOpen size={20} />,
   },
   '/portfolio': {
     name: 'portfolio',
-    icon: <Icon inline size={20} icon={MdiBriefcase} />,
+    icon: <Briefcase size={20} />,
   },
   '/value': {
     name: '',
-    icon: <Icon inline size={20} icon={MdiHeart} />,
+    icon: <Heart size={20} />,
   },
 } as const
 
@@ -40,7 +34,7 @@ export function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-40 w-full bg-background  tracking-tight px-4 py-3 border-b border-border transition-colors"
+      className="sticky top-0 z-40 w-full bg-background/20 backdrop-blur-sm   tracking-tight px-4 py-3 border-b border-border transition-colors"
       id="nav"
     >
       <div className="container mx-auto flex items-center justify-between">
@@ -57,13 +51,8 @@ export function Navbar() {
           aria-expanded={isMenuOpen}
           aria-label="Toggle navigation menu"
         >
-          <Icon
-            inline
-            icon={isMenuOpen ? MdiClose : MdiMenu}
-            size={24}
-            aria-hidden="true"
-            />
-          </button>
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
 
 
         {/* Desktop navigation */}
@@ -92,9 +81,9 @@ export function Navbar() {
             )
           })}
 
-          {/* <div className="ml-2">
+          <div className="ml-2">
             <ThemeSwitcher />
-          </div> */}
+          </div>
         </div>
 
         {/* Mobile navigation overlay */}

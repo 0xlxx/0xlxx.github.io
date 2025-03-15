@@ -3,11 +3,12 @@
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { motion, MotionConfig } from 'motion/react'
+import { Sun, Moon } from 'lucide-react'
 
-const colors = [
-  '#facc15',
-  '#1f2937',
-]
+const colors = {
+  light: '#facc15', // 黄色
+  dark: '#1f2937', // 深灰色
+}
 
 export function ThemeSwitcher() {
   const [mounted, setMounted] = useState(false)
@@ -49,7 +50,6 @@ export function ThemeSwitcher() {
           initial={false}
           animate={{
             scale: isHovered ? 0.9 : 1,
-            rotate: isDark ? 0 : 0
           }}
           transition={{
             type: 'spring',
@@ -60,14 +60,7 @@ export function ThemeSwitcher() {
           className="relative w-5 h-5"
         >
           {/* Sun icon */}
-          <motion.svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill={isDark ? colors[0] : colors[1]}
-            stroke={isDark ? colors[0] : colors[1]}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <motion.div
             initial={false}
             animate={{
               opacity: isDark ? 1 : 0,
@@ -78,21 +71,13 @@ export function ThemeSwitcher() {
               duration: 0.15,
               ease: 'easeInOut'
             }}
-            className="absolute inset-0 w-full h-full text-foreground"
+            className="absolute inset-0 w-full h-full text-foreground flex items-center justify-center"
           >
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2m0 16v2M4 12H2m20 0h-2m-1.6-7l-1.4 1.4M5 5L3.6 3.6m14.4 14.4l1.4 1.4M5 19l-1.4 1.4" />
-          </motion.svg>
+            <Sun size={20} color={colors.light} />
+          </motion.div>
 
           {/* Moon icon */}
-          <motion.svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill={isDark ? colors[1] : colors[0]}
-            stroke={isDark ? colors[1] : colors[0]}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <motion.div
             initial={false}
             animate={{
               opacity: isDark ? 0 : 1,
@@ -103,10 +88,10 @@ export function ThemeSwitcher() {
               duration: 0.15,
               ease: 'easeInOut'
             }}
-            className="absolute inset-0 w-full h-full text-foreground"
+            className="absolute inset-0 w-full h-full text-foreground flex items-center justify-center"
           >
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          </motion.svg>
+            <Moon size={20} color={colors.dark} />
+          </motion.div>
         </motion.div>
       </motion.button>
     </MotionConfig>

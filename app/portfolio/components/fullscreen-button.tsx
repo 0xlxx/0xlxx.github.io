@@ -1,5 +1,5 @@
 "use client"
-import { Icon } from "@iconify-icon/react"
+import { Maximize, Minimize } from "lucide-react"
 import { motion } from 'motion/react'
 import { cn } from "../../utils"
 
@@ -20,10 +20,11 @@ export default function FullscreenButton({ isFullscreen, onClick, className }: F
       transition={{ duration: 0.3 }}
       aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
     >
-      <Icon
-        icon={isFullscreen ? "mdi:fullscreen-exit" : "mdi:fullscreen"}
-        className="text-primary transition-transform group-hover:scale-120"
-      />
+      {isFullscreen ? (
+        <Minimize className="text-primary transition-transform group-hover:scale-120" size={20} />
+      ) : (
+        <Maximize className="text-primary transition-transform group-hover:scale-120" size={20} />
+      )}
     </motion.button>
   )
 }

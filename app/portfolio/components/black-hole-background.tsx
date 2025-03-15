@@ -1,9 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { JSX, useEffect, useRef, useState } from "react"
 import * as THREE from "three"
-import { useFullscreen } from "../../hooks/useFullscreen"
-import FullscreenButton from "./fullscreen-button"
 import { animate } from "motion"
 import { GUI } from "lil-gui"
 import { cn } from "../../utils"
@@ -27,6 +25,7 @@ const fragmentShaderSource = `
   uniform float uRadius;
   uniform float uDistortion;
   uniform vec3 uAccentColor;
+  uniform vec3 uBackgroundColor;
   varying vec2 vUv;
 
   void main() {
@@ -55,12 +54,20 @@ const fragmentShaderSource = `
     float glow = 0.015 / length(p);
     col += vec3(glow * uAccentColor.r * 0.5, glow * uAccentColor.g * 0.7, glow * uAccentColor.b);
 
+    // Add background color with subtle gradient
+    float bgFade = smoothstep(0.0, 2.0, length(p));
+    col = mix(col, uBackgroundColor, bgFade * 0.8);
+
     // Output to screen
     gl_FragColor = vec4(col, 1.0);
   }
 `;
 
-export default function BlackHoleBackground({ className }: { className?: string }) {
+interface BlackHoleBackgroundProps {
+  className?: string;
+}
+
+export default function BlackHoleBackground({ className }: BlackHoleBackgroundProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -69,48 +76,62 @@ export default function BlackHoleBackground({ className }: { className?: string 
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
   const requestRef = useRef<number | null>(null);
   const guiRef = useRef<GUI | null>(null);
-  const { containerRef: fullscreenRef, isFullscreen, toggleFullscreen } = useFullscreen();
-  const { theme } = useTheme();
+  const { theme, resolvedTheme } = useTheme();
 
   // Parameters for the black hole effect with theme-aware defaults
   const [params] = useState({
     intensity: 0.1,
     radius: 0.5,
     distortion: 0.01,
-    accentColor: { r: 0.1, g: 0.2, b: 0.3 } // Default accent color (can be changed via GUI)
+    accentColor: { r: 0.1, g: 0.2, b: 0.3 }, // Default accent color (can be changed via GUI)
+    backgroundColor: { r: 0.01, g: 0.01, b: 0.02 } // Default background color
   });
 
   // Update accent color based on theme
-  // useEffect(() => {
-  //   if (!materialRef.current) return;
+  useEffect(() => {
+    if (!materialRef.current) return;
 
-  //   // Set theme-specific colors
-  //   if (theme === 'dark') {
-  //     // Blue-purple glow for dark theme
-  //     params.accentColor.r = 0.1;
-  //     params.accentColor.g = 0.2;
-  //     params.accentColor.b = 0.5;
-  //   } else {
-  //     // Warm orange-gold glow for light theme
-  //     params.accentColor.r = 0.5;
-  //     params.accentColor.g = 0.3;
-  //     params.accentColor.b = 0.1;
-  //   }
+    // Set theme-specific colors
+    if (resolvedTheme === 'dark') {
+      // Blue-purple glow for dark theme
+      params.accentColor.r = 0.1;
+      params.accentColor.g = 0.2;
+      params.accentColor.b = 0.5;
+      // Dark blue-black background
+      params.backgroundColor.r = 0.01;
+      params.backgroundColor.g = 0.01;
+      params.backgroundColor.b = 0.02;
+    } else {
+      // Deep teal-blue for light theme (high contrast with white)
+      params.accentColor.r = 0.0;
+      params.accentColor.g = 0.4;
+      params.accentColor.b = 0.6;
+      // Very light blue-white background
+      params.backgroundColor.r = 0.98;
+      params.backgroundColor.g = 0.99;
+      params.backgroundColor.b = 1.0;
+    }
 
-  //   // Update shader uniform
-  //   materialRef.current.uniforms.uAccentColor.value.set(
-  //     params.accentColor.r,
-  //     params.accentColor.g,
-  //     params.accentColor.b
-  //   );
+    // Update shader uniforms
+    materialRef.current.uniforms.uAccentColor.value.set(
+      params.accentColor.r,
+      params.accentColor.g,
+      params.accentColor.b
+    );
 
-  //   // Update GUI if it exists
-  //   if (guiRef.current) {
-  //     guiRef.current.controllers.forEach(controller => {
-  //       controller.updateDisplay();
-  //     });
-  //   }
-  // }, [theme, params]);
+    materialRef.current.uniforms.uBackgroundColor.value.set(
+      params.backgroundColor.r,
+      params.backgroundColor.g,
+      params.backgroundColor.b
+    );
+
+    // Update GUI if it exists
+    if (guiRef.current) {
+      guiRef.current.controllers.forEach(controller => {
+        controller.updateDisplay();
+      });
+    }
+  }, [resolvedTheme, params]);
 
   // Setup animation for UI elements
   useEffect(() => {
@@ -164,7 +185,8 @@ export default function BlackHoleBackground({ className }: { className?: string 
         uIntensity: { value: params.intensity },
         uRadius: { value: params.radius },
         uDistortion: { value: params.distortion },
-        uAccentColor: { value: new THREE.Vector3(params.accentColor.r, params.accentColor.g, params.accentColor.b) }
+        uAccentColor: { value: new THREE.Vector3(params.accentColor.r, params.accentColor.g, params.accentColor.b) },
+        uBackgroundColor: { value: new THREE.Vector3(params.backgroundColor.r, params.backgroundColor.g, params.backgroundColor.b) }
       },
     });
     materialRef.current = material;
@@ -281,17 +303,7 @@ export default function BlackHoleBackground({ className }: { className?: string 
   }, [params]);
 
   return (
-    <div ref={fullscreenRef} className={cn("relative w-full h-full bg-black", className)}>
-      {/* <div
-        ref={containerRef}
-        className="absolute top-4 left-4 z-10"
-      >
-        <FullscreenButton
-          isFullscreen={isFullscreen}
-          onClick={toggleFullscreen}
-          className="bg-background/80 backdrop-blur-sm hover:bg-background/90 transition-colors"
-        />
-      </div> */}
+    <div className={cn("relative w-full h-full", resolvedTheme === 'dark' ? 'bg-black' : 'bg-white', className)}>
       <canvas
         ref={canvasRef}
         className="absolute w-full h-full"
