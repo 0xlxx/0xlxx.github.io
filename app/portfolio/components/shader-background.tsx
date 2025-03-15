@@ -31,13 +31,10 @@ const fragmentShaderSource = `
     vec2 FC = gl_FragCoord.xy;
 
     // 计算中心点
-    vec2 center = r / 2.0;
+    vec2 center = r;
 
     // 将坐标缩放为更小的范围，使效果更集中，并将坐标偏移到中心点
-    vec2 p = (FC.xy - center) / (r.y * 0.3); // 使用中心点作为缩放参考点，增加缩放系数使效果变大
-
-    // 添加垂直偏移，使效果向下移动一些
-    p.y += 0.15; // 向下偏移
+    vec2 p = (FC.xy - center) / (r.y * 0.5); // 使用中心点作为缩放参考点，增加缩放系数使效果变大
 
     vec2 l;
     vec2 v = p * (1.0 - (l += abs(0.7 - dot(p, p)))) / 0.2;
@@ -125,8 +122,7 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
     });
 
     // 设置像素比例并限制以提高性能
-    const pixelRatio = Math.min(window.devicePixelRatio, 1.5); // 进一步限制像素比例以提高性能
-    renderer.setPixelRatio(pixelRatio);
+    renderer.setPixelRatio(window.devicePixelRatio);
 
     // 初始化渲染器尺寸
     updateRendererSize(renderer);
