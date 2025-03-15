@@ -64,7 +64,7 @@ export default function RootLayout({
             <div className="fixed top-0 w-full z-20">
               <Navbar />
             </div>
-            <main className="flex-1 overflow-x-hidden">
+            <main className="flex-1 overflow-x-hidden overflow-y-auto">
               {children}
             </main>
             <div className="fixed bottom-0 w-full z-20">

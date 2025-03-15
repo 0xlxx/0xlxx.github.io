@@ -90,11 +90,13 @@
     width: 100vw;
     height: 100vh;
     z-index: -1; /* 将背景置于内容下方 */
-
+    background-image: url("https://images.unsplash.com/photo-1558158539-226f4a45f7b3?q=80&w=889&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    background-size: cover;
+    background-position: center;
     /* 使用现代滚动驱动动画语法 */
     animation: blurBackground linear;
     animation-timeline: scroll();
-    animation-range: 0vh 100vh; /* 从页面顶部开始到滚动30%时完成动画 */
+    animation-range: 0 100vh; /* 从页面顶部开始到滚动100vh时完成动画 */
     animation-fill-mode: forwards; /* 确保动画前后状态都应用 */
   }
 }
