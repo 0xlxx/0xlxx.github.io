@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ShaderBackground from "app/portfolio/components/shader-background";
-import Image from "next/image";
 import { Icon } from "@iconify/react";
 
 export default function Page() {
@@ -32,9 +31,8 @@ export default function Page() {
   ];
 
   return (
-    <div className="relative w-full min-h-screen overflow-x-hidden">
-      <ShaderBackground className="fixed w-screen h-screen inset-0 -z-1" />
-      {/* <div className="fixed w-screen h-screen scroll-blur"></div> */}
+    <div >
+      <ShaderBackground className="fixed w-screen h-screen test-scroll "/>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-8 sm:py-12 md:py-16">
         {/* Hero Section */}
         <section
@@ -205,6 +203,10 @@ export default function Page() {
               >
                 View
               </Link>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              shader effect from: <Link href="https://x.com/XorDev" target="_blank" rel="noopener noreferrer">XorDev</Link>
             </div>
           </div>
         </section>

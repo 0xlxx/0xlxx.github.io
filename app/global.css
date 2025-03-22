@@ -195,3 +195,20 @@
     min-height: 100vh;
   }
 }
+
+/* 滚动驱动动画，随着滚动，背景逐渐模糊 */
+@keyframes blurBackground {
+  from {
+    filter: blur(0px);
+  }
+  to {
+    filter: blur(10px); /* 滚动到指定位置时，模糊度变为 10px */
+  }
+}
+
+.test-scroll {
+  animation-name: blurBackground;
+  animation-duration: 1ms; /* Firefox requires this to apply the animation */
+  animation-direction: alternate;
+  animation-timeline: --mainScroll;
+}

@@ -53,7 +53,7 @@ const ANIMATION = {
 export function ThemeSwitcher() {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  
+
   // 组件挂载后设置状态
   useEffect(() => {
     setMounted(true)
@@ -67,7 +67,7 @@ export function ThemeSwitcher() {
   // 确定当前主题
   const isDark = resolvedTheme === 'dark'
   const colors = isDark ? THEME_COLORS.dark : THEME_COLORS.light
-  
+
   // 切换主题
   const toggleTheme = () => {
     // 检查浏览器是否支持 View Transitions API
@@ -75,7 +75,7 @@ export function ThemeSwitcher() {
       setTheme(isDark ? 'light' : 'dark')
       return
     }
-    
+
     // 使用 View Transitions API 实现平滑过渡
     document.startViewTransition(() => {
       setTheme(isDark ? 'light' : 'dark')
@@ -87,7 +87,7 @@ export function ThemeSwitcher() {
       aria-label={`切换到${isDark ? '亮色' : '暗色'}模式`}
       type="button"
       className="relative h-8 w-14 rounded-full p-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900"
-      style={{ 
+      style={{
         backgroundColor: colors.track,
         viewTransitionName: 'theme-switcher' // 添加 view-transition-name
       }}
@@ -98,12 +98,12 @@ export function ThemeSwitcher() {
       {/* 滑块 */}
       <motion.div
         className="absolute top-1 left-1 flex h-6 w-6 items-center justify-center rounded-full overflow-hidden"
-        style={{ 
+        style={{
           backgroundColor: colors.thumb,
           boxShadow: colors.shadow
         }}
-        animate={{ 
-          x: isDark ? 26 : 0 
+        animate={{
+          x: isDark ? 26 : 0
         }}
         transition={ANIMATION.standard}
       >
@@ -111,7 +111,7 @@ export function ThemeSwitcher() {
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           initial={false}
-          animate={{ 
+          animate={{
             opacity: isDark ? 0 : 1,
             scale: isDark ? 0.5 : 1
           }}
@@ -119,12 +119,12 @@ export function ThemeSwitcher() {
         >
           <Sun size={14} className="text-amber-500" />
         </motion.div>
-        
+
         {/* 月亮图标 - 只在暗色模式显示 */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           initial={false}
-          animate={{ 
+          animate={{
             opacity: isDark ? 1 : 0,
             scale: isDark ? 1 : 0.5
           }}

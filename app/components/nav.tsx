@@ -32,9 +32,10 @@ export function Navbar() {
     setIsMenuOpen(false)
   }, [pathname])
 
+  // TODO
   return (
     <nav
-      className="sticky top-0 z-40 w-full bg-background/20 backdrop-blur-sm   tracking-tight px-4 py-3 border-b border-border transition-colors"
+      className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-sm   tracking-tight px-4 py-3 border-b border-border transition-colors"
       id="nav"
     >
       <div className="container mx-auto flex items-center justify-between">
