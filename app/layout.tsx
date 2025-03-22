@@ -1,7 +1,6 @@
 import './global.css'
 import type { Metadata } from 'next'
 import { Navbar } from './components/nav'
-import Footer from './components/footer'
 import { baseUrl } from './sitemap'
 import { Providers } from './providers'
 import { inter } from "./font"
