@@ -1,8 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Briefcase, Heart, Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Home, BookOpen, Briefcase } from 'lucide-react'
 import { ThemeSwitcher } from './theme-switcher'
 
 const navItems = {
@@ -11,31 +10,21 @@ const navItems = {
     icon: <Home size={20} />,
   },
   '/blog': {
-    name: 'blog',
+    name: 'archive',
     icon: <BookOpen size={20} />,
   },
-  '/portfolio': {
-    name: 'portfolio',
+  '/demo': {
+    name: 'demo',
     icon: <Briefcase size={20} />,
-  },
-  '/value': {
-    name: '',
-    icon: <Heart size={20} />,
   },
 } as const
 
 export function Navbar() {
   const pathname = usePathname()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  useEffect(() => {
-    setIsMenuOpen(false)
-  }, [pathname])
-
-  // TODO
+  const isActive = pathname && pathname.startsWith('/')
   return (
     <nav
-      className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-sm   tracking-tight px-4 py-3 border-b border-border transition-colors"
+      className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-sm tracking-tight px-4 py-3 border-b border-border transition-colors"
       id="nav"
     >
       <div className="container mx-auto flex items-center justify-between">
@@ -45,20 +34,9 @@ export function Navbar() {
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70 group-hover:to-primary transition-all duration-300">BL</span>
         </Link>
 
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-primary transition-colors"
-          aria-expanded={isMenuOpen}
-          aria-label="Toggle navigation menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-
-
         {/* Desktop navigation */}
         <div
-          className="hidden md:flex items-center gap-2"
+          className="flex items-center gap-2"
           id="nav-items"
         >
           {Object.entries(navItems).map(([url, { name, icon }]) => {
@@ -86,38 +64,6 @@ export function Navbar() {
             <ThemeSwitcher />
           </div>
         </div>
-
-        {/* Mobile navigation overlay */}
-        {isMenuOpen && (
-          <div
-            className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm pt-16"
-            id="mobile-menu"
-          >
-            <div className="container mx-auto px-4 py-6 flex flex-col space-y-4 ">
-              {Object.entries(navItems).map(([url, { name, icon }]) => {
-                const isActive = pathname === url
-                return (
-                  <Link
-                    key={url}
-                    href={url}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg  transition-colors ${isActive
-                      ? 'text-primary bg-primary/10 font-medium'
-                      : 'text-muted-foreground hover:text-primary hover:bg-primary/5'}`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {icon}
-                    <span className="text-lg capitalize">{name}</span>
-                  </Link>
-                )
-              })}
-
-              <div className="pt-4 mt-4 border-t border-border flex justify-between items-center menu-divider">
-                <span className="text-muted-foreground">Theme</span>
-                <ThemeSwitcher />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   )

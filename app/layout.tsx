@@ -4,7 +4,7 @@ import { Navbar } from './components/nav'
 import { baseUrl } from './sitemap'
 import { Providers } from './providers'
 import { inter } from "./font"
-
+import { unstable_ViewTransition as ViewTransition } from 'react'
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
@@ -60,11 +60,13 @@ export default function RootLayout({
       <body className="min-h-screen bg-transparent text-foreground font-sans">
         <Providers>
           <div className="page-layout relative flex flex-col min-h-screen">
-            <div className="fixed top-0 w-full z-20">
+            <div className="sticky top-0 w-full z-20">
               <Navbar />
             </div>
             <main className="flex-1 overflow-x-hidden overflow-y-scroll [scroll-timeline-name:--mainScroll]">
-              {children}
+              <ViewTransition name="crossfade">
+                {children}
+              </ViewTransition>
             </main>
           </div>
         </Providers>

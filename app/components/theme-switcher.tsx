@@ -1,5 +1,4 @@
 'use client'
-
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
@@ -68,18 +67,20 @@ export function ThemeSwitcher() {
   const isDark = resolvedTheme === 'dark'
   const colors = isDark ? THEME_COLORS.dark : THEME_COLORS.light
 
-  // 切换主题
-  const toggleTheme = () => {
-    // 检查浏览器是否支持 View Transitions API
+
+  const startViewTransition = (callback: () => void) => {
     if (!document.startViewTransition) {
-      setTheme(isDark ? 'light' : 'dark')
+      callback()
       return
     }
-
-    // 使用 View Transitions API 实现平滑过渡
     document.startViewTransition(() => {
-      setTheme(isDark ? 'light' : 'dark')
+      callback()
     })
+  }
+
+  // 切换主题
+  const toggleTheme = () => {
+    startViewTransition(() => setTheme(isDark ? 'light' : 'dark'));
   }
 
   return (

@@ -1,5 +1,10 @@
 # Portfolio Blog Starter
 
+## TODO
+
+- [x] 添加阅读进度条
+- [ ] 添加博客目录
+
 This is a porfolio site template complete with a blog. Includes:
 
 - MDX and Markdown support

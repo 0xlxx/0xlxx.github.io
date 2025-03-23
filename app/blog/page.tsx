@@ -2,7 +2,7 @@ import { BlogPostsBlock } from 'app/components/posts'
 
 export const metadata = {
   title: '博客',
-  description: '我的技术博客文章，分享我对编程、设计和技术的见解与经验。',
+  description: 'some experience',
 }
 
 export default function Page() {

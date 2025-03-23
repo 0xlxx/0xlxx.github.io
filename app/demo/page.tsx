@@ -100,7 +100,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
-      <section className="animate-in slide-in-from-bottom duration-500">
+      <section className="duration-500">
         <div className="prose dark:prose-invert mb-12">
           <h1 className="tracking-tight">
             Portfolio

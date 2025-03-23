@@ -1,12 +1,11 @@
 import { formatDate, getBlogPosts } from "app/blog/utils";
 import Link from "next/link";
 import Image from "next/image";
-
 export function BlogPostsBlock() {
   let allBlogs = getBlogPosts();
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-in">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {allBlogs
         .sort((a, b) => {
           if (
@@ -70,7 +69,7 @@ export function BlogPostsBlock() {
                 </div>
                 <div className="pt-2">
                   <span className="inline-flex items-center text-sm font-medium text-primary transition-colors duration-300 group-hover/card:text-primary/80">
-                    阅读文章
+                    reading
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="ml-1 h-4 w-4 transition-transform duration-300 group-hover/card:translate-x-1"

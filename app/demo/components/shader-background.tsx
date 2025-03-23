@@ -187,8 +187,9 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
   return (
     <div
       ref={containerRef}
-      className={cn("absolute inset-0 w-full h-full overflow-hidden dark:bg-black bg-white",
+      className={cn("w-full h-full overflow-hidden dark:bg-black bg-white",
                  className)}
+      style={{viewTransitionName:"none"}}
     >
       <canvas
         ref={canvasRef}
