@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Home, BookOpen, Briefcase } from 'lucide-react'
 import { ThemeSwitcher } from './theme-switcher'
@@ -28,10 +29,18 @@ export function Navbar() {
       id="nav"
     >
       <div className="container mx-auto flex items-center justify-between">
-        {/* Logo/Home link */}
-        <Link href="/" className="font-semibold text-lg group">
-          <span className="sr-only">Bjorn Li</span>
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70 group-hover:to-primary transition-all duration-300">BL</span>
+        {/* Avatar logo */}
+        <Link href="/" className="group">
+          <div className="relative overflow-hidden rounded-full transition-all duration-300 w-9 h-9 flex-shrink-0">
+            <Image
+              src="/images/icon.png"
+              alt="Bjorn Li"
+              width={36}
+              height={36}
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <span className="sr-only">Bjorn Li</span>
+          </div>
         </Link>
 
         {/* Desktop navigation */}
