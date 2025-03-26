@@ -165,7 +165,7 @@
     height: 2px;
     z-index: 100;
     animation: progress 1s forwards;
-    background: oklch(0.85 0.01 0);
+    background: var(--primary);
     animation-timeline:--mainScroll;
   }
 }
