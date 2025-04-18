@@ -93,8 +93,6 @@ export function ThemeSwitcher() {
         viewTransitionName: 'theme-switcher' // 添加 view-transition-name
       }}
       onClick={toggleTheme}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
     >
       {/* 滑块 */}
       <motion.div
@@ -114,7 +112,6 @@ export function ThemeSwitcher() {
           initial={false}
           animate={{
             opacity: isDark ? 0 : 1,
-            scale: isDark ? 0.5 : 1
           }}
           transition={ANIMATION.icon}
         >
@@ -127,7 +124,6 @@ export function ThemeSwitcher() {
           initial={false}
           animate={{
             opacity: isDark ? 1 : 0,
-            scale: isDark ? 1 : 0.5
           }}
           transition={ANIMATION.icon}
         >
