@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Navbar } from './components/nav'
 import { baseUrl } from './sitemap'
 import { Providers } from './providers'
-import { inter } from "./font"
+import { sans } from "./font"
 import { unstable_ViewTransition as ViewTransition } from 'react'
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -46,7 +46,8 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cx(
         'scroll-smooth antialiased',
-        inter.className
+        'font-sans',
+        sans.className
       )}
     >
       <head>
