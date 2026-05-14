@@ -1,68 +1,14 @@
 import * as THREE from 'three';
-import { useTheme } from 'next-themes';
+import { fragmentShaderSource } from './sun-shader';
 
 // 顶点着色器源码
-const vertexShaderSource = `
-  varying vec2 vUv;
+const vertexShaderSource = /* glsl */ `
+varying vec2 vUv;
 
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-// 片段着色器源码
-const fragmentShaderSource = `
-  uniform float uTime;
-  uniform vec2 uResolution;
-  uniform vec3 uDarkColor;
-  uniform vec3 uLightColor;
-  uniform bool uIsDarkMode;
-  uniform float uDevicePixelRatio;
-  varying vec2 vUv;
-
-  void main() {
-    // 归一化坐标
-    vec2 r = uResolution.xy;
-    vec2 FC = gl_FragCoord.xy;
-
-    // 考虑设备像素比例
-    FC = FC / uDevicePixelRatio;
-
-    // 使用屏幕尺寸作为参考
-    vec2 center = r * 0.5;
-
-    // 将坐标缩放为更小的范围，使效果更集中，并将坐标偏移到中心点
-    vec2 p = (FC.xy - center) / (r.y * 0.25); // 使用中心点作为缩放参考点，增加缩放系数使效果变大
-
-    vec2 l;
-    vec2 v = p * (1.0 - (l += abs(0.7 - dot(p, p)))) / 0.2;
-
-    // 初始化输出颜色
-    vec4 o = vec4(0.0);
-
-    // 主要着色器循环
-    for(float i = 0.0; i < 8.0; i++) {
-      i += 1.0;
-      o += (sin(v.xyyx) + 1.0) * abs(v.x - v.y) * 0.2;
-      v += cos(v.yx * i + vec2(0.0, i) + uTime) / i + 0.7;
-    }
-
-    // 应用颜色变换
-    o = tanh(exp(p.y * vec4(1.0, -1.0, -2.0, 0.0)) * exp(-4.0 * l.x) / o);
-
-    // 根据主题应用不同的颜色调整
-    vec3 finalColor;
-    if (uIsDarkMode) {
-      // 暗色模式 - 深色背景，明亮的图案
-      finalColor = mix(uDarkColor, vec3(o.rgb), o.rgb * 1.2);
-    } else {
-      // 亮色模式 - 浅色背景，深色图案
-      finalColor = mix(uLightColor, vec3(1.0) - o.rgb, o.rgb * 0.8);
-    }
-
-    gl_FragColor = vec4(finalColor, 1.0);
-  }
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
 `;
 
 // 着色器参数默认值
@@ -138,7 +84,6 @@ export function updateShaderTime(material: THREE.ShaderMaterial, elapsedTime: nu
  */
 export function updateShaderResolution(material: THREE.ShaderMaterial, width: number, height: number): void {
   if (material && material.uniforms && material.uniforms.uResolution) {
-    // 确保宽度和高度是有效的正数
     const validWidth = Math.max(1, width || 1);
     const validHeight = Math.max(1, height || 1);
     material.uniforms.uResolution.value.set(validWidth, validHeight);
@@ -156,6 +101,8 @@ export function updateShaderDevicePixelRatio(material: THREE.ShaderMaterial, dev
   }
 }
 
+
+
 /**
  * 更新着色器材质的主题模式
  * @param material - 要更新的着色器材质
@@ -166,6 +113,8 @@ export function updateShaderTheme(material: THREE.ShaderMaterial, isDarkMode: bo
     material.uniforms.uIsDarkMode.value = isDarkMode;
   }
 }
+
+
 
 /**
  * 释放着色器材质资源

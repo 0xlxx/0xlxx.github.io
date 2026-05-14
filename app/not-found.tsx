@@ -1,6 +1,9 @@
+import { Navbar } from "app/components/nav"
+
 export default function NotFound() {
   return (
     <section>
+      <Navbar />
       <h1 className="mb-8 text-2xl font-semibold tracking-tighter">
         404 - Page Not Found
       </h1>

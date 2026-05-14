@@ -14,7 +14,7 @@ export default function FullscreenButton({ isFullscreen, onClick, className }: F
     <motion.button
       type="button"
       onClick={onClick}
-      className={cn("group cursor-pointer z-10 flex items-center justify-center p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border shadow-md hover:bg-accent transition-colors duration-200 text-xl", className)}
+      className={cn("group cursor-pointer z-10 flex items-center justify-center p-2 corner-squircle bg-background/80 backdrop-blur-sm border border-border shadow-md hover:bg-accent transition-colors duration-200 text-xl", className)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

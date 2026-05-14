@@ -1,79 +1,176 @@
-'use client'
-import Link from 'next/link'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Briefcase } from 'lucide-react'
-import { ThemeSwitcher } from './theme-switcher'
+"use client"
 
-const navItems = {
-  '/': {
-    name: 'home',
-    icon: <Home size={20} />,
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "motion/react"
+import { Menu, X } from "lucide-react"
+
+import { cn } from "app/utils"
+import { Logo } from "app/components/logo"
+import { ThemeToggle } from "app/components/theme-toggle"
+
+const navItems = [
+  {
+    path: "/blog",
+    name: "BLOG",
   },
-  '/blog': {
-    name: 'archive',
-    icon: <BookOpen size={20} />,
-  },
-  '/demo': {
-    name: 'demo',
-    icon: <Briefcase size={20} />,
-  },
-} as const
+  {
+    path: "/demo",
+    name: "DEMO",
+  }
+]
 
 export function Navbar() {
-  const pathname = usePathname()
-  const isActive = pathname && pathname.startsWith('/')
+  const pathname = usePathname() || "/"
+  const [hidden, setHidden] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const main = document.querySelector("main")
+    if (!main) return
+
+    let lastScrollY = main.scrollTop
+    let ticking = false
+
+    const updateNavbar = () => {
+      const currentScrollY = main.scrollTop
+
+      // Hide if scrolling down and past 150px
+      if (currentScrollY > lastScrollY && currentScrollY > 150) {
+        setHidden(true)
+      } else {
+        setHidden(false)
+      }
+
+      lastScrollY = currentScrollY
+      ticking = false
+    }
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateNavbar)
+        ticking = true
+      }
+    }
+
+    main.addEventListener("scroll", handleScroll, { passive: true })
+    return () => main.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [mobileMenuOpen])
+
   return (
-    <nav
-      className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-sm tracking-tight px-4 py-3 border-b border-border transition-colors"
-      id="nav"
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 h-16 transition-transform duration-300 ease-in-out",
+        hidden && !mobileMenuOpen ? "-translate-y-full" : "translate-y-0"
+      )}
     >
-      <div className="container mx-auto flex items-center justify-between">
-        {/* Avatar logo */}
-        <Link href="/" className="group">
-          <div className="relative overflow-hidden rounded-full transition-all duration-300 w-9 h-9 flex-shrink-0">
-            <Image
-              src="/images/icon.png"
-              alt="Bjorn Li"
-              width={36}
-              height={36}
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-            <span className="sr-only">Bjorn Li</span>
-          </div>
+      {/* Background */}
+      <div
+        className="absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-border/40 shadow-sm"
+      />
+
+      {/* Content */}
+      <div className="relative z-10 flex items-center justify-between px-6 h-full">
+        <Link
+          href="/"
+          className="transition-opacity hover:opacity-80 active:scale-95"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <Logo className="h-8 w-8" />
         </Link>
 
-        {/* Desktop navigation */}
-        <div
-          className="flex items-center gap-2"
-          id="nav-items"
-        >
-          {Object.entries(navItems).map(([url, { name, icon }]) => {
-            const isActive = pathname === url
-            return (
-              <Link
-                key={url}
-                href={url}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <div
-                  className={`relative text-sm flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:backdrop-blur-sm ${isActive
-                    ? 'text-primary bg-primary/10 backdrop-blur-sm '
-                    : 'text-muted-foreground hover:text-primary hover:bg-primary/5 '}`}
-                  data-active={isActive}
-                >
-                  {icon}
-                  <span className="hidden md:inline capitalize">{name}</span>
-                </div>
-              </Link>
-            )
-          })}
+        {/* Desktop Nav */}
+        <nav className="hidden sm:block">
+          <div className="flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path))
 
-          <div className="ml-2">
-            <ThemeSwitcher />
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path as any}
+                  className={cn(
+                    "relative flex items-center justify-center px-4 py-2 corner-squircle text-sm font-medium transition-colors duration-200",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground/80"
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="navbar-active"
+                      className="absolute inset-0 bg-accent corner-squircle border border-border/50"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {item.name}
+                  </span>
+                </Link>
+              )
+            })}
+            <div className="w-px h-4 bg-border mx-2" />
+            <ThemeToggle />
           </div>
-        </div>
+        </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="sm:hidden p-2 text-foreground"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
-    </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-border/40 shadow-lg sm:hidden overflow-hidden"
+          >
+            <div className="flex flex-col p-4 space-y-4">
+              {navItems.map((item) => {
+                const isActive = pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path))
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path as any}
+                    className={cn(
+                      "flex items-center px-4 py-3 corner-squircle text-base font-medium transition-colors",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              })}
+              <div className="px-4 py-2 flex items-center justify-between border-t border-border/40 pt-4">
+                <span className="text-sm font-medium text-muted-foreground">Theme</span>
+                <ThemeToggle />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   )
 }

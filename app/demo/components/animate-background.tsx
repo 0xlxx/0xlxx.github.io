@@ -1,8 +1,7 @@
 "use client"
 
-import { JSX, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import * as THREE from "three"
-import { animate } from "motion"
 import { useTheme } from "next-themes"
 import { cn } from "../../utils"
 import {
@@ -18,7 +17,7 @@ interface ShaderBackgroundProps {
   className?: string;
 }
 
-export default function ShaderBackground({ className }: ShaderBackgroundProps): JSX.Element {
+export default function AnimateBackground({ className }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -35,17 +34,6 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
     speed: 0.5, // 动画速度
   };
 
-  // 设置 UI 动画
-  useEffect(() => {
-    if (containerRef.current) {
-      // 容器淡入动画
-      animate(
-        containerRef.current,
-        { opacity: [0, 1] },
-        { duration: 0.5 }
-      );
-    }
-  }, []);
 
   // 初始化 Three.js 场景
   useEffect(() => {
@@ -69,8 +57,8 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
       precision: 'mediump' // 使用中等精度以提高性能
     });
 
-    // 设置像素比例并限制以提高性能
-    const pixelRatio = window.devicePixelRatio;
+    // 设置像素比例并限制以提高性能（高 DPI 下减小计算量）
+    const pixelRatio = Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(pixelRatio);
 
     // 初始化渲染器尺寸
@@ -102,6 +90,8 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
     // 立即触发一次 resize 事件以确保正确的初始尺寸
     handleResize();
 
+
+
     // 启动动画循环
     let startTime = Date.now();
     const animate = () => {
@@ -130,6 +120,7 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
       }
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
+
       renderer.dispose();
       geometry.dispose();
       disposeShaderMaterial(material); // 使用封装好的函数释放资源
@@ -166,7 +157,7 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
     requestAnimationFrame(() => {
       if (!rendererRef.current) return;
 
-      const pixelRatio = window.devicePixelRatio;
+      const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
       rendererRef.current.setPixelRatio(pixelRatio);
 
       const { width, height } = updateRendererSize(rendererRef.current);
@@ -187,13 +178,13 @@ export default function ShaderBackground({ className }: ShaderBackgroundProps): 
   return (
     <div
       ref={containerRef}
-      className={cn("w-full h-full overflow-hidden dark:bg-black bg-white",
-                 className)}
-      style={{viewTransitionName:"none"}}
+      className={cn("overflow-hidden",
+        className)}
+      style={{ viewTransitionName: "none" }}
     >
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full pointer-events-none"
       />
     </div>
   );

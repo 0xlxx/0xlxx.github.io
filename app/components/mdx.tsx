@@ -6,6 +6,8 @@ import React from 'react'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 
 
 function Table({ data }) {
@@ -49,7 +51,7 @@ function CustomLink(props) {
 }
 
 function RoundedImage(props) {
-  return <Image alt={props.alt} className="rounded-lg" {...props} />
+  return <Image alt={props.alt} className="corner-squircle" {...props} />
 }
 
 function Code({ children, ...props }) {
@@ -57,46 +59,7 @@ function Code({ children, ...props }) {
   return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
 }
 
-function slugify(str) {
-  return str
-    .toString()
-    .toLowerCase()
-    .trim() // Remove whitespace from both ends of a string
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word characters except for -
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
-}
-
-function createHeading(level) {
-  const Heading = ({ children }) => {
-    let slug = slugify(children)
-    return React.createElement(
-      `h${level}`,
-      { id: slug },
-      [
-        React.createElement('a', {
-          href: `#${slug}`,
-          key: `link-${slug}`,
-          className: 'anchor',
-        }),
-      ],
-      children
-    )
-  }
-
-  Heading.displayName = `Heading${level}`
-
-  return Heading
-}
-
 let components = {
-  h1: createHeading(1),
-  h2: createHeading(2),
-  h3: createHeading(3),
-  h4: createHeading(4),
-  h5: createHeading(5),
-  h6: createHeading(6),
   Image: RoundedImage,
   a: CustomLink,
   code: Code,
@@ -109,11 +72,19 @@ export function CustomMDX(props) {
       options={{
         mdxOptions: {
           remarkPlugins: [[remarkMath, { singleDollar: true }], remarkGfm],
-          rehypePlugins: [[rehypeKatex, {
-            output: 'mathml',
-            throwOnError: false,
-            strict: false
-          }]],
+          rehypePlugins: [
+            [rehypeKatex, {
+              output: 'mathml',
+              throwOnError: false,
+              strict: false
+            }],
+            rehypeSlug,
+            [rehypeAutolinkHeadings, {
+              properties: {
+                className: ['anchor'],
+              },
+            }]
+          ],
         },
         format: 'mdx',
       }}
@@ -121,4 +92,5 @@ export function CustomMDX(props) {
     />
   )
 }
+
 
