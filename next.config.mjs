@@ -1,11 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['next-mdx-remote'],
+  cacheComponents: true,
+  reactCompiler: true,
+  typedRoutes: true,
+  reactStrictMode: true,
+  output: 'standalone',
+
   experimental: {
     mdxRs: true,
-    ppr: true,
-    viewTransition: true,
+    turbopackFileSystemCacheForDev: true,
   }
 }
 
 export default nextConfig
+
+import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev());
