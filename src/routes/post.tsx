@@ -3,6 +3,7 @@ import { Fragment, createElement, useEffect, useMemo, useState } from 'octane'
 import { renderMarkdownOctane } from '@tanstack/markdown/octane'
 import { Link } from '../components/link'
 import { postBySlug } from '../content/posts'
+import { createMathExtension, hasMath, type MathRenderer } from '../markdown/math'
 import { NotFound } from './not-found'
 
 const s = stylex.create({
@@ -49,16 +50,19 @@ const s = stylex.create({
 
 export function Post(props: { slug: string }) {
   const post = postBySlug(props.slug)
-  const [content, setContent] = useState<string | null>(null)
+  const [state, setState] = useState<{ text: string; render: MathRenderer | null } | null>(null)
 
   // 显式依赖 props.slug：切到另一篇文章时重新取源码。
   useEffect(() => {
     if (!post) return
     let cancelled = false
-    setContent(null)
-    post.load().then((text) => {
-      if (!cancelled) setContent(text)
-    })
+    setState(null)
+    void (async () => {
+      const text = await post.load()
+      // 只有正文真的带公式才拉 KaTeX，避免把渲染器打进所有页面的主包。
+      const render = hasMath(text) ? (await import('../markdown/katex')).renderMath : null
+      if (!cancelled) setState({ text, render })
+    })()
     return () => {
       cancelled = true
     }
@@ -67,11 +71,16 @@ export function Post(props: { slug: string }) {
   /*
    * 用 renderMarkdownOctane 而不是 <Markdown> 组件：octane 传给组件的 children
    * 是数组，而适配器只接受字符串。（同一个解析器，只是入口不同。）
+   * 公式扩展产出 HTML 节点，所以需要打开 allowHtml。
    */
-  const body = useMemo(
-    () => (content === null ? null : createElement(Fragment, null, ...renderMarkdownOctane(content))),
-    [content],
-  )
+  const body = useMemo(() => {
+    if (!state) return null
+    const nodes = renderMarkdownOctane(state.text, {
+      allowHtml: true,
+      extensions: [createMathExtension(state.render)],
+    })
+    return createElement(Fragment, null, ...nodes)
+  }, [state])
 
   if (!post) return <NotFound />
 

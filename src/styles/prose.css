@@ -133,3 +133,18 @@
 .prose > :is(table, pre, figure) {
   max-inline-size: 100%;
 }
+
+/*
+ * 公式：KaTeX 自带 .katex / .katex-display 结构，这里只处理行内基线与块级溢出。
+ * 块级公式用独立的滚动容器，窄屏下宽公式不会把页面撑出横向滚动。
+ */
+.prose .katex {
+  font-size: 1.02em;
+}
+
+.prose .katex-display {
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: var(--space-2xs);
+}
