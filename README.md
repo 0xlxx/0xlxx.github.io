@@ -14,6 +14,9 @@
 
 没有外部 UI 组件库：组件用原生 HTML 元素加现代 CSS（`color-mix()`、容器查询、`clamp()`、逻辑属性）搭出来。
 
+`react` / `react-dom` 只作为 octane 与 `@tanstack/markdown` 的 peer 依赖待在
+`devDependencies` 里，不参与渲染，构建产物里也没有它们 —— octane 是唯一的 UI 运行时。
+
 ## 命令
 
 ```bash
