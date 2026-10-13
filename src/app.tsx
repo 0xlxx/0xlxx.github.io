@@ -18,6 +18,9 @@ const s = stylex.create({
     color: 'var(--color-fg)',
   },
   header: {
+    /* 自身作为查询容器：导航据此适配，而不是跟着 <640px 之类的设备断点走。 */
+    containerName: 'site-header',
+    containerType: 'inline-size',
     position: 'sticky',
     insetBlockStart: 0,
     zIndex: 10,
@@ -25,7 +28,7 @@ const s = stylex.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 'var(--space-s)',
+    gap: 'var(--space-xs) var(--space-m)',
     paddingBlock: 'var(--space-s)',
     paddingInline: 'var(--gutter)',
     borderBlockEndWidth: 1,
@@ -35,6 +38,9 @@ const s = stylex.create({
     backdropFilter: 'blur(14px) saturate(1.4)',
   },
   wordmark: {
+    /* 品牌区只占内容宽度，永不参与压缩。 */
+    flex: '0 0 auto',
+    whiteSpace: 'nowrap',
     fontFamily: 'var(--font-display)',
     fontSize: 'var(--text-l)',
     fontWeight: 500,
@@ -42,9 +48,19 @@ const s = stylex.create({
   },
   nav: {
     display: 'flex',
+    flexWrap: 'wrap',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     gap: 'var(--space-m)',
     marginInlineStart: 'auto',
+    minInlineSize: 0,
+    /* 品牌 + 导航在最长目标语言下挤不进一行时，让导航整行独占。
+       阈值由内容决定（品牌宽度 + 导航标签宽度），不是按某种语言的实测像素写死。 */
+    '@container site-header (inline-size < 30rem)': {
+      flexBasis: '100%',
+      justifyContent: 'space-between',
+      marginInlineStart: 0,
+    },
   },
   navLink: {
     fontSize: 'var(--text-s)',
