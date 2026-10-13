@@ -1,11 +1,10 @@
 // 首页背景的「太阳」：体积光线步进，把旧站首页的 GLSL 着色器逐行移植到 WGSL。
 // 原实现见 git 历史里的 main:app/components/materials/sun-shader.ts。
+// 只做暗色一版——首页是深色专属页面，不提供浅色方案。
 
 struct Params {
   time: f32,
-  // 0 = 暗色主题，1 = 亮色主题。f32 而不是 bool：这个结构体要按 host-shareable 布局打包。
-  light: f32,
-  // 放在最后：vec2f 要 8 字节对齐，排一下正好 16 字节，没有隐式 padding。
+  // vec2f 要 8 字节对齐，time 后面跟着的 4 字节是隐式 padding，结构体共 16 字节。
   resolution: vec2f,
 }
 
@@ -57,9 +56,5 @@ fn fs_main(@builtin(position) position: vec4f) -> @location(0) vec4f {
   // 累加值恒为非负，所以只需要压上界。
   let glow = tanh(min(color.rgb / 500.0, vec3f(20.0)));
 
-  // 暗色主题直接用这份发光；亮色主题把它当作纸面上的暖光晕——否则深色正文
-  // 压在近黑的背景上就没法读了。红光先饱和，正好可以当强度来插值。
-  let paper = mix(vec3f(0.99, 0.98, 0.96), vec3f(1.0, 0.72, 0.42), clamp(glow.r, 0.0, 1.0) * 0.8);
-
-  return vec4f(mix(glow, paper, params.light), 1.0);
+  return vec4f(glow, 1.0);
 }

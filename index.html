@@ -24,13 +24,19 @@
     />
     <script>
       ;(() => {
-        try {
-          const stored = localStorage.getItem('theme')
-          const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
-          document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-        } catch {
-          document.documentElement.dataset.theme = 'light'
+        // 首页只有深色一版（背景着色器没有浅色方案），其余页面跟随用户偏好。
+        // 与 src/theme.ts 的 readPreference 是同一套取值逻辑，改一边记得改另一边。
+        const home = location.pathname === '/'
+        let dark = home
+        if (!home) {
+          try {
+            const stored = localStorage.getItem('theme')
+            dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+          } catch {
+            dark = false
+          }
         }
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
       })()
     </script>
   </head>

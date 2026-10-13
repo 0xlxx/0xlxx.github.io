@@ -1,13 +1,9 @@
 import { clock, effect, frame, frameLoop, init, surface, type Frame } from 'vgpu'
-import { themeStore } from '../theme'
 import sunSource from './sun.wgsl'
 
 export interface SunBackgroundHandle {
   stop(): void
 }
-
-/** 着色器里用 f32 表示主题，亮色 = 1。 */
-const lightValue = () => (themeStore.get() === 'light' ? 1 : 0)
 
 /**
  * 把「太阳」着色器挂到 canvas 上。
@@ -21,17 +17,12 @@ export async function mountSunBackground(canvas: HTMLCanvasElement): Promise<Sun
   const view = surface(gpu, canvas, { dpr: [1, 1.5] })
   const sun = effect(gpu, sunSource, {
     label: 'sun',
-    set: { params: { time: 0, resolution: [view.size[0], view.size[1]], light: lightValue() } },
+    set: { params: { time: 0, resolution: [view.size[0], view.size[1]] } },
   })
 
   // 订阅时会立刻回调一次，第一帧的尺寸也是从这里来的。
   view.onResize(({ width, height }) => {
     sun.set({ params: { resolution: [width, height] } })
-  })
-
-  // 切主题只改一个 uniform：重建设备太贵，而且会闪一下。
-  const unwatchTheme = themeStore.subscribe(() => {
-    sun.set({ params: { light: lightValue() } })
   })
 
   // 这个背景是纯装饰，跟着系统的「减少动态效果」走：不播动画，只留一张静帧。
@@ -47,7 +38,6 @@ export async function mountSunBackground(canvas: HTMLCanvasElement): Promise<Sun
 
   return {
     stop() {
-      unwatchTheme()
       loop?.stop()
       gpu.dispose()
     },

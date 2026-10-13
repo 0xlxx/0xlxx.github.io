@@ -6,7 +6,7 @@ import { postBySlug } from './content/posts'
 import { syncDocumentMeta } from './head'
 import { matchSegment, routeStore } from './router'
 import { SITE_DESCRIPTION, SITE_TITLE } from './site'
-import { themeStore, toggleTheme } from './theme'
+import { applyTheme, themeStore, toggleTheme } from './theme'
 import { Home } from './routes/home'
 import { Blog } from './routes/blog'
 import { Post } from './routes/post'
@@ -95,11 +95,6 @@ const s = stylex.create({
     zIndex: 1,
   },
   footer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 'var(--space-s)',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingBlock: 'var(--space-l)',
     paddingInline: 'var(--gutter)',
     borderBlockStartWidth: 1,
@@ -147,6 +142,12 @@ export function App() {
     syncDocumentMeta(title, description, path)
   }, [path, title, description])
 
+  // 首页是深色专属：背景着色器只做了暗色一版，浅色正文压在近黑画面上没法读。
+  // 这里把生效主题钉死在 dark，切到别的页面再交还给用户偏好。
+  useEffect(() => {
+    applyTheme(path === '/' ? 'dark' : theme)
+  }, [path, theme])
+
   return (
     <div {...stylex.props(s.page)}>
       {/* 放在 main 外面：main 是会形成层叠上下文的定位元素，画在里面会盖住自己的内容。 */}
@@ -162,20 +163,22 @@ export function App() {
           <Link href="/about" class={stylex.props(s.navLink).className}>
             关于
           </Link>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}
-            {...stylex.props(s.toggle)}
-          >
-            {theme === 'dark' ? '☀' : '☾'}
-          </button>
+          {/* 首页没有浅色方案，放个点了没反应的按钮更让人困惑，索性不显示。 */}
+          {path === '/' ? null : (
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}
+              {...stylex.props(s.toggle)}
+            >
+              {theme === 'dark' ? '☀' : '☾'}
+            </button>
+          )}
         </nav>
       </header>
       <main {...stylex.props(s.main)}>{page}</main>
       <footer {...stylex.props(s.footer)}>
         <span>© 2026 Bjorn Li</span>
-        <span>用 octane 与 StyleX 构建</span>
       </footer>
     </div>
   )
