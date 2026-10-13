@@ -1,55 +1,25 @@
 {
+  "name": "blog",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev --turbopack",
-    "start": "next start",
-    "knip": "knip",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "4.0.0-beta.9",
-    "@tailwindcss/typography": "^0.5.16",
-    "@types/three": "^0.174.0",
-    "@vercel/analytics": "^1.5.0",
-    "@vercel/speed-insights": "^1.2.0",
-    "clsx": "^2.1.1",
-    "framer-motion": "^12.23.24",
-    "github-slugger": "^2.0.0",
-    "lucide-react": "^0.479.0",
-    "mdast-util-to-string": "^4.0.0",
-    "motion": "^12.4.9",
-    "next": "16.2.6",
-    "next-mdx-remote": "0.0.0-canary-20240522052620",
-    "next-themes": "^0.4.4",
-    "postcss": "^8.5.3",
-    "react": "19.3.0-canary-408b38ef-20251023",
-    "react-dom": "19.3.0-canary-408b38ef-20251023",
-    "rehype-autolink-headings": "^7.1.0",
-    "rehype-katex": "^7.0.1",
-    "rehype-slug": "^6.0.0",
-    "remark-gfm": "^4.0.1",
-    "remark-math": "^6.0.0",
-    "remark-parse": "^11.0.0",
-    "sugar-high": "^0.6.1",
-    "tailwind-merge": "^3.0.2",
-    "tailwindcss": "4.0.0-beta.9",
-    "three": "^0.174.0",
-    "unified": "^11.0.5",
-    "unist-util-visit": "^5.0.0"
+    "@octanejs/stylex": "^0.1.64",
+    "@octanejs/vite-plugin": "^0.4.0",
+    "@tanstack/markdown": "^1.0.0",
+    "octane": "^0.13.1"
   },
-  "packageManager": "bun@1.3.14",
   "devDependencies": {
-    "@iconify-icon/react": "^2.3.0",
-    "@opennextjs/cloudflare": "^1.19.9",
-    "@types/node": "20.11.17",
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
-    "babel-plugin-react-compiler": "^1.0.0",
-    "typescript": "5.8.2",
-    "wrangler": "^4.90.1"
-  }
+    "@tsrx/oxc": "0.20.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4"
+  },
+  "packageManager": "bun@1.3.14"
 }

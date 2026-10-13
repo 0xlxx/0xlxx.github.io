@@ -1,0 +1,74 @@
+/*
+ * Design tokens —— 全站唯一的取值来源。
+ * 组件只引用这里的变量，不写死具体数值。
+ * 主题切换靠覆盖同名变量完成，不需要生成第二套 class。
+ */
+:root {
+  color-scheme: light;
+
+  --color-bg: oklch(0.99 0 0);
+  --color-bg-elevated: oklch(1 0 0);
+  --color-fg: oklch(0.2 0.01 240);
+  --color-fg-muted: oklch(0.52 0.01 240);
+  --color-fg-subtle: oklch(0.68 0 0);
+  --color-border: oklch(0.92 0 0);
+  --color-border-strong: oklch(0.84 0 0);
+  --color-accent: oklch(0.55 0.2 262);
+  --color-accent-soft: oklch(0.55 0.2 262 / 0.12);
+  --color-surface-hover: oklch(0.96 0 0);
+  --color-code-bg: oklch(0.97 0 0);
+
+  /* 排版 */
+  --font-sans: 'Noto Sans SC', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Newsreader', 'Noto Serif SC', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-2xs: 0.75rem;
+  --text-xs: 0.82rem;
+  --text-s: 0.92rem;
+  --text-base: 1rem;
+  --text-l: 1.15rem;
+  --text-xl: 1.4rem;
+  --text-2xl: clamp(1.6rem, 1.3rem + 1.4vw, 2.25rem);
+  --text-display: clamp(2.5rem, 1.5rem + 5vw, 4.75rem);
+
+  --leading-tight: 1.08;
+  --leading-body: 1.65;
+  --leading-loose: 1.8;
+
+  /* 间距 */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-s: 0.75rem;
+  --space-m: 1.25rem;
+  --space-l: 2rem;
+  --space-xl: 3.5rem;
+  --space-2xl: 6rem;
+
+  --radius-s: 0.5rem;
+  --radius-m: 0.875rem;
+  --radius-l: 1.5rem;
+  --radius-full: 9999px;
+
+  /* 布局：内容决定宽度，而不是按设计稿量死 */
+  --page-max: 68rem;
+  --measure: 66ch;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --gutter-page: clamp(2.5rem, 10vw, 8rem);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: oklch(0.16 0.02 265);
+  --color-bg-elevated: oklch(0.2 0.02 265);
+  --color-fg: oklch(0.97 0 0);
+  --color-fg-muted: oklch(0.74 0.01 265);
+  --color-fg-subtle: oklch(0.58 0.01 265);
+  --color-border: oklch(0.28 0.02 265);
+  --color-border-strong: oklch(0.38 0.02 265);
+  --color-accent: oklch(0.76 0.15 262);
+  --color-accent-soft: oklch(0.76 0.15 262 / 0.18);
+  --color-surface-hover: oklch(0.23 0.02 265);
+  --color-code-bg: oklch(0.21 0.02 265);
+}

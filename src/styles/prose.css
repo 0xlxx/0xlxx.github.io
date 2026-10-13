@@ -1,0 +1,135 @@
+/*
+ * Markdown 正文排版。
+ * TanStack Markdown 输出的是标准标签，用后代选择器统一收口，
+ * 这样文章内容不需要带任何 class。
+ */
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  max-inline-size: var(--measure);
+  font-size: var(--text-l);
+  line-height: var(--leading-loose);
+  text-wrap: pretty;
+  /* 长 URL / 长英文单词在窄容器里要能断开，否则会把页面撑出横向滚动。 */
+  overflow-wrap: break-word;
+}
+
+.prose > :first-child {
+  margin-block-start: 0;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  margin-block-start: var(--space-l);
+  margin-block-end: calc(-1 * var(--space-2xs));
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.prose h2 {
+  font-size: var(--text-2xl);
+}
+
+.prose h3 {
+  font-size: var(--text-xl);
+}
+
+.prose h4 {
+  font-size: var(--text-l);
+}
+
+.prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+
+.prose a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.prose strong {
+  font-weight: 700;
+}
+
+.prose ul,
+.prose ol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-inline-start: 1.4em;
+}
+
+.prose li::marker {
+  color: var(--color-fg-subtle);
+}
+
+.prose blockquote {
+  padding-inline-start: var(--space-m);
+  border-inline-start: 2px solid var(--color-border-strong);
+  color: var(--color-fg-muted);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 0.12em 0.36em;
+  border-radius: var(--radius-s);
+  background-color: var(--color-code-bg);
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: var(--space-m);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-code-bg);
+  font-size: var(--text-s);
+  line-height: 1.6;
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.prose img {
+  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border);
+}
+
+.prose table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-s);
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-xs) var(--space-s);
+  border-block-end: 1px solid var(--color-border);
+  text-align: start;
+}
+
+.prose th {
+  color: var(--color-fg-muted);
+  font-weight: 500;
+}
+
+.prose hr {
+  inline-size: 100%;
+  border: 0;
+  border-block-start: 1px solid var(--color-border);
+}
+
+/* 宽内容（表格、代码块）允许自己撑宽，正文列宽不受影响。 */
+.prose > :is(table, pre, figure) {
+  max-inline-size: 100%;
+}
