@@ -1,6 +1,7 @@
 import * as stylex from '@octanejs/stylex'
 import { useEffect, useSyncExternalStore } from 'octane'
 import { Link } from './components/link'
+import { SunBackground } from './components/sun-background'
 import { postBySlug } from './content/posts'
 import { syncDocumentMeta } from './head'
 import { matchSegment, routeStore } from './router'
@@ -89,6 +90,9 @@ const s = stylex.create({
     maxInlineSize: 'var(--page-max)',
     marginInline: 'auto',
     paddingInline: 'var(--gutter)',
+    /* 首页的背景着色器是 fixed 的兄弟节点，内容得抬到它上面才看得见。 */
+    position: 'relative',
+    zIndex: 1,
   },
   footer: {
     display: 'flex',
@@ -103,6 +107,8 @@ const s = stylex.create({
     borderBlockStartColor: 'var(--color-border)',
     fontSize: 'var(--text-xs)',
     color: 'var(--color-fg-subtle)',
+    position: 'relative',
+    zIndex: 1,
   },
 })
 
@@ -143,6 +149,8 @@ export function App() {
 
   return (
     <div {...stylex.props(s.page)}>
+      {/* 放在 main 外面：main 是会形成层叠上下文的定位元素，画在里面会盖住自己的内容。 */}
+      {path === '/' ? <SunBackground /> : null}
       <header {...stylex.props(s.header)}>
         <Link href="/" class={stylex.props(s.wordmark).className}>
           Bjorn Li

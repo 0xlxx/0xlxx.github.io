@@ -15,11 +15,13 @@
     "@tanstack/markdown": "^1.0.0",
     "highlight.js": "^11.12.0",
     "katex": "^0.16.47",
-    "octane": "^0.13.1"
+    "octane": "^0.13.1",
+    "vgpu": "0.6.0"
   },
   "devDependencies": {
     "@tsrx/oxc": "0.20.0",
     "@types/node": "^26.6.5",
+    "@vgpu/wgsl": "0.6.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",
