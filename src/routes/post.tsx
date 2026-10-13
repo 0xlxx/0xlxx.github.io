@@ -1,9 +1,11 @@
 import * as stylex from '@octanejs/stylex'
 import { Fragment, createElement, useEffect, useMemo, useState } from 'octane'
+import type { CodeHighlighter } from '@tanstack/markdown'
 import { renderMarkdownOctane } from '@tanstack/markdown/octane'
 import { Link } from '../components/link'
 import { postBySlug } from '../content/posts'
-import { createMathExtension, hasMath, type MathRenderer } from '../markdown/math'
+import { hasCode, hasMath } from '../markdown/detect'
+import { createMathExtension, type MathRenderer } from '../markdown/math'
 import { NotFound } from './not-found'
 
 const s = stylex.create({
@@ -50,7 +52,11 @@ const s = stylex.create({
 
 export function Post(props: { slug: string }) {
   const post = postBySlug(props.slug)
-  const [state, setState] = useState<{ text: string; render: MathRenderer | null } | null>(null)
+  const [state, setState] = useState<{
+    text: string
+    render: MathRenderer | null
+    highlight: CodeHighlighter | null
+  } | null>(null)
 
   // 显式依赖 props.slug：切到另一篇文章时重新取源码。
   useEffect(() => {
@@ -59,9 +65,10 @@ export function Post(props: { slug: string }) {
     setState(null)
     void (async () => {
       const text = await post.load()
-      // 只有正文真的带公式才拉 KaTeX，避免把渲染器打进所有页面的主包。
+      // 只有正文真的用到公式 / 代码块才拉对应渲染器，避免打进所有页面的主包。
       const render = hasMath(text) ? (await import('../markdown/katex')).renderMath : null
-      if (!cancelled) setState({ text, render })
+      const highlight = hasCode(text) ? (await import('../markdown/highlight')).highlightCode : null
+      if (!cancelled) setState({ text, render, highlight })
     })()
     return () => {
       cancelled = true
@@ -78,6 +85,7 @@ export function Post(props: { slug: string }) {
     const nodes = renderMarkdownOctane(state.text, {
       allowHtml: true,
       extensions: [createMathExtension(state.render)],
+      ...(state.highlight ? { highlighter: state.highlight } : {}),
     })
     return createElement(Fragment, null, ...nodes)
   }, [state])

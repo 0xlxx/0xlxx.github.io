@@ -17,11 +17,6 @@ function escapeHtml(value: string): string {
   )
 }
 
-/** 正文里是否可能出现公式：`$$…$$` 或成对的 `$…$`。用来决定要不要按需加载 KaTeX。 */
-export function hasMath(source: string): boolean {
-  return /\$\$/.test(source) || /\$[^\s$][^$]*\$/.test(source)
-}
-
 /**
  * TanStack Markdown 的公式扩展。
  *

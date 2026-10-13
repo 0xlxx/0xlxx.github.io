@@ -100,6 +100,80 @@
   font-size: inherit;
 }
 
+/*
+ * 语法着色：highlight.js 输出 .hljs-* token class，
+ * 颜色统一走 tokens.css 的语法色变量，明暗主题自动跟随。
+ */
+.prose .hljs-comment,
+.prose .hljs-quote {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.prose .hljs-keyword,
+.prose .hljs-selector-tag,
+.prose .hljs-literal,
+.prose .hljs-doctag,
+.prose .hljs-name {
+  color: var(--syntax-keyword);
+}
+
+.prose .hljs-string,
+.prose .hljs-regexp,
+.prose .hljs-addition,
+.prose .hljs-selector-attr,
+.prose .hljs-selector-pseudo {
+  color: var(--syntax-string);
+}
+
+.prose .hljs-number,
+.prose .hljs-symbol,
+.prose .hljs-bullet,
+.prose .hljs-selector-id,
+.prose .hljs-selector-class {
+  color: var(--syntax-number);
+}
+
+.prose .hljs-title,
+.prose .hljs-title.function_,
+.prose .hljs-built_in {
+  color: var(--syntax-function);
+}
+
+.prose .hljs-type,
+.prose .hljs-class .hljs-title,
+.prose .hljs-attribute,
+.prose .hljs-attr {
+  color: var(--syntax-type);
+}
+
+.prose .hljs-variable,
+.prose .hljs-template-variable,
+.prose .hljs-params,
+.prose .hljs-property {
+  color: var(--syntax-variable);
+}
+
+.prose .hljs-meta,
+.prose .hljs-meta .hljs-keyword,
+.prose .hljs-tag,
+.prose .hljs-section,
+.prose .hljs-link {
+  color: var(--syntax-meta);
+}
+
+.prose .hljs-emphasis {
+  font-style: italic;
+}
+
+.prose .hljs-strong {
+  font-weight: 700;
+}
+
+.prose .hljs-deletion {
+  color: oklch(0.6 0.18 25);
+}
+
 .prose img {
   border-radius: var(--radius-m);
   border: 1px solid var(--color-border);

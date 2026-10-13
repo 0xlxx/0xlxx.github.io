@@ -18,6 +18,16 @@
   --color-surface-hover: oklch(0.96 0 0);
   --color-code-bg: oklch(0.97 0 0);
 
+  /* 代码语法着色：只在这里定义，prose.css 把高亮器的 token class 映射过来 */
+  --syntax-comment: oklch(0.58 0.02 250);
+  --syntax-keyword: oklch(0.48 0.19 300);
+  --syntax-string: oklch(0.46 0.13 155);
+  --syntax-number: oklch(0.52 0.15 45);
+  --syntax-function: oklch(0.48 0.18 262);
+  --syntax-type: oklch(0.5 0.12 205);
+  --syntax-variable: oklch(0.4 0.03 250);
+  --syntax-meta: oklch(0.55 0.09 330);
+
   /* 排版 */
   --font-sans: 'Noto Sans SC', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Newsreader', 'Noto Serif SC', Georgia, serif;
@@ -71,4 +81,13 @@ html[data-theme='dark'] {
   --color-accent-soft: oklch(0.76 0.15 262 / 0.18);
   --color-surface-hover: oklch(0.23 0.02 265);
   --color-code-bg: oklch(0.21 0.02 265);
+
+  --syntax-comment: oklch(0.62 0.02 265);
+  --syntax-keyword: oklch(0.78 0.14 300);
+  --syntax-string: oklch(0.8 0.12 155);
+  --syntax-number: oklch(0.82 0.11 60);
+  --syntax-function: oklch(0.78 0.12 262);
+  --syntax-type: oklch(0.8 0.09 205);
+  --syntax-variable: oklch(0.92 0.01 265);
+  --syntax-meta: oklch(0.76 0.1 330);
 }
