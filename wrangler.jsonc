@@ -1,38 +1,11 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": ".open-next/worker.js",
-	"name": "bjorn-blog",
-	"compatibility_date": "2026-05-11",
-	"compatibility_flags": [
-		"nodejs_compat",
-		"global_fetch_strictly_public"
-	],
-	"assets": {
-		"directory": ".open-next/assets",
-		"binding": "ASSETS"
-	},
-	"services": [
-		{
-			// Self-reference service binding, the service name must match the worker name
-			// see https://opennext.js.org/cloudflare/caching
-			"binding": "WORKER_SELF_REFERENCE",
-			"service": "bjorn-blog"
-		}
-	],
-	"r2_buckets": [
-		// Use R2 incremental cache
-		// See https://opennext.js.org/cloudflare/caching
-		{
-			"binding": "NEXT_INC_CACHE_R2_BUCKET",
-			// Create the bucket before deploying
-			// You can change the bucket name if you want
-			// See https://developers.cloudflare.com/workers/wrangler/commands/#r2-bucket-create
-			"bucket_name": "bjorn-blog-opennext-cache"
-		}
-	],
-	"images": {
-		// Enable image optimization
-		// see https://opennext.js.org/cloudflare/howtos/image
-		"binding": "IMAGES"
-	}
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bjorn-blog",
+  "compatibility_date": "2026-05-11",
+  // 纯静态站点：把 vite build 的产物直接当作 Workers Static Assets 发布。
+  // 路由是客户端 pushState，未命中的路径交回 index.html（SPA 回退）。
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
 }

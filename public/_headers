@@ -1,4 +1,4 @@
 # https://developers.cloudflare.com/workers/static-assets/headers
-# https://opennext.js.org/cloudflare/caching#static-assets-caching
-/_next/static/*
+# Vite 把带 hash 的产物放在 /assets 下，可以放心长缓存。
+/assets/*
   Cache-Control: public,max-age=31536000,immutable

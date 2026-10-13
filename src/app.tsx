@@ -1,7 +1,10 @@
 import * as stylex from '@octanejs/stylex'
-import { useSyncExternalStore } from 'octane'
+import { useEffect, useSyncExternalStore } from 'octane'
 import { Link } from './components/link'
+import { postBySlug } from './content/posts'
+import { syncDocumentMeta } from './head'
 import { matchSegment, routeStore } from './router'
+import { SITE_DESCRIPTION, SITE_TITLE } from './site'
 import { themeStore, toggleTheme } from './theme'
 import { Home } from './routes/home'
 import { Blog } from './routes/blog'
@@ -107,13 +110,36 @@ export function App() {
   const path = useSyncExternalStore(routeStore.subscribe, routeStore.get)
   const theme = useSyncExternalStore(themeStore.subscribe, themeStore.get)
   const slug = matchSegment('/blog/:slug', path)
+  const post = slug ? postBySlug(slug) : undefined
 
   let page
-  if (path === '/') page = <Home />
-  else if (path === '/blog') page = <Blog />
-  else if (slug) page = <Post slug={slug} />
-  else if (path === '/about') page = <About />
-  else page = <NotFound />
+  let title = SITE_TITLE
+  let description = SITE_DESCRIPTION
+  if (path === '/') {
+    page = <Home />
+    description = '写点关于前端工程、渲染管线与系统设计的笔记。'
+  } else if (path === '/blog') {
+    page = <Blog />
+    title = '文章'
+    description = '全部文章列表。'
+  } else if (post && slug) {
+    page = <Post slug={slug} />
+    title = post.title
+    description = post.summary
+  } else if (path === '/about') {
+    page = <About />
+    title = '关于'
+    description = '关于 Bjorn Li。'
+  } else {
+    page = <NotFound />
+    title = '页面不存在'
+    description = '链接可能失效了，或者这篇文章还没写。'
+  }
+
+  // 客户端路由切换后同步 head，保证分享/收藏拿到的是当前页面。
+  useEffect(() => {
+    syncDocumentMeta(title, description, path)
+  }, [path, title, description])
 
   return (
     <div {...stylex.props(s.page)}>
