@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
 import { useTheme } from "next-themes"
-import { cn } from "../../utils"
+import { cn } from "../utils"
 import {
   updateShaderTime,
   createShaderMaterial,

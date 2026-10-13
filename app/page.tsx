@@ -1,5 +1,5 @@
 
-import AnimateBackground from "app/demo/components/animate-background"
+import AnimateBackground from "app/components/animate-background"
 import HomeHero from "app/components/home-hero"
 import HomeNav from "app/components/home-nav"
 import HomeSocial from "app/components/home-social"

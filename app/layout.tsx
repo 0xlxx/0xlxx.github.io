@@ -11,10 +11,10 @@ export const metadata: Metadata = {
     default: 'Bjorn Li',
     template: '%s | Bjorn Li',
   },
-  description: 'Web developer and optimist.',
+  description: '一个程序员',
   openGraph: {
     title: 'Bjorn Li',
-    description: 'Web developer and optimist.',
+    description: '一个程序员',
     url: baseUrl,
     siteName: 'Bjorn Li',
     locale: 'zh_CN',

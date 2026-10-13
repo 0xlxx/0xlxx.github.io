@@ -7,12 +7,11 @@ import * as motion from "motion/react-client"
 
 const navItems: Array<{ href: Route; label: string; delay: number }> = [
   { href: "/blog", label: "BLOG", delay: 0.3 },
-  { href: "/demo", label: "DEMO", delay: 0.4 },
 ]
 
 export default function HomeNav() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+    <div className="grid grid-cols-1 gap-4 max-w-lg mx-auto">
       {navItems.map(({ href, label, delay }) => (
         <Link key={label} href={href} className="block group">
           <motion.div

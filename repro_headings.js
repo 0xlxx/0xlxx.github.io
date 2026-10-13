@@ -5,7 +5,7 @@ Some text.
 
 \`\`\`bash
 # This is a comment in code
-npm install
+bun install
 \`\`\`
 
 # Real Heading 2

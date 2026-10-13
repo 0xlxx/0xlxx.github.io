@@ -15,10 +15,6 @@ const navItems = [
     path: "/blog",
     name: "BLOG",
   },
-  {
-    path: "/demo",
-    name: "DEMO",
-  }
 ]
 
 export function Navbar() {

@@ -17,10 +17,8 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "clsx": "^2.1.1",
-    "flubber": "^0.4.2",
     "framer-motion": "^12.23.24",
     "github-slugger": "^2.0.0",
-    "lil-gui": "^0.20.0",
     "lucide-react": "^0.479.0",
     "mdast-util-to-string": "^4.0.0",
     "motion": "^12.4.9",
@@ -43,7 +41,7 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0"
   },
-  "packageManager": "pnpm@10.16.1+sha512.0e155aa2629db8672b49e8475da6226aa4bdea85fdcdfdc15350874946d4f3c91faaf64cbdc4a5d1ab8002f473d5c3fcedcd197989cf0390f9badd3c04678706",
+  "packageManager": "bun@1.3.14",
   "devDependencies": {
     "@iconify-icon/react": "^2.3.0",
     "@opennextjs/cloudflare": "^1.19.9",
@@ -51,7 +49,7 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "babel-plugin-react-compiler": "^1.0.0",
-    "typescript": "latest",
+    "typescript": "5.8.2",
     "wrangler": "^4.90.1"
   }
 }
