@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@tsrx/oxc": "0.20.0",
+    "@types/node": "^26.6.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",
