@@ -5,6 +5,7 @@ interface LinkProps {
   href: string
   class?: string
   'aria-label'?: string
+  'aria-current'?: 'page'
   children?: OctaneNode
 }
 
@@ -21,7 +22,13 @@ export function Link(props: LinkProps) {
   }
 
   return (
-    <a href={props.href} class={props.class} aria-label={props['aria-label']} onClick={onClick}>
+    <a
+      href={props.href}
+      class={props.class}
+      aria-label={props['aria-label']}
+      aria-current={props['aria-current']}
+      onClick={onClick}
+    >
       {props.children}
     </a>
   )

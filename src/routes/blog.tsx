@@ -6,14 +6,15 @@ const s = stylex.create({
   root: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--space-xl)',
-    paddingBlockStart: 'var(--space-xl)',
+    gap: 'var(--space-l)',
     paddingBlockEnd: 'var(--space-2xl)',
   },
   title: {
     fontFamily: 'var(--font-display)',
-    fontSize: 'var(--text-2xl)',
+    /* 页标题与左侧菜单同属一套字阶：约菜单的 1.5 倍，而不是喧宾夺主。 */
+    fontSize: 'var(--text-xl)',
     fontWeight: 500,
+    lineHeight: 1.2,
     letterSpacing: '-0.02em',
   },
   year: {
@@ -24,6 +25,8 @@ const s = stylex.create({
   yearLabel: {
     fontFamily: 'var(--font-mono)',
     fontSize: 'var(--text-s)',
+    /* 提掉 h2 默认的 700——目录里年份只是轻量的分组标签。 */
+    fontWeight: 400,
     color: 'var(--color-fg-subtle)',
     letterSpacing: '0.08em',
   },
@@ -33,36 +36,38 @@ const s = stylex.create({
   },
   post: {
     display: 'flex',
-    flexWrap: 'wrap',
     alignItems: 'baseline',
-    gap: 'var(--space-xs) var(--space-m)',
-    paddingBlock: 'var(--space-m)',
-    borderBlockEndWidth: 1,
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'var(--color-border)',
+    gap: 0,
+    paddingBlock: 'var(--space-s)',
+  },
+  /*
+   * 目录式引导点线：夹在标题与时间之间，占据剩余空白。
+   * 自己不带基线，靠「底外边线对齐基线」把点的位置压到文字基线上。
+   */
+  leader: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 'var(--space-m)',
+    minInlineSize: 'var(--space-m)',
+    alignSelf: 'baseline',
+    marginInline: 'var(--space-xs)',
+    borderBlockEndWidth: 2,
+    borderBlockEndStyle: 'dotted',
+    borderBlockEndColor: 'var(--color-fg-subtle)',
   },
   day: {
     flex: '0 0 auto',
-    minInlineSize: '3.5rem',
     fontFamily: 'var(--font-mono)',
     fontSize: 'var(--text-xs)',
     color: 'var(--color-fg-subtle)',
   },
-  postBody: {
-    display: 'grid',
-    flex: '1 1 18rem',
-    gap: 'var(--space-2xs)',
-  },
   postTitle: {
-    fontSize: 'var(--text-l)',
-    fontWeight: 500,
-    lineHeight: 1.4,
-    textWrap: 'balance',
-  },
-  postSummary: {
-    fontSize: 'var(--text-s)',
-    color: 'var(--color-fg-muted)',
-    maxInlineSize: '58ch',
+    flex: '0 1 auto',
+    /* 与菜单、文章标题同用衬线体，字号贴近菜单（text-s），让左右两栏读起来是一套。 */
+    fontFamily: 'var(--font-display)',
+    fontSize: 'var(--text-base)',
+    fontWeight: 400,
+    minInlineSize: 0,
   },
 })
 
@@ -75,18 +80,16 @@ function formatDay(date: string): string {
 export function Blog() {
   return (
     <div {...stylex.props(s.root)}>
-      <h1 {...stylex.props(s.title)}>文章</h1>
+      <h1 {...stylex.props(s.title)}>想法</h1>
       {postsByYear().map(([year, items]) => (
         <section {...stylex.props(s.year)}>
           <h2 {...stylex.props(s.yearLabel)}>{year}</h2>
           <div {...stylex.props(s.list)}>
             {items.map((post) => (
               <Link href={`/blog/${post.slug}`} class={stylex.props(s.post).className}>
+                <span {...stylex.props(s.postTitle)}>{post.title}</span>
+                <span {...stylex.props(s.leader)} aria-hidden="true" />
                 <span {...stylex.props(s.day)}>{formatDay(post.date)}</span>
-                <span {...stylex.props(s.postBody)}>
-                  <span {...stylex.props(s.postTitle)}>{post.title}</span>
-                  <span {...stylex.props(s.postSummary)}>{post.summary}</span>
-                </span>
               </Link>
             ))}
           </div>

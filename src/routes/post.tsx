@@ -13,7 +13,7 @@ const s = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--space-xl)',
-    paddingBlockStart: 'var(--space-xl)',
+    /* 列宽与居中由外层 main 决定（左侧导航 + 竖线 + 正文列），这里只管正文自身的排布。 */
     paddingBlockEnd: 'var(--space-2xl)',
   },
   header: {
@@ -96,7 +96,7 @@ export function Post(props: { slug: string }) {
     <article {...stylex.props(s.root)}>
       <header {...stylex.props(s.header)}>
         <Link href="/blog" class={stylex.props(s.back).className}>
-          ← 文章列表
+          ← 想法
         </Link>
         <h1 {...stylex.props(s.title)}>{post.title}</h1>
         <p {...stylex.props(s.meta)}>

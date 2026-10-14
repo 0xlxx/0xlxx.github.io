@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-/// <reference types="@vgpu/wgsl/wgsl-types" />
 
 declare module 'virtual:posts' {
   export interface PostMeta {

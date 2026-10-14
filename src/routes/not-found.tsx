@@ -17,8 +17,10 @@ const s = stylex.create({
   },
   title: {
     fontFamily: 'var(--font-display)',
-    fontSize: 'var(--text-2xl)',
+    fontSize: 'var(--text-xl)',
     fontWeight: 500,
+    lineHeight: 1.2,
+    letterSpacing: '-0.02em',
   },
   body: {
     color: 'var(--color-fg-muted)',
@@ -35,7 +37,7 @@ export function NotFound() {
     <div {...stylex.props(s.root)}>
       <p {...stylex.props(s.code)}>404</p>
       <h1 {...stylex.props(s.title)}>这里什么也没有</h1>
-      <p {...stylex.props(s.body)}>链接可能失效了，或者这篇文章还没写。</p>
+      <p {...stylex.props(s.body)}>链接可能失效了，或者这个想法还没写。</p>
       <Link href="/" class={stylex.props(s.link).className}>
         ← 回到首页
       </Link>

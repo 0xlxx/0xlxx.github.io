@@ -25,7 +25,7 @@ function buildSitemap(posts: ReturnType<typeof readIndex>): string {
   const latest = posts[0]?.date
   const entries = [
     { loc: `${SITE_URL}/`, lastmod: latest },
-    { loc: `${SITE_URL}/blog`, lastmod: latest },
+    { loc: `${SITE_URL}/projects` },
     { loc: `${SITE_URL}/about` },
     ...posts.map((post) => ({ loc: postUrl(post.slug), lastmod: post.date })),
   ]
