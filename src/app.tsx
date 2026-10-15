@@ -10,7 +10,14 @@ import {
 import { Link } from './components/link'
 import { postBySlug } from './content/posts'
 import { syncDocumentMeta } from './head'
-import { acknowledgeRouteCommit, matchSegment, routeStore, takePendingScrollY, takeTransitionScrollOffset } from './router'
+import {
+  acknowledgeRouteCommit,
+  matchSegment,
+  routeStore,
+  setTransitionOffset,
+  takePendingScrollY,
+  takeTransitionOffset,
+} from './router'
 import { SITE_DESCRIPTION, SITE_TITLE } from './site'
 import { cycleTheme, themeStore, watchSystemTheme } from './theme'
 import type { ThemePreference } from './theme'
@@ -193,17 +200,18 @@ export function App() {
         : inAbout
           ? 'about'
           : 'notFound'
-  const [renderPage, setRenderPage] = useState<PageRenderer | null>(null)
-  const [routeLoadFailed, setRouteLoadFailed] = useState(false)
+  const [loadedPage, setLoadedPage] = useState<{ route: PageRoute; render: PageRenderer } | null>(null)
+  const [failedRoute, setFailedRoute] = useState<PageRoute | null>(null)
+  const renderPage = loadedPage?.route === pageRoute ? loadedPage.render : null
+  const routeLoadFailed = failedRoute === pageRoute
 
   useEffect(() => {
     let cancelled = false
-    setRenderPage(null)
-    setRouteLoadFailed(false)
+    setFailedRoute(null)
     void pageLoaders[pageRoute]().then((renderer) => {
-      if (!cancelled) setRenderPage(() => renderer)
+      if (!cancelled) setLoadedPage({ route: pageRoute, render: renderer })
     }).catch(() => {
-      if (!cancelled) setRouteLoadFailed(true)
+      if (!cancelled) setFailedRoute(pageRoute)
     })
     return () => {
       cancelled = true
@@ -236,12 +244,15 @@ export function App() {
   /*
    * 路由提交后、浏览器绘制前把滚动位置放回去：从文章返回列表要落回原来的位置，
    * 又不能先画一帧顶部再补跳，所以放在 layout 阶段（此时 DOM 已是新页面）。
+   *
+   * 带视图过渡时反过来：过渡期间不能动滚动——浏览器会把「元素在视口里换了位置」补间成
+   * 位移，看起来就是页面自己滚了一段。于是这里只把位置差补偿给正文，等过渡收尾再一次性落位。
    */
   useLayoutEffect(() => {
-    const transitionOffset = takeTransitionScrollOffset()
-    if (transitionOffset !== null) {
-      document.querySelector<HTMLElement>('main')?.style.setProperty('transform', `translateY(${transitionOffset}px)`)
-      takePendingScrollY()
+    if (!renderPage && !routeLoadFailed) return
+    const offset = takeTransitionOffset()
+    if (offset !== null) {
+      setTransitionOffset(offset)
       return
     }
     const y = takePendingScrollY()
@@ -256,11 +267,12 @@ export function App() {
       if (window.scrollY !== y && performance.now() < deadline) raf = requestAnimationFrame(follow)
     })
     return () => cancelAnimationFrame(raf)
-  }, [path])
+  }, [path, renderPage, routeLoadFailed])
 
   useLayoutEffect(() => {
+    if (!renderPage && !routeLoadFailed) return
     acknowledgeRouteCommit(path)
-  }, [path])
+  }, [path, renderPage, routeLoadFailed])
 
   // 给文章首图提前发起请求，避免必须等 Markdown 正文解析后浏览器才发现 LCP 图片。
   useLayoutEffect(() => {
@@ -323,7 +335,13 @@ export function App() {
         </button>
       </nav>
       <div {...stylex.props(s.divider)} aria-hidden="true" />
-      <main {...stylex.props(s.main)}>{page}</main>
+      <main {...stylex.props(s.main)}>
+        {/*
+         * 过渡的位置补偿挂在这一层：transform 不参与布局，main 的盒子不会被带着动，
+         * 浏览器算出的转场几何才和上一帧一致。
+         */}
+        <div data-page-content="">{page}</div>
+      </main>
     </div>
   )
 }

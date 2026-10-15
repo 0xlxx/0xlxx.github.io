@@ -3,13 +3,6 @@ import { postBySlug } from './content/posts'
 
 const routePrefetches = new Map<string, Promise<void>>()
 let pendingRouteCommit: { path: string; resolve: () => void } | null = null
-let pendingTransitionScrollOffset: number | null = null
-
-export function takeTransitionScrollOffset(): number | null {
-  const offset = pendingTransitionScrollOffset
-  pendingTransitionScrollOffset = null
-  return offset
-}
 
 /** 通知 View Transition：新路由已提交，布局阶段的滚动恢复也已完成。 */
 export function acknowledgeRouteCommit(path: string): void {
@@ -58,6 +51,16 @@ const scrollPositions = new Map<string, number>()
 let currentPath = routeStore.get()
 /** 本次切换要放回的滚动位置，由 App 在提交后、绘制前取走。 */
 let pendingScrollY: number | null = null
+/**
+ * 过渡期间施加在正文上的补偿位移（离开位置 − 目标位置）。
+ *
+ * 视图过渡会把「元素在视口里的位置变化」补间成一段位移：只要滚动位置变了，旧页面的截图
+ * 就会被当成「滚了一下」推走——这正是切菜单时右侧内容莫名自动滚动的来源。所以过渡期间
+ * 不动滚动，改为给正文挂一段反向位移，让两次截图的元素几何完全一致，只剩模糊淡入淡出。
+ */
+let pendingTransitionOffset: number | null = null
+/** 过渡世代号：连着切两次时，前一次遗留的清理不能动到后一次的状态。 */
+let transitionGeneration = 0
 
 /** 列表有 `/` 和 `/blog` 两种写法，归一成同一个键，滚动位置才对得上。 */
 function scrollKey(path: string): string {
@@ -71,6 +74,53 @@ export function takePendingScrollY(): number | null {
   return y
 }
 
+/** 取出本次要施加的补偿位移并清空；不是过渡切换时为 null。 */
+export function takeTransitionOffset(): number | null {
+  const offset = pendingTransitionOffset
+  pendingTransitionOffset = null
+  return offset
+}
+
+/**
+ * 补偿位移挂在正文容器上：transform 不参与布局，`main` 的盒子不会被带着动，
+ * 视图过渡算出来的几何才和上一次截图一致。传 null 表示撤销。
+ */
+export function setTransitionOffset(offset: number | null): void {
+  const layer = document.querySelector<HTMLElement>('[data-page-content]')
+  if (!layer) return
+  if (offset === null || offset === 0) layer.style.removeProperty('transform')
+  else layer.style.transform = `translateY(${offset}px)`
+}
+
+/** 页面外壳：sticky 导航受它约束，撑高时不能漏掉。 */
+function pageShell(): HTMLElement | null {
+  return document.querySelector<HTMLElement>('main')?.parentElement ?? null
+}
+
+/**
+ * 过渡期间把页面撑到「离开位置」仍然可用的高度，并关掉滚动锚定：
+ * 这样目标页更短时，浏览器也不会把旧的滚动位置夹掉、让两次截图的几何对不上。
+ */
+function holdScrollPosition(minHeight: number): void {
+  const value = `${minHeight}px`
+  document.documentElement.style.minHeight = value
+  document.body.style.minHeight = value
+  // sticky 导航受页面外壳约束；只延长 html/body 会让短目标页里的导航滑出视口。
+  const shell = pageShell()
+  if (shell) shell.style.minHeight = value
+  document.documentElement.style.overflowAnchor = 'none'
+  document.body.style.overflowAnchor = 'none'
+}
+
+/** 撤掉临时的撑高与滚动锚定开关，让页面回到真实高度。 */
+function releaseScrollHold(): void {
+  document.documentElement.style.removeProperty('min-height')
+  document.body.style.removeProperty('min-height')
+  pageShell()?.style.removeProperty('min-height')
+  document.documentElement.style.removeProperty('overflow-anchor')
+  document.body.style.removeProperty('overflow-anchor')
+}
+
 /** 切换路由：先记住离开时的位置，再把目标页的位置准备好。 */
 function commit(next: string, transition = true): void {
   if (next === currentPath) return
@@ -78,59 +128,66 @@ function commit(next: string, transition = true): void {
   const sourceScrollY = window.scrollY
   scrollPositions.set(scrollKey(sourcePath), sourceScrollY)
   currentPath = next
-  pendingScrollY = scrollPositions.get(scrollKey(next)) ?? 0
+  const destinationScrollY = scrollPositions.get(scrollKey(next)) ?? 0
   const useViewTransition =
     transition &&
     Boolean(document.startViewTransition) &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const holdScrollForTransition =
-    useViewTransition &&
-    scrollKey(sourcePath) === '/' &&
-    Boolean(matchSegment('/blog/:slug', next)) &&
-    sourceScrollY > 0
-  pendingTransitionScrollOffset = holdScrollForTransition ? sourceScrollY : null
   const update = () => routeStore.set(next)
-  if (useViewTransition && document.startViewTransition) {
-    const originalMinHeight = document.documentElement.style.minHeight
-    const originalBodyMinHeight = document.body.style.minHeight
-    const originalHtmlOverflowAnchor = document.documentElement.style.overflowAnchor
-    const originalBodyOverflowAnchor = document.body.style.overflowAnchor
-    if (holdScrollForTransition) {
-      const minHeight = `${sourceScrollY + window.innerHeight}px`
-      document.documentElement.style.minHeight = minHeight
-      document.body.style.minHeight = minHeight
-      document.documentElement.style.overflowAnchor = 'none'
-      document.body.style.overflowAnchor = 'none'
-    }
-    pendingRouteCommit?.resolve()
-    const routeCommitted = new Promise<void>((resolve) => {
-      pendingRouteCommit = { path: next, resolve }
-    })
-    const viewTransition = document.startViewTransition(async () => {
-      update()
-      // 等 Octane 提交新路由并完成 layout effect 中的滚动恢复，再截取转场的新画面。
-      await routeCommitted
-    })
-    if (holdScrollForTransition) {
-      const finishScrollTransition = () => {
-        window.scrollTo({ top: 0, behavior: 'instant' })
-        document.querySelector<HTMLElement>('main')?.style.removeProperty('transform')
-        document.documentElement.style.minHeight = originalMinHeight
-        document.body.style.minHeight = originalBodyMinHeight
-        document.documentElement.style.overflowAnchor = originalHtmlOverflowAnchor
-        document.body.style.overflowAnchor = originalBodyOverflowAnchor
-      }
-      void viewTransition.finished.then(finishScrollTransition, finishScrollTransition)
-    }
-  } else {
+
+  // 没有视图过渡（首屏、reduced motion、浏览器不支持）就照旧直接把滚动放回去。
+  if (!useViewTransition || !document.startViewTransition) {
+    pendingScrollY = destinationScrollY
     update()
+    return
   }
+
+  const offset = sourceScrollY - destinationScrollY
+  const compensateScroll = offset !== 0
+  const generation = (transitionGeneration += 1)
+  if (compensateScroll) {
+    // 落位改由过渡收尾时一次性完成，App 这次不要自己滚。
+    pendingScrollY = null
+    pendingTransitionOffset = offset
+    holdScrollPosition(Math.max(sourceScrollY, destinationScrollY) + window.innerHeight)
+  } else {
+    pendingScrollY = destinationScrollY
+  }
+  pendingRouteCommit?.resolve()
+  const routeCommitted = new Promise<void>((resolve) => {
+    pendingRouteCommit = { path: next, resolve }
+  })
+  const viewTransition = document.startViewTransition(async () => {
+    update()
+    // 等 Octane 提交新路由、layout effect 把补偿位移放好，再截取转场的新画面。
+    await routeCommitted
+  })
+  if (!compensateScroll) return
+
+  const finishScrollTransition = () => {
+    // 这一次过渡被跳过时清理已经过期，收尾交给后一次过渡。
+    if (generation !== transitionGeneration) return
+    const deadline = performance.now() + 1000
+    const settle = () => {
+      releaseScrollHold()
+      window.scrollTo({ top: destinationScrollY, behavior: 'instant' })
+      // 目标页正文还没长到目标高度（例如文章正文懒加载）：先撑住高度、留着补偿位移，
+      // 下一帧再试，这期间滚动位置和画面都不动。
+      if (window.scrollY !== destinationScrollY && performance.now() < deadline) {
+        holdScrollPosition(destinationScrollY + window.innerHeight)
+        window.scrollTo({ top: sourceScrollY, behavior: 'instant' })
+        requestAnimationFrame(settle)
+        return
+      }
+      // 撤销补偿位移与落位在同一帧里完成：滚动位置换了，画面却完全不动。
+      setTransitionOffset(null)
+    }
+    settle()
+  }
+  void viewTransition.finished.then(finishScrollTransition, finishScrollTransition)
 }
 
-/*
- * 交给浏览器自动恢复会走 CSS 的 `scroll-behavior: smooth`，于是「返回列表」变成一段
- * 从顶部滚下来的动画。这里接管过来，位置在绘制前一次性放好，看不见滚动过程。
- */
+/* 路由切换由应用接管滚动恢复，避免浏览器默认恢复与新页面布局/视图过渡互相竞争。 */
 window.history.scrollRestoration = 'manual'
 
 /** 历史条目上的 state 只放我们自己的东西。 */
