@@ -25,11 +25,16 @@ const s = stylex.create({
     color: 'var(--color-fg-muted)',
     textWrap: 'pretty',
   },
-  /* 联系方式只做展示：图标 + 文字，不给可点的外链。 */
+  /* 图标与描述作为一个整体链接，保持联系方式的视觉连续性。 */
   contact: {
     display: 'flex',
     alignItems: 'center',
     gap: 'var(--space-xs)',
+    color: 'inherit',
+    textDecoration: 'none',
+    ':hover': {
+      color: 'var(--color-fg)',
+    },
   },
   icon: {
     display: 'block',
@@ -58,10 +63,16 @@ export function About() {
       <h1 {...stylex.props(s.title)}>关于</h1>
       <div {...stylex.props(s.body)}>
         <p>程序员，对程序开发、交互设计和创意编程有广泛兴趣。</p>
-        <div {...stylex.props(s.contact)}>
+        <a
+          {...stylex.props(s.contact)}
+          href="https://github.com/0xlxx"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="GitHub：0xlxx"
+        >
           <GithubIcon />
           <span>0xlxx</span>
-        </div>
+        </a>
       </div>
     </div>
   )
