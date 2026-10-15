@@ -4,6 +4,7 @@ import type { CodeHighlighter } from '@tanstack/markdown'
 import { renderMarkdownOctane } from '@tanstack/markdown/octane'
 import { Link } from '../components/link'
 import { postBySlug } from '../content/posts'
+import { imageDimensions } from 'virtual:image-dimensions'
 import { hasCode, hasMath } from '../markdown/detect'
 import { createMathExtension, type MathRenderer } from '../markdown/math'
 import { NotFound } from './not-found'
@@ -54,13 +55,17 @@ const s = stylex.create({
  * 正文图片：长文章里图片常常远在首屏之外，默认懒加载 + 异步解码，
  * 免得它们一上来就和正文抢带宽、拖慢 LCP。
  */
-function PostImage(props: { src?: string; alt?: string; title?: string }) {
+function PostImage(props: { src?: string; alt?: string; title?: string; eager?: boolean }) {
+  const dimensions = props.src ? imageDimensions[props.src] : undefined
   return (
     <img
       src={props.src}
       alt={props.alt ?? ''}
-      loading="lazy"
+      width={dimensions?.width}
+      height={dimensions?.height}
+      loading={props.eager ? 'eager' : 'lazy'}
       decoding="async"
+      {...(props.eager ? { fetchpriority: 'high' } : {})}
       {...(props.title ? { title: props.title } : {})}
     />
   )
@@ -81,9 +86,18 @@ export function Post(props: { slug: string }) {
     setState(null)
     void (async () => {
       const text = await post.load()
-      // 只有正文真的用到公式 / 代码块才拉对应渲染器，避免打进所有页面的主包。
-      const render = hasMath(text) ? (await import('../markdown/katex')).renderMath : null
-      const highlight = hasCode(text) ? (await import('../markdown/highlight')).highlightCode : null
+      if (cancelled) return
+
+      // 正文先用轻量渲染结果呈现，避免等待 KaTeX 的动态 CSS 才显示首屏内容。
+      setState({ text, render: null, highlight: null })
+
+      // 只有正文用到时才拉渲染器，并行下载，缩短功能模块的关键请求链。
+      const [render, highlight] = await Promise.all([
+        hasMath(text) ? import('../markdown/katex').then((module) => module.renderMath) : null,
+        hasCode(text)
+          ? import('../markdown/highlight').then((module) => module.highlightCode)
+          : null,
+      ])
       if (!cancelled) setState({ text, render, highlight })
     })()
     return () => {
@@ -101,11 +115,15 @@ export function Post(props: { slug: string }) {
     const nodes = renderMarkdownOctane(state.text, {
       allowHtml: true,
       extensions: [createMathExtension(state.render)],
-      components: { img: PostImage },
+      components: {
+        img: (imageProps) => (
+          <PostImage {...imageProps} eager={imageProps.src === post?.image} />
+        ),
+      },
       ...(state.highlight ? { highlighter: state.highlight } : {}),
     })
     return createElement(Fragment, null, ...nodes)
-  }, [state])
+  }, [state, post?.image])
 
   if (!post) return <NotFound />
 

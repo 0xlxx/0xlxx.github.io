@@ -7,6 +7,7 @@ declare module 'virtual:posts' {
     title: string
     date: string
     summary: string
+    image?: string
     modulePath: string
   }
 
@@ -15,6 +16,10 @@ declare module 'virtual:posts' {
 
 /** StyleX 在构建期聚合出的原子样式表，由入口一次性引入。 */
 declare module 'virtual:stylex.css'
+
+declare module 'virtual:image-dimensions' {
+  export const imageDimensions: Record<string, { width: number; height: number }>
+}
 
 /** 官方包只带了实现，没有随附 .d.ts。 */
 declare module '@octanejs/stylex/vite' {

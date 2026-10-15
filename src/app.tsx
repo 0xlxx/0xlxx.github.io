@@ -1,5 +1,12 @@
 import * as stylex from '@octanejs/stylex'
-import { useEffect, useLayoutEffect, useSyncExternalStore } from 'octane'
+import {
+  createElement,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useSyncExternalStore,
+  type ElementDescriptor,
+} from 'octane'
 import { Link } from './components/link'
 import { postBySlug } from './content/posts'
 import { syncDocumentMeta } from './head'
@@ -8,11 +15,32 @@ import { SITE_DESCRIPTION, SITE_TITLE } from './site'
 import { cycleTheme, themeStore, watchSystemTheme } from './theme'
 import type { ThemePreference } from './theme'
 import { ThemeIcon } from './components/theme-icon'
-import { Blog } from './routes/blog'
-import { Projects } from './routes/projects'
-import { Post } from './routes/post'
-import { About } from './routes/about'
-import { NotFound } from './routes/not-found'
+
+type PageRoute = 'blog' | 'post' | 'projects' | 'about' | 'notFound'
+type PageRenderer = (slug: string | null) => ElementDescriptor<any>
+
+const pageLoaders: Record<PageRoute, () => Promise<PageRenderer>> = {
+  blog: async () => {
+    const { Blog } = await import('./routes/blog')
+    return () => createElement(Blog, null)
+  },
+  post: async () => {
+    const { Post } = await import('./routes/post')
+    return (slug) => createElement(Post, { slug: slug ?? '' })
+  },
+  projects: async () => {
+    const { Projects } = await import('./routes/projects')
+    return () => createElement(Projects, null)
+  },
+  about: async () => {
+    const { About } = await import('./routes/about')
+    return () => createElement(About, null)
+  },
+  notFound: async () => {
+    const { NotFound } = await import('./routes/not-found')
+    return () => createElement(NotFound, null)
+  },
+}
 
 /* 主题按钮的 aria 文案：说明当前偏好，并暗示点击可切换。 */
 const THEME_LABELS: Record<ThemePreference, string> = {
@@ -155,27 +183,43 @@ export function App() {
   const inPosts = home || Boolean(post)
   const inProjects = path === '/projects'
   const inAbout = path === '/about'
+  const pageRoute: PageRoute = home
+    ? 'blog'
+    : post && slug
+      ? 'post'
+      : inProjects
+        ? 'projects'
+        : inAbout
+          ? 'about'
+          : 'notFound'
+  const [renderPage, setRenderPage] = useState<PageRenderer | null>(null)
 
-  let page
+  useEffect(() => {
+    let cancelled = false
+    setRenderPage(null)
+    void pageLoaders[pageRoute]().then((renderer) => {
+      if (!cancelled) setRenderPage(() => renderer)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [pageRoute])
+
+  let page = renderPage ? renderPage(slug) : <p>正在载入…</p>
   let title = SITE_TITLE
   let description = SITE_DESCRIPTION
   if (home) {
-    page = <Blog />
     description = '写点关于前端工程、渲染管线与系统设计的笔记。'
   } else if (post && slug) {
-    page = <Post slug={slug} />
     title = post.title
     description = post.summary
   } else if (path === '/projects') {
-    page = <Projects />
     title = '项目'
     description = '做过的一些东西。'
   } else if (path === '/about') {
-    page = <About />
     title = '关于'
     description = '程序员，对程序开发、交互设计和创意编程有广泛兴趣。'
   } else {
-    page = <NotFound />
     title = '页面不存在'
     description = '链接可能失效了，或者这个想法还没写。'
   }
@@ -198,6 +242,22 @@ export function App() {
     })
     return () => cancelAnimationFrame(raf)
   }, [path])
+
+  // 给文章首图提前发起请求，避免必须等 Markdown 正文解析后浏览器才发现 LCP 图片。
+  useLayoutEffect(() => {
+    const existing = document.querySelector<HTMLLinkElement>('link[data-post-image-preload]')
+    if (existing?.getAttribute('href') === post?.image) return
+    existing?.remove()
+    if (!post?.image) return
+    const preload = document.createElement('link')
+    preload.rel = 'preload'
+    preload.as = 'image'
+    preload.href = post.image
+    preload.setAttribute('fetchpriority', 'high')
+    preload.dataset.postImagePreload = ''
+    document.head.append(preload)
+    return () => preload.remove()
+  }, [path, post?.image])
 
   // 客户端路由切换后同步 head，保证分享/收藏拿到的是当前页面。
   // 列表页有两种写法（/ 与 /blog），canonical 统一收敛到 /。

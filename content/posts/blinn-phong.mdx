@@ -12,7 +12,7 @@ Blinn-Phong 模型是一种着色模型。该模型将光照对物体的作用�
 2. 高光
 3. 环境光
 
-![stage](/images/computer-graphics/stage.png)
+![stage](/images/computer-graphics/stage.avif)
 
 ## 漫反射
 
@@ -20,7 +20,7 @@ Blinn-Phong 模型是一种着色模型。该模型将光照对物体的作用�
 
 漫反射不考虑观察者的观察角度。只考虑光源的入射角度以及着色点法向量的位置
 
-![diffuse-ill](/images/computer-graphics/assets/diffuse-ill.png)
+![diffuse-ill](/images/computer-graphics/assets/diffuse-ill.avif)
 
 $$
 \mathrm{diffuse} = k_d\cdot (I/r^2) \mathrm{max}(0, \mathbf{l}\cdot \mathbf{n})
@@ -38,7 +38,7 @@ $$
 
 半角向量就是$\frac{\mathbf{l} + \mathbf{v}}{{\|\mathbf{l} + \mathbf{v}\|}}$记作$\mathbf{h}$。当观察方向和出射方向相同时可以知道半角向量和法向量方向相同
 
-![specular-ill](/images/computer-graphics/assets/specular-ill.png)
+![specular-ill](/images/computer-graphics/assets/specular-ill.avif)
 
 现在，得到计算高光的公式如下：
 
@@ -50,20 +50,20 @@ $$
 
 还有一个问题是，毕竟 blinn-phong 是一个经验模型。换而言之就是不够准确。如果直接用上述公式，就会得到一个很大的高光
 
-![specular-p-1](/images/computer-graphics/specular-p-1.png)
+![specular-p-1](/images/computer-graphics/specular-p-1.avif)
 
 这是因为 $\mathbf{n}\cdot \mathbf{h}$ 也就是两个方向向量的余弦$\cos{\alpha}$ 变化过于平缓
 
-![cos](/images/computer-graphics/assets/cos.png)
+![cos](/images/computer-graphics/assets/cos.avif)
 
 需要给cos加上一个指数 $alpha$
 
 $p=64$
-![specular-p-64](/images/computer-graphics/specular_p_64.png)
+![specular-p-64](/images/computer-graphics/specular_p_64.avif)
 
 $p=150$
 
-![specular](/images/computer-graphics/specular.png)
+![specular](/images/computer-graphics/specular.avif)
 
 ## 环境光
 
@@ -73,7 +73,7 @@ $$
 \mathrm{ambient}=k_a \cdot I
 $$
 
-![ambient](/images/computer-graphics/abmbient.png)
+![ambient](/images/computer-graphics/abmbient.avif)
 
 ## 结合
 
@@ -83,5 +83,5 @@ $$
 \mathrm{color}= \text{diffuse} + \text{ambient} + \text{specular}
 $$
 
-![Blinn-Phong](/images/computer-graphics/blinn-phong.png)
+![Blinn-Phong](/images/computer-graphics/blinn-phong.avif)
 

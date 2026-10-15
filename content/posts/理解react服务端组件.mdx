@@ -81,7 +81,7 @@ html 文件仍会包含 `<script>` 标签，因为我们仍然需要 React 在�
 - 使用像 React Query 或 SWR 或 Apollo 这样的东西，客户端会向后端发出网络请求，然后后端会从数据库中获取数据并将其发送回来。
 
 我们可以用一张图来可视化这个流程：
-![date-fetching-in-react](/images/date-fetching-in-react.png)
+![date-fetching-in-react](/images/date-fetching-in-react.avif)
 
 第一张展示了使用客户端渲染策略的流程。它从客户端接收一个 HTML 文件开始。这个文件没有任何内容，但它确实有一个或多个 `<script>` 标签。
 
@@ -89,7 +89,7 @@ html 文件仍会包含 `<script>` 标签，因为我们仍然需要 React 在�
 
 你可能经常看到这种模式。例如，UberEats 从渲染一个外壳开始，同时获取它需要填充实际餐厅的数据：
 
-![uber-eats-loading-state](/images/uber-eats-loading-state.png)
+![uber-eats-loading-state](/images/uber-eats-loading-state.avif)
 
 用户直到网络请求解析并且react重新渲染，用真实的内容替换加载UI。
 
@@ -97,9 +97,9 @@ html 文件仍会包含 `<script>` 标签，因为我们仍然需要 React 在�
 
 为了真正的了解用户体验的差异，让我们在图表中添加一些网络性能指标。在这两个流程之间切换，注意标志的变化：
 
-![csr](/images/csr.png)
+![csr](/images/csr.avif)
 
-![ssr](/images/ssr.png)
+![ssr](/images/ssr.avif)
 
 每个标志代表一个常用的网络性能指标。这是一个简单的解释：
 
@@ -116,7 +116,7 @@ html 文件仍会包含 `<script>` 标签，因为我们仍然需要 React 在�
 但是这个流程感觉有点傻吧？当我看 SSR 图表时，我忍不住注意到请求是从服务器开始的。为什么不在初始请求期间进行数据库工作，而不是需要第二次网络请求呢？
 
 换句话说，为什么不像这样做？
-![ssr-opt](/images/ssr-opt.png)
+![ssr-opt](/images/ssr-opt.avif)
 
 将我们的数据库查询作为初始请求的的一部分，发送完全渲染的UI给用户。而不是在客户端和服务器之间来回切换，
 
@@ -226,7 +226,7 @@ export default Homepage
 
 “客户端组件”这个名字暗示这些组件只在客户端上渲染，但实际上并不是这样。客户端组件在客户端和服务器上都会渲染。
 
-![render-table](/images/render-table.png)
+![render-table](/images/render-table.avif)
 
 ## 服务端组件的好处
 
@@ -329,13 +329,13 @@ function HitCounter({ hits }) {
 
 假设我们有以下组件树：
 
-![component-tree](/images/component-tree.png)
+![component-tree](/images/component-tree.avif)
 
 如果所有的这些组件都是服务端组件，那么这一切都是有意义的。没有一个 props 会改变，因为没有一个组件会重新渲染。
 
 但是我们假设 Article 组件拥有 hits 状态变量。为了使用状态，我们需要将其转换为客户端组件：
 
-![to-client-comp](/images/to-client-comp.png)
+![to-client-comp](/images/to-client-comp.avif)
 
 你发现这里的问题了吗？当`Article`重新渲染时，任何拥有的组件也会重新渲染，包括`HitCounter`和`Discussion`。然而，如果这些是服务端组件，他们不能重新渲染。
 
@@ -343,7 +343,7 @@ function HitCounter({ hits }) {
 
 React 服务端组件最大的“我草”时刻之一是意识到这个新范式是关于创建客户端边界的。在实践中，这是发生的：
 
-![boundary](/images/boundary.png)
+![boundary](/images/boundary.avif)
 
 当我们在`Article`组件添加`use client`指令，我们就创建了一个“客户端边界”。在这个边界内的所有组件都会被隐式转换为客户端组件。即使像`HitCounter`这样的组件没有`use client`指令，在这种特定情况下，他们仍然会在客户端上水合/渲染。
 
@@ -532,8 +532,8 @@ rsc 是第一个在React中运行服务器独占代码的“官方”方式。�
 
 **最明显的好处是性能。服务端组件不会包含在我们的JS捆绑包中，这减少了需要下载的JavaScript的数量，以及需要水合的组件的数量**：
 
-![pre-rsc](/images/pre-rsc.png)
-![post-rsc](/images/post-rsc.png)
+![pre-rsc](/images/pre-rsc.avif)
+![post-rsc](/images/post-rsc.avif)
 
 老实说，尽管这可能对我来说是最没那么激动的事情了，大多数next.js应用在 Page Interactive时间方面已经够快了
 
@@ -557,7 +557,7 @@ function exampleJavaScriptFunction(
 
 这是Bright背后的大想法，这是一个现代的语法高亮包，设计用于与React服务端组件一起使用
 
-![Bright](/images/Bright.png)
+![Bright](/images/Bright.avif)
 
 这是我对React服务端组件感到兴奋的原因。那些在JS捆绑包中成本太高的东西现在可以免费在服务器上运行，不会增加我们的捆绑包的大小，从而产生更好的用户体验。
 
@@ -571,4 +571,4 @@ rsc 是一个令人兴奋的发展，但实际上它只是“现代React”拼�
 
 当我们将React服务端组件与Suspense和新的流式SSR架构相结合时，事情变得非常有趣。它允许我们做一些疯狂的事情，比如这样：
 
-![with-Suspense](/images/with-suspense.png)
+![with-Suspense](/images/with-suspense.avif)
