@@ -10,7 +10,7 @@ import {
 import { Link } from './components/link'
 import { postBySlug } from './content/posts'
 import { syncDocumentMeta } from './head'
-import { matchSegment, routeStore, takePendingScrollY } from './router'
+import { acknowledgeRouteCommit, matchSegment, routeStore, takePendingScrollY, takeTransitionScrollOffset } from './router'
 import { SITE_DESCRIPTION, SITE_TITLE } from './site'
 import { cycleTheme, themeStore, watchSystemTheme } from './theme'
 import type { ThemePreference } from './theme'
@@ -238,6 +238,12 @@ export function App() {
    * 又不能先画一帧顶部再补跳，所以放在 layout 阶段（此时 DOM 已是新页面）。
    */
   useLayoutEffect(() => {
+    const transitionOffset = takeTransitionScrollOffset()
+    if (transitionOffset !== null) {
+      document.querySelector<HTMLElement>('main')?.style.setProperty('transform', `translateY(${transitionOffset}px)`)
+      takePendingScrollY()
+      return
+    }
     const y = takePendingScrollY()
     if (y === null) return
     window.scrollTo({ top: y, behavior: 'instant' })
@@ -250,6 +256,10 @@ export function App() {
       if (window.scrollY !== y && performance.now() < deadline) raf = requestAnimationFrame(follow)
     })
     return () => cancelAnimationFrame(raf)
+  }, [path])
+
+  useLayoutEffect(() => {
+    acknowledgeRouteCommit(path)
   }, [path])
 
   // 给文章首图提前发起请求，避免必须等 Markdown 正文解析后浏览器才发现 LCP 图片。

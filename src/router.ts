@@ -2,6 +2,21 @@ import { createStore } from './store'
 import { postBySlug } from './content/posts'
 
 const routePrefetches = new Map<string, Promise<void>>()
+let pendingRouteCommit: { path: string; resolve: () => void } | null = null
+let pendingTransitionScrollOffset: number | null = null
+
+export function takeTransitionScrollOffset(): number | null {
+  const offset = pendingTransitionScrollOffset
+  pendingTransitionScrollOffset = null
+  return offset
+}
+
+/** 通知 View Transition：新路由已提交，布局阶段的滚动恢复也已完成。 */
+export function acknowledgeRouteCommit(path: string): void {
+  if (pendingRouteCommit?.path !== path) return
+  pendingRouteCommit.resolve()
+  pendingRouteCommit = null
+}
 
 /** 在用户表明导航意图时提前取页面模块与文章正文；失败时正常导航仍可重试。 */
 export function prefetchRoute(path: string): void {
@@ -59,16 +74,54 @@ export function takePendingScrollY(): number | null {
 /** 切换路由：先记住离开时的位置，再把目标页的位置准备好。 */
 function commit(next: string, transition = true): void {
   if (next === currentPath) return
-  scrollPositions.set(scrollKey(currentPath), window.scrollY)
+  const sourcePath = currentPath
+  const sourceScrollY = window.scrollY
+  scrollPositions.set(scrollKey(sourcePath), sourceScrollY)
   currentPath = next
   pendingScrollY = scrollPositions.get(scrollKey(next)) ?? 0
-  const update = () => routeStore.set(next)
-  if (
+  const useViewTransition =
     transition &&
-    document.startViewTransition &&
+    Boolean(document.startViewTransition) &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ) {
-    document.startViewTransition(update)
+  const holdScrollForTransition =
+    useViewTransition &&
+    scrollKey(sourcePath) === '/' &&
+    Boolean(matchSegment('/blog/:slug', next)) &&
+    sourceScrollY > 0
+  pendingTransitionScrollOffset = holdScrollForTransition ? sourceScrollY : null
+  const update = () => routeStore.set(next)
+  if (useViewTransition && document.startViewTransition) {
+    const originalMinHeight = document.documentElement.style.minHeight
+    const originalBodyMinHeight = document.body.style.minHeight
+    const originalHtmlOverflowAnchor = document.documentElement.style.overflowAnchor
+    const originalBodyOverflowAnchor = document.body.style.overflowAnchor
+    if (holdScrollForTransition) {
+      const minHeight = `${sourceScrollY + window.innerHeight}px`
+      document.documentElement.style.minHeight = minHeight
+      document.body.style.minHeight = minHeight
+      document.documentElement.style.overflowAnchor = 'none'
+      document.body.style.overflowAnchor = 'none'
+    }
+    pendingRouteCommit?.resolve()
+    const routeCommitted = new Promise<void>((resolve) => {
+      pendingRouteCommit = { path: next, resolve }
+    })
+    const viewTransition = document.startViewTransition(async () => {
+      update()
+      // 等 Octane 提交新路由并完成 layout effect 中的滚动恢复，再截取转场的新画面。
+      await routeCommitted
+    })
+    if (holdScrollForTransition) {
+      const finishScrollTransition = () => {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+        document.querySelector<HTMLElement>('main')?.style.removeProperty('transform')
+        document.documentElement.style.minHeight = originalMinHeight
+        document.body.style.minHeight = originalBodyMinHeight
+        document.documentElement.style.overflowAnchor = originalHtmlOverflowAnchor
+        document.body.style.overflowAnchor = originalBodyOverflowAnchor
+      }
+      void viewTransition.finished.then(finishScrollTransition, finishScrollTransition)
+    }
   } else {
     update()
   }
