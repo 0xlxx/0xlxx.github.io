@@ -1,4 +1,29 @@
 /*
+ * 自托管字体：只取 latin 子集（中文交给系统字体），
+ * 放在 src/assets/ 让 Vite 指纹化，既拿到 immutable 缓存，
+ * 也去掉了第三方字体的额外 RTT——它原本是首屏渲染阻塞的一大部分。
+ */
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url('../assets/fonts/newsreader-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url('../assets/fonts/jetbrains-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
  * Design tokens —— 全站唯一的取值来源。
  * 组件只引用这里的变量，不写死具体数值。
  * 主题切换靠覆盖同名变量完成，不需要生成第二套 class。
@@ -29,8 +54,13 @@
   --syntax-meta: oklch(0.55 0.09 330);
 
   /* 排版 */
-  --font-sans: 'Noto Sans SC', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Newsreader', 'Noto Serif SC', Georgia, serif;
+  /*
+   * 中文交给系统字体：CJK webfont 在中文长文里要下 1MB+，而系统里的
+   * PingFang / 思源黑体 本身质量就很好，不值得为一致性付这个代价。
+   */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Source Han Sans SC', 'Noto Sans CJK SC', sans-serif;
+  --font-display: 'Newsreader', 'Noto Serif SC', 'Songti SC', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --text-2xs: 0.75rem;

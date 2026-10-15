@@ -50,6 +50,22 @@ const s = stylex.create({
   },
 })
 
+/*
+ * 正文图片：长文章里图片常常远在首屏之外，默认懒加载 + 异步解码，
+ * 免得它们一上来就和正文抢带宽、拖慢 LCP。
+ */
+function PostImage(props: { src?: string; alt?: string; title?: string }) {
+  return (
+    <img
+      src={props.src}
+      alt={props.alt ?? ''}
+      loading="lazy"
+      decoding="async"
+      {...(props.title ? { title: props.title } : {})}
+    />
+  )
+}
+
 export function Post(props: { slug: string }) {
   const post = postBySlug(props.slug)
   const [state, setState] = useState<{
@@ -85,6 +101,7 @@ export function Post(props: { slug: string }) {
     const nodes = renderMarkdownOctane(state.text, {
       allowHtml: true,
       extensions: [createMathExtension(state.render)],
+      components: { img: PostImage },
       ...(state.highlight ? { highlighter: state.highlight } : {}),
     })
     return createElement(Fragment, null, ...nodes)
