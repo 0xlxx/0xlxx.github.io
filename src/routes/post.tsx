@@ -78,14 +78,22 @@ export function Post(props: { slug: string }) {
     render: MathRenderer | null
     highlight: CodeHighlighter | null
   } | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
 
   // 显式依赖 props.slug：切到另一篇文章时重新取源码。
   useEffect(() => {
     if (!post) return
     let cancelled = false
     setState(null)
+    setLoadFailed(false)
     void (async () => {
-      const text = await post.load()
+      let text: string
+      try {
+        text = await post.load()
+      } catch {
+        if (!cancelled) setLoadFailed(true)
+        return
+      }
       if (cancelled) return
 
       // 正文先用轻量渲染结果呈现，避免等待 KaTeX 的动态 CSS 才显示首屏内容。
@@ -99,7 +107,9 @@ export function Post(props: { slug: string }) {
           : null,
       ])
       if (!cancelled) setState({ text, render, highlight })
-    })()
+    })().catch(() => {
+      // 基础正文已经显示；增强渲染模块失败时保留它，不回退成永久 loading。
+    })
     return () => {
       cancelled = true
     }
@@ -139,7 +149,11 @@ export function Post(props: { slug: string }) {
         </p>
       </header>
       <div class="prose">
-        {body ?? <p {...stylex.props(s.pending)}>正在载入…</p>}
+        {body ?? (
+          <p {...stylex.props(s.pending)}>
+            {loadFailed ? '文章载入失败，请刷新后重试。' : '正在载入…'}
+          </p>
+        )}
       </div>
     </article>
   )

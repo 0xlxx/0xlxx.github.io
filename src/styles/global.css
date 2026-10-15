@@ -96,3 +96,21 @@
     }
   }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(page-content) {
+    animation: page-out 100ms cubic-bezier(0.2, 0, 1, 1) both;
+  }
+
+  ::view-transition-new(page-content) {
+    animation: page-in 180ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+}
+
+@keyframes page-out {
+  to { opacity: 0; }
+}
+
+@keyframes page-in {
+  from { opacity: 0; }
+}

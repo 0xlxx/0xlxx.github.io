@@ -1,4 +1,4 @@
-import { navigate } from '../router'
+import { navigate, prefetchRoute } from '../router'
 import type { OctaneNode } from 'octane'
 
 interface LinkProps {
@@ -18,7 +18,7 @@ export function Link(props: LinkProps) {
     if (event.defaultPrevented || event.button !== 0) return
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     event.preventDefault()
-    navigate(props.href)
+    navigate(props.href, { transition: event.detail !== 0 })
   }
 
   return (
@@ -28,6 +28,8 @@ export function Link(props: LinkProps) {
       aria-label={props['aria-label']}
       aria-current={props['aria-current']}
       onClick={onClick}
+      onPointerEnter={() => prefetchRoute(props.href)}
+      onFocus={() => prefetchRoute(props.href)}
     >
       {props.children}
     </a>

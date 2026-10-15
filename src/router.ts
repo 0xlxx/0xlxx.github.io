@@ -1,4 +1,30 @@
 import { createStore } from './store'
+import { postBySlug } from './content/posts'
+
+const routePrefetches = new Map<string, Promise<void>>()
+
+/** 在用户表明导航意图时提前取页面模块与文章正文；失败时正常导航仍可重试。 */
+export function prefetchRoute(path: string): void {
+  if (routePrefetches.has(path)) return
+
+  const slug = matchSegment('/blog/:slug', path)
+  const task = slug
+    ? Promise.all([
+        import('./routes/post'),
+        postBySlug(slug)?.load() ?? Promise.resolve(),
+      ])
+    : path === '/' || path === '/blog'
+      ? import('./routes/blog')
+      : path === '/projects'
+        ? import('./routes/projects')
+        : path === '/about'
+          ? import('./routes/about')
+          : null
+
+  if (!task) return
+  const prefetch = Promise.resolve(task).then(() => undefined).catch(() => undefined)
+  routePrefetches.set(path, prefetch)
+}
 
 /** 去掉尾斜杠，`/blog/` 与 `/blog` 视为同一路由。 */
 function readPath(): string {
@@ -31,12 +57,21 @@ export function takePendingScrollY(): number | null {
 }
 
 /** 切换路由：先记住离开时的位置，再把目标页的位置准备好。 */
-function commit(next: string): void {
+function commit(next: string, transition = true): void {
   if (next === currentPath) return
   scrollPositions.set(scrollKey(currentPath), window.scrollY)
   currentPath = next
   pendingScrollY = scrollPositions.get(scrollKey(next)) ?? 0
-  routeStore.set(next)
+  const update = () => routeStore.set(next)
+  if (
+    transition &&
+    document.startViewTransition &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    document.startViewTransition(update)
+  } else {
+    update()
+  }
 }
 
 /*
@@ -66,17 +101,17 @@ const entryScrollY = (window.history.state as EntryState | null)?.scrollY
 if (typeof entryScrollY === 'number') pendingScrollY = entryScrollY
 
 window.addEventListener('popstate', () => {
-  commit(readPath())
+  commit(readPath(), false)
 })
 
-export function navigate(to: string, options?: { replace?: boolean }): void {
+export function navigate(to: string, options?: { replace?: boolean; transition?: boolean }): void {
   const next = to.startsWith('/') ? to : `/${to}`
   if (next === routeStore.get()) return
 
   if (options?.replace) window.history.replaceState(null, '', next)
   else window.history.pushState(null, '', next)
 
-  commit(readPath())
+  commit(readPath(), options?.transition)
 }
 
 /**

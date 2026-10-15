@@ -155,6 +155,7 @@ const s = stylex.create({
   main: {
     flexGrow: 1,
     minInlineSize: 0,
+    viewTransitionName: 'page-content',
     /* 窄屏没有竖线，用一条横线分开导航与正文。 */
     borderBlockStartWidth: 1,
     borderBlockStartStyle: 'solid',
@@ -193,19 +194,27 @@ export function App() {
           ? 'about'
           : 'notFound'
   const [renderPage, setRenderPage] = useState<PageRenderer | null>(null)
+  const [routeLoadFailed, setRouteLoadFailed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     setRenderPage(null)
+    setRouteLoadFailed(false)
     void pageLoaders[pageRoute]().then((renderer) => {
       if (!cancelled) setRenderPage(() => renderer)
+    }).catch(() => {
+      if (!cancelled) setRouteLoadFailed(true)
     })
     return () => {
       cancelled = true
     }
   }, [pageRoute])
 
-  let page = renderPage ? renderPage(slug) : <p>正在载入…</p>
+  let page = renderPage
+    ? renderPage(slug)
+    : routeLoadFailed
+      ? <p>页面载入失败，请刷新后重试。</p>
+      : <p>正在载入…</p>
   let title = SITE_TITLE
   let description = SITE_DESCRIPTION
   if (home) {
