@@ -3,7 +3,6 @@ import { Fragment, createElement, useEffect, useMemo, useState } from 'octane'
 import type { CodeHighlighter } from '@tanstack/markdown'
 import { renderMarkdownOctane } from '@tanstack/markdown/octane'
 import { Link } from '../components/link'
-import { assetUrl } from '../base'
 import { postBySlug } from '../content/posts'
 import { imageDimensions } from 'virtual:image-dimensions'
 import { hasCode, hasMath } from '../markdown/detect'
@@ -60,7 +59,7 @@ function PostImage(props: { src?: string; alt?: string; title?: string; eager?: 
   const dimensions = props.src ? imageDimensions[props.src] : undefined
   return (
     <img
-      src={props.src ? assetUrl(props.src) : undefined}
+      src={props.src}
       alt={props.alt ?? ''}
       width={dimensions?.width}
       height={dimensions?.height}

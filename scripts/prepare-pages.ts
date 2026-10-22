@@ -1,7 +1,7 @@
 /**
  * GitHub Pages 不支持 SPA 的服务端回退：未命中的路径会返回 404.html。
  * 把构建好的 index.html 复制一份当 404 页，客户端路由才能接管深链接
- * （例如 `/blog/blog/<slug>`）。
+ * （例如 `/blog/<slug>`）。
  */
 import { copyFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'

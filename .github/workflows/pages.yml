@@ -24,7 +24,7 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
-      # 项目页挂在 /blog/ 下：构建基路径、404.html 回退都由 build:pages 处理。
+      # 用户站挂在根路径：与 Cloudflare 版本同一份构建，额外生成 404.html 供深链接回退。
       - run: bun run build:pages
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
