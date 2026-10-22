@@ -81,4 +81,5 @@ slug: 可选的-url-slug
   `wrangler.jsonc`。
 - **GitHub Pages**（<https://0xlxx.github.io/>）：仓库名 `0xlxx.github.io` 是账号的用户站，所以
   Pages 挂在根路径。推送到 `main` 后由 `.github/workflows/pages.yml` 执行 `bun run build:pages`
-  并发布；该命令在正常构建之外写出 `404.html`，作为 SPA 深链接（如 `/blog/<slug>`）的回退。
+  并发布。Pages 没有服务端回退，所以该命令会为已知路由（`/about`、`/blog/<slug>` 等）各写一份
+  `index.html` 让深链接返回 200，未知路径才落到 `404.html`。

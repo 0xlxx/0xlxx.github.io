@@ -25,7 +25,7 @@
 
 - `bun run dev`：启动 Vite 开发服务器（默认 <http://localhost:5173>）。
 - `bun run build`：生产构建，产物在 `dist/`，同时写出 `sitemap.xml` / `rss.xml` / `robots.txt`。
-- `bun run build:pages`：构建 GitHub Pages 版本（额外生成 `404.html`，其余与 `build` 相同）。
+- `bun run build:pages`：构建 GitHub Pages 版本（为已有路由生成静态入口，其余与 `build` 相同）。
 - `bun run preview`：本地预览构建产物。
 - `bun run typecheck`：运行 `tsc --noEmit`。
 - `bun run deploy`：构建并发布到 Cloudflare Workers Static Assets。
@@ -35,8 +35,8 @@
 - 站点同时发布到 Cloudflare（`bjorn.men`）和 GitHub Pages 用户站（`0xlxx.github.io`）：
   两个目标都在域名根路径，共用同一份构建，不需要基路径前缀。
 - GitHub Pages 仓库名必须是 `0xlxx.github.io`（GitHub 由此决定挂在根路径）；由
-  `.github/workflows/pages.yml` 在推送 `main` 时自动发布，`scripts/prepare-pages.ts`
-  负责写 `404.html` 回退深链接。
+  `.github/workflows/pages.yml` 在推送 `main` 时自动发布。`scripts/prepare-pages.ts` 为已知路由
+  各写一份 `index.html`（深链接返回 200），未知路径回退 `404.html`。
 
 #### 编码风格与命名约定
 
