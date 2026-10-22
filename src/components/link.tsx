@@ -1,4 +1,5 @@
 import { navigate, prefetchRoute } from '../router'
+import { withBase } from '../base'
 import type { OctaneNode } from 'octane'
 
 interface LinkProps {
@@ -23,7 +24,7 @@ export function Link(props: LinkProps) {
 
   return (
     <a
-      href={props.href}
+      href={withBase(props.href)}
       class={props.class}
       aria-label={props['aria-label']}
       aria-current={props['aria-current']}

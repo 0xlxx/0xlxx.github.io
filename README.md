@@ -22,6 +22,7 @@
 ```bash
 bun run dev        # 开发服务器（Vite，默认 http://localhost:5173）
 bun run build      # 生产构建，产物在 dist/，并写出 sitemap.xml / rss.xml / robots.txt
+bun run build:pages # 构建 GitHub Pages 版本（基路径 /blog/，附带 404.html 回退）
 bun run preview    # 预览构建产物
 bun run typecheck  # tsc --noEmit
 bun run deploy     # 构建并发布到 Cloudflare
@@ -35,6 +36,7 @@ content/posts/    文章源文件（.mdx，带 frontmatter）
 public/           静态资源（图片、_headers）
 src/
   app.tsx         站点外壳与路由分发
+  base.ts         部署基路径（Cloudflare 为 /，GitHub Pages 为 /blog/）
   router.ts       pushState 路由
   store.ts        useSyncExternalStore 状态容器
   theme.ts        明暗主题
@@ -73,5 +75,12 @@ slug: 可选的-url-slug
 
 ## 部署
 
-`bun run deploy` 会先 `vite build`，再把 `dist/` 作为 Workers Static Assets 发布；
-未命中的路径回退到 `index.html`（路由在客户端），见 `wrangler.jsonc`。
+两个目标共用同一份代码，区别只在构建基路径：
+
+- **Cloudflare Workers**（<https://bjorn.men>）：`bun run deploy` 会先 `vite build`，再把 `dist/`
+  作为 Workers Static Assets 发布；未命中的路径回退到 `index.html`（路由在客户端），见
+  `wrangler.jsonc`。
+- **GitHub Pages**（<https://0xlxx.github.io/blog/>）：推送到 `main` 后由
+  `.github/workflows/pages.yml` 执行 `bun run build:pages` 并发布。该命令用
+  `SITE_BASE=/blog/` 构建（项目页挂在 `/blog/` 下），并额外写出 `404.html` 作为 SPA 深链接的
+  回退。站内链接和静态资源由 `src/base.ts` 统一加前缀，canonical 仍指向 bjorn.men。

@@ -8,6 +8,7 @@ import {
   type ElementDescriptor,
 } from 'octane'
 import { Link } from './components/link'
+import { assetUrl } from './base'
 import { postBySlug } from './content/posts'
 import { syncDocumentMeta } from './head'
 import {
@@ -277,13 +278,13 @@ export function App() {
   // 给文章首图提前发起请求，避免必须等 Markdown 正文解析后浏览器才发现 LCP 图片。
   useLayoutEffect(() => {
     const existing = document.querySelector<HTMLLinkElement>('link[data-post-image-preload]')
-    if (existing?.getAttribute('href') === post?.image) return
+    if (existing?.getAttribute('href') === (post?.image ? assetUrl(post.image) : undefined)) return
     existing?.remove()
     if (!post?.image) return
     const preload = document.createElement('link')
     preload.rel = 'preload'
     preload.as = 'image'
-    preload.href = post.image
+    preload.href = assetUrl(post.image)
     preload.setAttribute('fetchpriority', 'high')
     preload.dataset.postImagePreload = ''
     document.head.append(preload)

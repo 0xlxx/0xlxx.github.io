@@ -7,6 +7,11 @@ import { imageDimensions } from './build/image-metadata-plugin.ts'
 import { siteMetadata } from './build/site-plugin.ts'
 
 export default defineConfig({
+  /*
+   * 部署基路径：Cloudflare Workers 挂在根，GitHub Pages 的项目页挂在 `/blog/`。
+   * 只有构建 GitHub Pages 版本时才传 `SITE_BASE=/blog/`，见 `build:pages`。
+   */
+  base: process.env.SITE_BASE || '/',
   plugins: [
     {
       name: 'blog:katex-font-display',

@@ -53,13 +53,19 @@ export function readIndex(dir: string): PostIndexEntry[] {
  */
 export function posts(dir = 'content/posts'): Plugin {
   const absolute = resolve(process.cwd(), dir)
+  // 部署基路径（GitHub Pages 项目页是 `/blog/`），内联脚本里补全用的资源地址要用它。
+  let basePath = '/'
   return {
     name: 'blog:posts',
+    configResolved(config) {
+      basePath = config.base
+    },
     transformIndexHtml: {
       order: 'post',
       handler(_html, context) {
         const bundle = context.bundle
         const posts = readIndex(absolute)
+        const prefix = basePath === '/' ? '' : basePath.replace(/\/+$/, '')
         const routePath = (slug: string) => encodeURI(`/blog/${slug}`)
         const findChunk = (sourcePath: string, base: string) =>
           bundle &&
@@ -100,7 +106,9 @@ export function posts(dir = 'content/posts'): Plugin {
             bodyChunk ? `/${bodyChunk.fileName}` : undefined,
           ])
         }
-        const script = `(()=>{const images=${JSON.stringify(imageByPath)};const chunks=${JSON.stringify(chunkByPath)};const path=location.pathname.replace(/\\/$/,'')||'/';const image=images[path];if(image){const link=document.createElement('link');link.rel='preload';link.as='image';link.href=image;link.setAttribute('fetchpriority','high');link.dataset.postImagePreload='';document.head.append(link)}for(const chunk of chunks[path]||[]){const link=document.createElement('link');link.rel='modulepreload';link.href=chunk;document.head.append(link)}})()`
+        // 内联脚本在 HTML 里跑，拿到的是带基路径的地址，先剥掉前缀再和内部路由比对；
+        // 写回 <link> 时再把前缀补上。
+        const script = `(()=>{const base=${JSON.stringify(prefix)};const images=${JSON.stringify(imageByPath)};const chunks=${JSON.stringify(chunkByPath)};const raw=(base&&location.pathname.startsWith(base+'/'))?location.pathname.slice(base.length):location.pathname;const path=raw.replace(/\\/$/,'')||'/';const image=images[path];if(image){const link=document.createElement('link');link.rel='preload';link.as='image';link.href=base+image;link.setAttribute('fetchpriority','high');link.dataset.postImagePreload='';document.head.append(link)}for(const chunk of chunks[path]||[]){const link=document.createElement('link');link.rel='modulepreload';link.href=base+chunk;document.head.append(link)}})()`
         return [{ tag: 'script', children: script, injectTo: 'head' }]
       },
     },

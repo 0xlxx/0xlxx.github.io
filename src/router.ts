@@ -1,5 +1,6 @@
 import { createStore } from './store'
 import { postBySlug } from './content/posts'
+import { stripBase, withBase } from './base'
 
 const routePrefetches = new Map<string, Promise<void>>()
 let pendingRouteCommit: { path: string; resolve: () => void } | null = null
@@ -34,9 +35,12 @@ export function prefetchRoute(path: string): void {
   routePrefetches.set(path, prefetch)
 }
 
-/** 去掉尾斜杠，`/blog/` 与 `/blog` 视为同一路由。 */
+/**
+ * 去掉基路径前缀和尾斜杠，`/blog/` 与 `/blog` 视为同一路由。
+ * 内部路径不带基路径，GitHub Pages 的 `/blog/` 前缀由 `withBase` 补回。
+ */
 function readPath(): string {
-  const path = window.location.pathname.replace(/\/{2,}/g, '/')
+  const path = stripBase(window.location.pathname).replace(/\/{2,}/g, '/')
   return path.length > 1 ? path.replace(/\/+$/, '') : '/'
 }
 
@@ -218,8 +222,9 @@ export function navigate(to: string, options?: { replace?: boolean; transition?:
   const next = to.startsWith('/') ? to : `/${to}`
   if (next === routeStore.get()) return
 
-  if (options?.replace) window.history.replaceState(null, '', next)
-  else window.history.pushState(null, '', next)
+  const url = withBase(next)
+  if (options?.replace) window.history.replaceState(null, '', url)
+  else window.history.pushState(null, '', url)
 
   commit(readPath(), options?.transition)
 }
