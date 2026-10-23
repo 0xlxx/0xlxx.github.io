@@ -503,7 +503,7 @@ self.__next['$Homepage-1'] = {
 
 这意味着我们的JS捆绑包虽然变得更小，但是 html 文件会变得更大。我们不再让组件的定义放在js当中，而是将组件的返回值内敛到一个`<script>`标签中。平均来说，我们仍然会发送更少的数据到网络，但是值得记住的是，服务端组件并不是完全免费的。我还要指出，html文件被分成了块并流式传输，所以浏览器可以快速绘制UI，而不必等待`<script>`标签中的所有内容
 
-如果你好奇看到服务端组件是如何序列化和发送到网络的，可以查看开发者Alvar Lagerlöf的[RSC devtools](/images/https://www.alvar.dev/blog/creating-devtools-for-react-server-components)
+如果你好奇看到服务端组件是如何序列化和发送到网络的，可以查看开发者Alvar Lagerlöf的[RSC devtools](https://www.alvar.dev/blog/creating-devtools-for-react-server-components)
 
 > 服务端组件的不要求一个服务器
 > **服务端组件不要求一个服务器**
