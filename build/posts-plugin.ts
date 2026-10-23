@@ -37,7 +37,7 @@ export interface PostIndexEntry {
 function socialImageFor(image: string): string | undefined {
   const png = image.replace(/\.(?:avif|webp)$/i, '.png')
   if (png === image) return image
-  return existsSync(resolve(process.cwd(), 'public', png.slice(1))) ? png : undefined
+  return existsSync(resolve(process.cwd(), 'content', png.replace(/^\//, ''))) ? png : undefined
 }
 
 export function readIndex(dir: string): PostIndexEntry[] {
@@ -47,7 +47,7 @@ export function readIndex(dir: string): PostIndexEntry[] {
       const source = readFileSync(resolve(dir, file), 'utf8')
       const frontmatter = parseFrontmatter(source)
       const slug = frontmatter.slug || basename(file, '.mdx')
-      // 作者可能在 Obsidian 里写成 `../../public/images/…`（预览能看），统一归一成站内路径。
+      // Obsidian 里写的是 `../images/…`（预览能看），统一归一成站点用的 `/images/…`。
       const image = [...source.matchAll(/!\[[^\]]*\]\(\s*([^)\s]+)/g)]
         .map((match) => siteImagePath(match[1]))
         .find((path) => path.startsWith('/images/'))

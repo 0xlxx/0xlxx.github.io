@@ -69,7 +69,7 @@ function postBody(post: PostIndexEntry): string {
     allowHtml: true,
     extensions: [math],
     highlighter: highlightCode,
-    // Obsidian 里写的 `../../public/images/…` 在站点里要变成 `/images/…`。
+    // Obsidian vault 里的 `../images/…` 在站点里要变成 `/images/…`。
     urlTransform: (url, kind, defaultUrl) => (kind === 'image' ? siteImagePath(url) : defaultUrl),
   })
 }

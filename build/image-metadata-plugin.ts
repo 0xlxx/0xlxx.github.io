@@ -21,7 +21,7 @@ function listPngFiles(dir: string): string[] {
 
 /** 给 Markdown 图片输出固有宽高，避免懒加载图片占零高度并提前触发下载。 */
 export function imageDimensions(): Plugin {
-  const imageDir = resolve(process.cwd(), 'public/images')
+  const imageDir = resolve(process.cwd(), 'content/images')
   return {
     name: 'blog:image-dimensions',
     resolveId(id) {
@@ -33,11 +33,13 @@ export function imageDimensions(): Plugin {
         listPngFiles(imageDir).flatMap((file) => {
           const size = pngDimensions(file)
           if (!size) return []
-          const url = `/images/${relative(imageDir, file).split(sep).join('/')}`
+          const relativePath = relative(imageDir, file).split(sep).join('/')
+          const url = `/images/${relativePath}`
           const entries: Array<[string, typeof size]> = [[url, size]]
+          // 同一张图的 webp/avif 版本复用 PNG 的尺寸，省去再解析一遍。
           for (const extension of ['webp', 'avif']) {
             const imageUrl = url.replace(/\.png$/i, `.${extension}`)
-            if (imageUrl !== url && existsSync(resolve(process.cwd(), 'public', imageUrl.slice(1)))) {
+            if (imageUrl !== url && existsSync(resolve(imageDir, relativePath.replace(/\.png$/i, `.${extension}`)))) {
               entries.push([imageUrl, size])
             }
           }

@@ -28,15 +28,15 @@ bun run typecheck  # tsc --noEmit
 bun run deploy     # 构建并发布到 Cloudflare
 bun run new "标题" # 新建文章脚手架（可加 --summary "摘要"）
 bun run plugin:build   # 构建 Obsidian 插件
-bun run plugin:install # 装进当前 vault（可传 vault 路径）
+bun run plugin:install # 装进 content/ vault（可传 vault 路径）
 ```
 
 ## 目录
 
 ```text
 build/            Vite 插件：文章索引（virtual:posts）与 sitemap / rss / robots
-content/posts/    文章源文件（.mdx，带 frontmatter）
-public/           静态资源（图片、_headers）
+content/          写作 vault：posts/ 文章源文件、images/ 文章图片
+public/           站点静态资源（favicon、og.jpg、_headers）
 obsidian-plugin/  Obsidian 插件源码与构建产物（main.js）
 src/
   app.tsx         站点外壳与路由分发
@@ -80,21 +80,21 @@ slug: 可选的-url-slug
 
 ### Obsidian 插件（推荐）
 
-插件在 `obsidian-plugin/`。把仓库当 vault 打开，然后：
+插件在 `obsidian-plugin/`。把 **`content/`** 当 vault 打开（只含文章与图片，代码不会出现在 Obsidian 里），然后：
 
 ```bash
 bun run plugin:build     # 生成 obsidian-plugin/main.js
-bun run plugin:install   # 装进当前仓库的 .obsidian/plugins/blog-author
+bun run plugin:install   # 自动装进 content/.obsidian/plugins/blog-author
 # 或 bun run plugin:install /path/to/vault
 ```
 
 在 Obsidian 的第三方插件里启用 **Blog Author** 后：
 
 - 命令面板 →「新建博客文章」：填标题/摘要，自动生成 `content/posts/<标题>.mdx` 并打开；
-- 正文里粘贴或拖入图片：存到 `public/images/<文章名>/`，光标处插入
-  `![](../../public/images/…)`，光标停在方括号里方便补 alt；
-- 相对路径在 Obsidian 里能直接预览，构建时由 `src/content/image-path.ts` 归一成
-  `/images/…`，站点侧无需改动。
+- 正文里粘贴或拖入图片：存到 `content/images/<文章名>/`，光标处插入
+  `![](../images/…)`，光标停在方括号里方便补 alt；
+- 相对路径在 Obsidian 里能直接预览；站点仍从 `/images/…` 提供图片，
+  由 `build/content-images.ts` 在开发时映射、构建时拷进 `dist/images`。
 
 `obsidian-plugin/main.js` 是构建产物，提交在仓库里方便直接安装；改插件后重新
 `bun run plugin:build`。

@@ -26,9 +26,10 @@ interface BlogAuthorSettings {
   imagesFolder: string
 }
 
+// vault 推荐直接指向仓库的 content/，所以这里用相对 vault 的路径。
 const DEFAULT_SETTINGS: BlogAuthorSettings = {
-  postsFolder: 'content/posts',
-  imagesFolder: 'public/images',
+  postsFolder: 'posts',
+  imagesFolder: 'images',
 }
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
@@ -272,7 +273,7 @@ class BlogAuthorSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('文章目录')
-      .setDesc('相对 vault 根目录，例如 content/posts。')
+      .setDesc('相对 vault 根目录。vault 指向 content/ 时就是 posts。')
       .addText((text) =>
         text.setValue(this.plugin.settings.postsFolder).onChange(async (value) => {
           this.plugin.settings.postsFolder = value.trim() || DEFAULT_SETTINGS.postsFolder
@@ -282,7 +283,7 @@ class BlogAuthorSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('图片目录')
-      .setDesc('相对 vault 根目录；构建时会映射成站点的 /images/。')
+      .setDesc('相对 vault 根目录。vault 指向 content/ 时就是 images；构建时映射成 /images/。')
       .addText((text) =>
         text.setValue(this.plugin.settings.imagesFolder).onChange(async (value) => {
           this.plugin.settings.imagesFolder = value.trim() || DEFAULT_SETTINGS.imagesFolder

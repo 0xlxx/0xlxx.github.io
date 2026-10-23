@@ -4,6 +4,7 @@ import { stylex } from '@octanejs/stylex/vite'
 import { knownAttributeSpreads } from '@octanejs/stylex/compiler/contract'
 import { posts } from './build/posts-plugin.ts'
 import { imageDimensions } from './build/image-metadata-plugin.ts'
+import { contentImages } from './build/content-images.ts'
 import { siteMetadata } from './build/site-plugin.ts'
 
 export default defineConfig({
@@ -19,6 +20,7 @@ export default defineConfig({
     octane({ knownAttributeSpreads }),
     stylex({ useCSSLayers: true }),
     posts(),
+    contentImages(),
     imageDimensions(),
     siteMetadata(),
   ],

@@ -17,12 +17,13 @@
 - `src/site.ts`：站点级常量（域名、标题、描述），构建期脚本与运行时共用。
 - `src/components/`：共享组件；`src/routes/`：页面（home / blog / post / about / not-found）。
 - `src/content/posts.ts`：`virtual:posts` 索引 + 正文懒加载；`post-template.ts`：新文章文件名与
-  frontmatter（CLI 与 Obsidian 插件共用）；`image-path.ts`：`public/images/…` → `/images/…` 归一。
+  frontmatter（CLI 与 Obsidian 插件共用）；`image-path.ts`：`../images/…`（兼容 `public/images/…`）→ `/images/…` 归一。
 - `obsidian-plugin/`：写作插件（新建文章、粘贴图片落盘），`main.js` 为构建产物。
+- `build/content-images.ts`：开发时把 `/images/*` 映射到 `content/images`，构建时拷进 `dist/images`。
 - `src/markdown/`：markdown 扩展（`math.ts`）与 KaTeX 适配层（`katex.ts`）。
 - `src/styles/`：`tokens.css`（design token）、`global.css`（reset + 全局规则）、`prose.css`（正文排版）。
 - `build/`：Vite 插件——`posts-plugin.ts` 生成文章索引，`site-plugin.ts` 生成 sitemap / rss / robots。
-- `content/posts/`：文章源文件（`.mdx`）；`public/`：静态资源。
+- `content/`：Obsidian vault——`posts/` 文章源文件（`.mdx`）、`images/` 文章配图；`public/`：站点静态资源。
 
 #### 构建、测试和发展命令
 
@@ -34,7 +35,7 @@
 - `bun run typecheck`：运行 `tsc --noEmit`。
 - `bun run deploy`：构建并发布到 Cloudflare Workers Static Assets。
 - `bun run new "标题" [--summary "…"]`：新建文章脚手架。
-- `bun run plugin:build` / `plugin:install [vault]`：构建 Obsidian 插件并装进 vault。
+- `bun run plugin:build` / `plugin:install [vault]`：构建并安装 Obsidian 插件（默认装进 `content/`）。
 
 #### 部署
 
@@ -59,9 +60,11 @@
 
 - 新文章的文件名与 frontmatter 只在 `src/content/post-template.ts` 定义；CLI（`scripts/new-post.ts`）
   与 Obsidian 插件都调用它，不要各写一份。
-- Obsidian 里粘贴的图片存到 `public/images/<文章名>/`，正文用相对路径
-  `../../public/images/…`（预览可用）；构建时由 `src/content/image-path.ts` 统一归一为
-  `/images/…`，文章首图、og:image 和 `<noscript>` 回退都走这条规则。
+- Obsidian vault 只覆盖 `content/`：文章在 `content/posts/`，图片在 `content/images/<文章名>/`，
+  正文用相对路径 `../images/…`（预览可用）。站点仍从 `/images/…` 提供图片：开发时由
+  `build/content-images.ts` 中间件映射，构建时拷进 `dist/images`。
+- 构建期由 `src/content/image-path.ts` 把 `../images/…` 归一为 `/images/…`，文章首图、
+  og:image 和 `<noscript>` 回退都走这条规则。
 
 #### 编码风格与命名约定
 

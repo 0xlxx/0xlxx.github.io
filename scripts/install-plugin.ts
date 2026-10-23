@@ -7,7 +7,11 @@
 import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-const vault = resolve(process.argv[2] ?? process.cwd())
+// 没传参数时优先装进 content/（推荐的写作 vault），否则装进当前目录。
+const fallback = existsSync(resolve(process.cwd(), 'content/.obsidian'))
+  ? resolve(process.cwd(), 'content')
+  : process.cwd()
+const vault = resolve(process.argv[2] ?? fallback)
 if (!existsSync(resolve(vault, '.obsidian'))) {
   console.error(`不是 Obsidian vault（缺少 .obsidian/）：${vault}`)
   process.exit(1)
