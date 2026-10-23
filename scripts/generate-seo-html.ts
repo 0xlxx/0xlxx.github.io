@@ -96,7 +96,7 @@ function homeFallback(): string {
           .join('')}</ul>`,
     )
     .join('')
-  return `<h1>${escapeHtml(SITE_TITLE)}</h1>${sections}`
+  return `<h1>想法</h1>${sections}`
 }
 
 function aboutFallback(): string {
