@@ -37,8 +37,5 @@ yarn-error.log*
 .dev.vars*
 !.dev.vars.example
 
-# Obsidian vault 状态（把仓库当 vault 用时）
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
-.obsidian/cache
-.obsidian/plugins/blog-author
+# Obsidian vault 配置（本地状态，不入库）
+.obsidian/
