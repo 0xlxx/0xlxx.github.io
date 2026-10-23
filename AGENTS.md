@@ -16,7 +16,9 @@
   `src/head.ts`：把元数据写进 `<head>`。
 - `src/site.ts`：站点级常量（域名、标题、描述），构建期脚本与运行时共用。
 - `src/components/`：共享组件；`src/routes/`：页面（home / blog / post / about / not-found）。
-- `src/content/posts.ts`：`virtual:posts` 索引 + 正文懒加载。
+- `src/content/posts.ts`：`virtual:posts` 索引 + 正文懒加载；`post-template.ts`：新文章文件名与
+  frontmatter（CLI 与 Obsidian 插件共用）；`image-path.ts`：`public/images/…` → `/images/…` 归一。
+- `obsidian-plugin/`：写作插件（新建文章、粘贴图片落盘），`main.js` 为构建产物。
 - `src/markdown/`：markdown 扩展（`math.ts`）与 KaTeX 适配层（`katex.ts`）。
 - `src/styles/`：`tokens.css`（design token）、`global.css`（reset + 全局规则）、`prose.css`（正文排版）。
 - `build/`：Vite 插件——`posts-plugin.ts` 生成文章索引，`site-plugin.ts` 生成 sitemap / rss / robots。
@@ -31,6 +33,8 @@
 - `bun run preview`：本地预览构建产物。
 - `bun run typecheck`：运行 `tsc --noEmit`。
 - `bun run deploy`：构建并发布到 Cloudflare Workers Static Assets。
+- `bun run new "标题" [--summary "…"]`：新建文章脚手架。
+- `bun run plugin:build` / `plugin:install [vault]`：构建 Obsidian 插件并装进 vault。
 
 #### 部署
 
@@ -50,6 +54,14 @@
 - og:image 优先用正文首图的同名 PNG（社交平台不认 AVIF），否则用 `/og.jpg`。
 - 每个页面在 `<noscript>` 里带构建期渲染的正文与链接，供无 JS 读者/爬虫；含公式的页面
   在 head 里用 `<noscript>` 样式表加载 KaTeX，脚本启用时不会产生额外请求。
+
+#### 写作工具链
+
+- 新文章的文件名与 frontmatter 只在 `src/content/post-template.ts` 定义；CLI（`scripts/new-post.ts`）
+  与 Obsidian 插件都调用它，不要各写一份。
+- Obsidian 里粘贴的图片存到 `public/images/<文章名>/`，正文用相对路径
+  `../../public/images/…`（预览可用）；构建时由 `src/content/image-path.ts` 统一归一为
+  `/images/…`，文章首图、og:image 和 `<noscript>` 回退都走这条规则。
 
 #### 编码风格与命名约定
 

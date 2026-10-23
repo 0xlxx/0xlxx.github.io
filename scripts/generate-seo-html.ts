@@ -14,6 +14,7 @@ import { dirname, resolve } from 'node:path'
 import { renderHtml } from '@tanstack/markdown/html'
 import katex from 'katex'
 import { readIndex, type PostIndexEntry } from '../build/posts-plugin.ts'
+import { siteImagePath } from '../src/content/image-path.ts'
 import { PROJECTS } from '../src/content/projects.ts'
 import { highlightCode } from '../src/markdown/highlight.ts'
 import { createMathExtension } from '../src/markdown/math.ts'
@@ -68,6 +69,8 @@ function postBody(post: PostIndexEntry): string {
     allowHtml: true,
     extensions: [math],
     highlighter: highlightCode,
+    // Obsidian 里写的 `../../public/images/…` 在站点里要变成 `/images/…`。
+    urlTransform: (url, kind, defaultUrl) => (kind === 'image' ? siteImagePath(url) : defaultUrl),
   })
 }
 

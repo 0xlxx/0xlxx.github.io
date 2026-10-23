@@ -26,6 +26,9 @@ bun run build:pages # 构建 GitHub Pages 版本（路由写成目录下的 inde
 bun run preview    # 预览构建产物
 bun run typecheck  # tsc --noEmit
 bun run deploy     # 构建并发布到 Cloudflare
+bun run new "标题" # 新建文章脚手架（可加 --summary "摘要"）
+bun run plugin:build   # 构建 Obsidian 插件
+bun run plugin:install # 装进当前 vault（可传 vault 路径）
 ```
 
 ## 目录
@@ -34,6 +37,7 @@ bun run deploy     # 构建并发布到 Cloudflare
 build/            Vite 插件：文章索引（virtual:posts）与 sitemap / rss / robots
 content/posts/    文章源文件（.mdx，带 frontmatter）
 public/           静态资源（图片、_headers）
+obsidian-plugin/  Obsidian 插件源码与构建产物（main.js）
 src/
   app.tsx         站点外壳与路由分发
   router.ts       pushState 路由
@@ -44,14 +48,20 @@ src/
   site.ts         站点级常量（域名、标题、描述）
   components/     共享组件
   routes/         home / blog / post / about / not-found
-  content/        virtual:posts 索引 + 正文懒加载
+  content/        virtual:posts 索引、项目数据、模板与图片路径规则
   markdown/       markdown 公式扩展与 KaTeX 适配层
   styles/         design token、reset、正文排版
 ```
 
 ## 写新文章
 
-在 `content/posts/` 新建 `.mdx`：
+三种方式，frontmatter 与文件名规则只在 `src/content/post-template.ts` 实现一次：
+
+```bash
+bun run new "文章标题" --summary "列表页显示的一句话摘要"
+```
+
+也可以在 Obsidian 里用插件（见下），或手写文件：
 
 ```md
 ---
@@ -67,6 +77,27 @@ slug: 可选的-url-slug
 `slug` 缺省时用文件名。文章索引在构建期生成，正文在打开文章时才下载。
 
 公式支持行内 `$…$` 与块级 `$$…$$`：KaTeX 只在文章真的含公式时才会被加载。
+
+### Obsidian 插件（推荐）
+
+插件在 `obsidian-plugin/`。把仓库当 vault 打开，然后：
+
+```bash
+bun run plugin:build     # 生成 obsidian-plugin/main.js
+bun run plugin:install   # 装进当前仓库的 .obsidian/plugins/blog-author
+# 或 bun run plugin:install /path/to/vault
+```
+
+在 Obsidian 的第三方插件里启用 **Blog Author** 后：
+
+- 命令面板 →「新建博客文章」：填标题/摘要，自动生成 `content/posts/<标题>.mdx` 并打开；
+- 正文里粘贴或拖入图片：存到 `public/images/<文章名>/`，光标处插入
+  `![](../../public/images/…)`，光标停在方括号里方便补 alt；
+- 相对路径在 Obsidian 里能直接预览，构建时由 `src/content/image-path.ts` 归一成
+  `/images/…`，站点侧无需改动。
+
+`obsidian-plugin/main.js` 是构建产物，提交在仓库里方便直接安装；改插件后重新
+`bun run plugin:build`。
 
 ## 改设计
 

@@ -8,7 +8,11 @@
     "build:pages": "vite build && bun scripts/generate-seo-html.ts pages",
     "preview": "vite preview",
     "deploy": "bun run build && wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "new": "bun scripts/new-post.ts",
+    "plugin:build": "bun build obsidian-plugin/src/main.ts --format=cjs --outfile=obsidian-plugin/main.js --external=obsidian --target=node --minify",
+    "plugin:typecheck": "tsc -p obsidian-plugin/tsconfig.json --noEmit",
+    "plugin:install": "bun scripts/install-plugin.ts"
   },
   "dependencies": {
     "@octanejs/stylex": "^0.1.64",
@@ -21,6 +25,7 @@
   "devDependencies": {
     "@tsrx/oxc": "0.20.0",
     "@types/node": "^26.6.5",
+    "obsidian": "^1.14.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",

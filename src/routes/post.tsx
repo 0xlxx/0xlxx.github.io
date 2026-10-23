@@ -4,6 +4,7 @@ import type { CodeHighlighter } from '@tanstack/markdown'
 import { renderMarkdownOctane } from '@tanstack/markdown/octane'
 import { Link } from '../components/link'
 import { postBySlug } from '../content/posts'
+import { siteImagePath } from '../content/image-path'
 import { imageDimensions } from 'virtual:image-dimensions'
 import { hasCode, hasMath } from '../markdown/detect'
 import { createMathExtension, type MathRenderer } from '../markdown/math'
@@ -56,10 +57,11 @@ const s = stylex.create({
  * 免得它们一上来就和正文抢带宽、拖慢 LCP。
  */
 function PostImage(props: { src?: string; alt?: string; title?: string; eager?: boolean }) {
-  const dimensions = props.src ? imageDimensions[props.src] : undefined
+  const src = props.src ? siteImagePath(props.src) : undefined
+  const dimensions = src ? imageDimensions[src] : undefined
   return (
     <img
-      src={props.src}
+      src={src}
       alt={props.alt ?? ''}
       width={dimensions?.width}
       height={dimensions?.height}

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, extname, resolve } from 'node:path'
 import type { Plugin } from 'vite'
+import { siteImagePath } from '../src/content/image-path.ts'
 
 const VIRTUAL_ID = 'virtual:posts'
 const RESOLVED_ID = '\0' + VIRTUAL_ID
@@ -46,7 +47,10 @@ export function readIndex(dir: string): PostIndexEntry[] {
       const source = readFileSync(resolve(dir, file), 'utf8')
       const frontmatter = parseFrontmatter(source)
       const slug = frontmatter.slug || basename(file, '.mdx')
-      const image = /!\[[^\]]*\]\(\s*(\/images\/[^\s)>]+)/.exec(source)?.[1]
+      // 作者可能在 Obsidian 里写成 `../../public/images/…`（预览能看），统一归一成站内路径。
+      const image = [...source.matchAll(/!\[[^\]]*\]\(\s*([^)\s]+)/g)]
+        .map((match) => siteImagePath(match[1]))
+        .find((path) => path.startsWith('/images/'))
       const socialImage = image ? socialImageFor(image) : undefined
       return {
         slug,
