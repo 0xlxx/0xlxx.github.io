@@ -22,7 +22,7 @@
 ```bash
 bun run dev        # 开发服务器（Vite，默认 http://localhost:5173）
 bun run build      # 生产构建，产物在 dist/，并写出 sitemap.xml / rss.xml / robots.txt
-bun run build:pages # 构建 GitHub Pages 版本（同一份产物，附带 404.html 回退）
+bun run build:pages # 构建 GitHub Pages 版本（路由写成目录下的 index.html）
 bun run preview    # 预览构建产物
 bun run typecheck  # tsc --noEmit
 bun run deploy     # 构建并发布到 Cloudflare
@@ -39,7 +39,8 @@ src/
   router.ts       pushState 路由
   store.ts        useSyncExternalStore 状态容器
   theme.ts        明暗主题
-  head.ts         客户端同步 title / canonical / og
+  seo.ts          页面级 SEO 元数据（标题、canonical、og、JSON-LD），运行时与构建期共用
+  head.ts         客户端把 seo.ts 的取值写进 <head>
   site.ts         站点级常量（域名、标题、描述）
   components/     共享组件
   routes/         home / blog / post / about / not-found
@@ -76,10 +77,20 @@ slug: 可选的-url-slug
 
 两个目标共用同一份代码、同一份构建：
 
-- **Cloudflare Workers**（<https://bjorn.men>）：`bun run deploy` 会先 `vite build`，再把 `dist/`
-  作为 Workers Static Assets 发布；未命中的路径回退到 `index.html`（路由在客户端），见
-  `wrangler.jsonc`。
+- **Cloudflare Workers**（<https://bjorn.men>）：`bun run deploy` 会先构建，再把 `dist/` 作为
+  Workers Static Assets 发布。每个已知路由都有一份带独立 head 的 HTML（`about.html` 等，
+  Workers 会把它服务在 `/about` 上）；未命中的路径返回 `404.html`，不再把未知地址伪装成首页，
+  见 `wrangler.jsonc`。
 - **GitHub Pages**（<https://0xlxx.github.io/>）：仓库名 `0xlxx.github.io` 是账号的用户站，所以
   Pages 挂在根路径。推送到 `main` 后由 `.github/workflows/pages.yml` 执行 `bun run build:pages`
-  并发布。Pages 没有服务端回退，所以该命令会为已知路由（`/about`、`/blog/<slug>` 等）各写一份
-  `index.html` 让深链接返回 200，未知路径才落到 `404.html`。
+  并发布；Pages 只认目录，所以同一批路由写成 `<route>/index.html`，未知路径落到 `404.html`。
+
+## SEO
+
+- 每个路由的标题、描述、canonical、Open Graph / Twitter 卡片和 JSON-LD 都由 `src/seo.ts`
+  生成：构建期写进静态 HTML（`scripts/generate-seo-html.ts`），客户端换页时由 `src/head.ts`
+  同步，爬虫与分享预览拿到的都是当前页面的值。
+- canonical 统一指向 `https://bjorn.men`，GitHub Pages 作为镜像不与自己竞争排名；404 页带
+  `noindex` 且不输出 canonical。
+- 文章有配图时 og:image 用同名的 PNG（社交平台不认 AVIF），没有配图则用 `/og.jpg`。
+- `sitemap.xml` 带 `<lastmod>` 与图片条目，`robots.txt` 指向它；`rss.xml` 供订阅。

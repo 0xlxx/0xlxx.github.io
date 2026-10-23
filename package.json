@@ -4,10 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:pages": "vite build && bun scripts/prepare-pages.ts",
+    "build": "vite build && bun scripts/generate-seo-html.ts",
+    "build:pages": "vite build && bun scripts/generate-seo-html.ts pages",
     "preview": "vite preview",
-    "deploy": "vite build && wrangler deploy",
+    "deploy": "bun run build && wrangler deploy",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

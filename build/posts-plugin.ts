@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, extname, resolve } from 'node:path'
 import type { Plugin } from 'vite'
 
@@ -24,7 +24,19 @@ export interface PostIndexEntry {
   date: string
   summary: string
   image?: string
+  /** 社交平台不认 AVIF，有同名 PNG 时用它做 og:image。 */
+  socialImage?: string
   modulePath: string
+}
+
+/**
+ * 正文首图现在多是 AVIF，分享卡片却只被 WebP/JPEG/PNG 支持。
+ * 转换时保留的同名 PNG 正好可以复用；没有就交给页面的默认预览图。
+ */
+function socialImageFor(image: string): string | undefined {
+  const png = image.replace(/\.(?:avif|webp)$/i, '.png')
+  if (png === image) return image
+  return existsSync(resolve(process.cwd(), 'public', png.slice(1))) ? png : undefined
 }
 
 export function readIndex(dir: string): PostIndexEntry[] {
@@ -35,12 +47,14 @@ export function readIndex(dir: string): PostIndexEntry[] {
       const frontmatter = parseFrontmatter(source)
       const slug = frontmatter.slug || basename(file, '.mdx')
       const image = /!\[[^\]]*\]\(\s*(\/images\/[^\s)>]+)/.exec(source)?.[1]
+      const socialImage = image ? socialImageFor(image) : undefined
       return {
         slug,
         title: frontmatter.title || slug,
         date: frontmatter.publishedAt || '',
         summary: frontmatter.summary || '',
         ...(image ? { image } : {}),
+        ...(socialImage ? { socialImage } : {}),
         modulePath: `/content/posts/${file}`,
       }
     })

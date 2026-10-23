@@ -6,15 +6,24 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#fdfdfd" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/images/icon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/images/icon.png" />
+    <!--
+      SEO 占位块：构建期由 scripts/generate-seo-html.ts 按路由整块替换成
+      对应页面的 title / description / canonical / og / twitter / JSON-LD。
+      开发服务器里用下面这份首页默认值，运行时再由 src/head.ts 同步。
+    -->
+    <!--seo:start-->
     <title>Bjorn Li</title>
-    <meta name="description" content="一个程序员" />
+    <meta name="description" content="写点关于前端工程、渲染管线与系统设计的笔记。" />
     <link rel="canonical" href="https://bjorn.men/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Bjorn Li" />
     <meta property="og:title" content="Bjorn Li" />
-    <meta property="og:description" content="一个程序员" />
+    <meta property="og:description" content="写点关于前端工程、渲染管线与系统设计的笔记。" />
     <meta property="og:url" content="https://bjorn.men/" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!--seo:end-->
     <link rel="alternate" type="application/rss+xml" title="Bjorn Li" href="/rss.xml" />
     <script>
       ;(() => {

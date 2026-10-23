@@ -3,9 +3,10 @@
   "name": "bjorn-blog",
   "compatibility_date": "2026-05-11",
   // 纯静态站点：把 vite build 的产物直接当作 Workers Static Assets 发布。
-  // 路由是客户端 pushState，未命中的路径交回 index.html（SPA 回退）。
+  // 每个已知路由都有独立 HTML（构建期生成），未命中的路径交给 404.html：
+  // 不再把所有未知地址都变成 200 的首页副本，避免软 404 被收录。
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "404-page"
   }
 }

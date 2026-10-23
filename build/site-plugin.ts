@@ -23,19 +23,27 @@ function escapeXml(value: string): string {
 
 function buildSitemap(posts: ReturnType<typeof readIndex>): string {
   const latest = posts[0]?.date
-  const entries = [
+  const entries: Array<{ loc: string; lastmod?: string; image?: string }> = [
     { loc: `${SITE_URL}/`, lastmod: latest },
     { loc: `${SITE_URL}/projects` },
     { loc: `${SITE_URL}/about` },
-    ...posts.map((post) => ({ loc: postUrl(post.slug), lastmod: post.date })),
+    ...posts.map((post) => ({
+      loc: postUrl(post.slug),
+      lastmod: post.date,
+      image: post.socialImage ?? post.image,
+    })),
   ]
   const body = entries
     .map((entry) => {
       const lastmod = entry.lastmod ? `\n    <lastmod>${escapeXml(entry.lastmod)}</lastmod>` : ''
-      return `  <url>\n    <loc>${escapeXml(entry.loc)}</loc>${lastmod}\n  </url>`
+      // 图片条目让搜索引擎知道文章配图的正式地址，而不只是正文里的 <img>。
+      const image = entry.image
+        ? `\n    <image:image>\n      <image:loc>${escapeXml(`${SITE_URL}${entry.image}`)}</image:loc>\n    </image:image>`
+        : ''
+      return `  <url>\n    <loc>${escapeXml(entry.loc)}</loc>${lastmod}${image}\n  </url>`
     })
     .join('\n')
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${body}\n</urlset>\n`
 }
 
 function buildRss(posts: ReturnType<typeof readIndex>): string {

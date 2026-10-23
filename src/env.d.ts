@@ -8,6 +8,8 @@ declare module 'virtual:posts' {
     date: string
     summary: string
     image?: string
+    /** 分享卡片用的图：AVIF 的 PNG 同名副本，没有则不写。 */
+    socialImage?: string
     modulePath: string
   }
 

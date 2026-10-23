@@ -9,7 +9,14 @@ import {
 } from 'octane'
 import { Link } from './components/link'
 import { postBySlug } from './content/posts'
-import { syncDocumentMeta } from './head'
+import { applySeo } from './head'
+import {
+  ABOUT_DESCRIPTION,
+  HOME_DESCRIPTION,
+  NOT_FOUND_DESCRIPTION,
+  PROJECTS_DESCRIPTION,
+  pageSeo,
+} from './seo'
 import {
   acknowledgeRouteCommit,
   matchSegment,
@@ -226,19 +233,19 @@ export function App() {
   let title = SITE_TITLE
   let description = SITE_DESCRIPTION
   if (home) {
-    description = '写点关于前端工程、渲染管线与系统设计的笔记。'
+    description = HOME_DESCRIPTION
   } else if (post && slug) {
     title = post.title
     description = post.summary
   } else if (path === '/projects') {
     title = '项目'
-    description = '做过的一些东西。'
+    description = PROJECTS_DESCRIPTION
   } else if (path === '/about') {
     title = '关于'
-    description = '程序员，对程序开发、交互设计和创意编程有广泛兴趣。'
+    description = ABOUT_DESCRIPTION
   } else {
     title = '页面不存在'
-    description = '链接可能失效了，或者这个想法还没写。'
+    description = NOT_FOUND_DESCRIPTION
   }
 
   /*
@@ -293,8 +300,23 @@ export function App() {
   // 客户端路由切换后同步 head，保证分享/收藏拿到的是当前页面。
   // 列表页有两种写法（/ 与 /blog），canonical 统一收敛到 /。
   useEffect(() => {
-    syncDocumentMeta(title, description, home ? '/' : path)
-  }, [path, home, title, description])
+    applySeo(
+      pageSeo({
+        path: home ? '/' : path,
+        title,
+        description,
+        ...(post
+          ? {
+              image: post.socialImage ?? post.image,
+              type: 'article',
+              publishedAt: post.date,
+            }
+          : {}),
+        ...(pageRoute === 'notFound' ? { noindex: true } : {}),
+      }),
+    )
+    // 文章的配图与日期决定分享卡片，单独列进依赖，避免整篇正文变化时重跑。
+  }, [path, home, title, description, pageRoute, post?.image, post?.socialImage, post?.date])
 
   // 偏好为「跟随系统」时，系统在明暗之间切换要即时反映到页面。
   useEffect(() => watchSystemTheme(), [])
