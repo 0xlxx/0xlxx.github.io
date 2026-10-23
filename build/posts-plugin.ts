@@ -42,17 +42,19 @@ function socialImageFor(image: string): string | undefined {
 
 export function readIndex(dir: string): PostIndexEntry[] {
   return readdirSync(dir)
-    .filter((file) => extname(file) === '.mdx')
-    .map((file) => {
+    .filter((file) => ['.md', '.mdx'].includes(extname(file)))
+    .flatMap<PostIndexEntry>((file) => {
       const source = readFileSync(resolve(dir, file), 'utf8')
       const frontmatter = parseFrontmatter(source)
-      const slug = frontmatter.slug || basename(file, '.mdx')
+      // 草稿留在仓库里但不进索引，因此不会出现在列表、RSS、sitemap 和静态路由里。
+      if (frontmatter.draft === 'true') return []
+      const slug = frontmatter.slug || basename(file, extname(file))
       // Obsidian 里写的是 `../images/…`（预览能看），统一归一成站点用的 `/images/…`。
       const image = [...source.matchAll(/!\[[^\]]*\]\(\s*([^)\s]+)/g)]
         .map((match) => siteImagePath(match[1]))
         .find((path) => path.startsWith('/images/'))
       const socialImage = image ? socialImageFor(image) : undefined
-      return {
+      return [{
         slug,
         title: frontmatter.title || slug,
         date: frontmatter.publishedAt || '',
@@ -60,7 +62,7 @@ export function readIndex(dir: string): PostIndexEntry[] {
         ...(image ? { image } : {}),
         ...(socialImage ? { socialImage } : {}),
         modulePath: `/content/posts/${file}`,
-      }
+      }]
     })
     .sort((a, b) => b.date.localeCompare(a.date))
 }
@@ -111,7 +113,7 @@ export function posts(dir = 'content/posts'): Plugin {
         for (const post of posts) {
           const file = post.modulePath.split('/').at(-1)
           if (!file) continue
-          const base = file.replace(/\.mdx$/, '')
+          const base = file.replace(/\.(md|mdx)$/, '')
           const bodyChunk = findChunk(`/content/posts/${file}`, base)
           addChunks(routePath(post.slug), [
             postRouteChunk ? `/${postRouteChunk.fileName}` : undefined,

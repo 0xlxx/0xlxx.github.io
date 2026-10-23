@@ -10,7 +10,7 @@ export function postFileName(title: string): string {
     .replace(/\s+/g, ' ')
     .replace(/^[.\s]+|[.\s]+$/g, '')
     .slice(0, 80)
-  return `${name || '未命名'}.mdx`
+  return `${name || '未命名'}.md`
 }
 
 /**

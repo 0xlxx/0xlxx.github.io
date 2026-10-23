@@ -1,7 +1,7 @@
 {
   "id": "blog-author",
   "name": "Blog Author",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.5.0",
   "description": "新建博客文章，并把粘贴/拖入的图片放进 public/images，插入站点能用的链接。",
   "author": "Bjorn Li",

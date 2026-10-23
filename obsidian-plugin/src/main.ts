@@ -66,6 +66,8 @@ export default class BlogAuthorPlugin extends Plugin {
   settings: BlogAuthorSettings = { ...DEFAULT_SETTINGS }
 
   async onload(): Promise<void> {
+    // 兼容遗留的 .mdx：注册后这类文件也能按 Markdown 打开，而不是交给系统处理。
+    this.registerExtensions(['mdx'], 'markdown')
     await this.loadSettings()
     this.addSettingTab(new BlogAuthorSettingTab(this.app, this))
 
@@ -100,10 +102,10 @@ export default class BlogAuthorPlugin extends Plugin {
     const folder = normalizePath(this.settings.postsFolder)
     await this.ensureFolder(folder)
 
-    const base = postFileName(input.title).replace(/\.mdx$/, '')
-    let path = normalizePath(`${folder}/${base}.mdx`)
+    const base = postFileName(input.title).replace(/\.md$/, '')
+    let path = normalizePath(`${folder}/${base}.md`)
     for (let index = 2; this.app.vault.getAbstractFileByPath(path); index++) {
-      path = normalizePath(`${folder}/${base}-${index}.mdx`)
+      path = normalizePath(`${folder}/${base}-${index}.md`)
     }
 
     try {

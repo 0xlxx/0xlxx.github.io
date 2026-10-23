@@ -5,7 +5,7 @@ export interface Post extends PostMeta {
   load: () => Promise<string>
 }
 
-const loaders = import.meta.glob<string>('/content/posts/*.mdx', {
+const loaders = import.meta.glob<string>('/content/posts/*.{md,mdx}', {
   query: '?raw',
   import: 'default',
 })

@@ -32,10 +32,10 @@ const postsDir = resolve('content/posts')
 mkdirSync(postsDir, { recursive: true })
 
 const fileName = postFileName(title)
-const base = fileName.replace(/\.mdx$/, '')
+const base = fileName.replace(/\.md$/, '')
 let file = resolve(postsDir, fileName)
 for (let index = 2; existsSync(file); index++) {
-  file = resolve(postsDir, `${base}-${index}.mdx`)
+  file = resolve(postsDir, `${base}-${index}.md`)
 }
 
 mkdirSync(dirname(file), { recursive: true })

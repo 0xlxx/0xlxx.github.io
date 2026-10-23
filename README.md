@@ -75,6 +75,7 @@ slug: 可选的-url-slug
 ```
 
 `slug` 缺省时用文件名。文章索引在构建期生成，正文在打开文章时才下载。
+加 `draft: true` 可以让稿子留在仓库里但不发布（不进列表、RSS、sitemap 和静态路由）。
 
 公式支持行内 `$…$` 与块级 `$$…$$`：KaTeX 只在文章真的含公式时才会被加载。
 
@@ -90,7 +91,7 @@ bun run plugin:install   # 自动装进 content/.obsidian/plugins/blog-author
 
 在 Obsidian 的第三方插件里启用 **Blog Author** 后：
 
-- 命令面板 →「新建博客文章」：填标题/摘要，自动生成 `content/posts/<标题>.mdx` 并打开；
+- 命令面板 →「新建博客文章」：填标题/摘要，自动生成 `content/posts/<标题>.md` 并打开；
 - 正文里粘贴或拖入图片：存到 `content/images/<文章名>/`，光标处插入
   `![](../images/…)`，光标停在方括号里方便补 alt；
 - 相对路径在 Obsidian 里能直接预览；站点仍从 `/images/…` 提供图片，

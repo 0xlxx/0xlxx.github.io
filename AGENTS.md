@@ -23,7 +23,7 @@
 - `src/markdown/`：markdown 扩展（`math.ts`）与 KaTeX 适配层（`katex.ts`）。
 - `src/styles/`：`tokens.css`（design token）、`global.css`（reset + 全局规则）、`prose.css`（正文排版）。
 - `build/`：Vite 插件——`posts-plugin.ts` 生成文章索引，`site-plugin.ts` 生成 sitemap / rss / robots。
-- `content/`：Obsidian vault——`posts/` 文章源文件（`.mdx`）、`images/` 文章配图；`public/`：站点静态资源。
+- `content/`：Obsidian vault——`posts/` 文章源文件（`.md`，兼容 `.mdx`）、`images/` 文章配图；`public/`：站点静态资源。
 
 #### 构建、测试和发展命令
 
@@ -63,6 +63,7 @@
 - Obsidian vault 只覆盖 `content/`：文章在 `content/posts/`，图片在 `content/images/<文章名>/`，
   正文用相对路径 `../images/…`（预览可用）。站点仍从 `/images/…` 提供图片：开发时由
   `build/content-images.ts` 中间件映射，构建时拷进 `dist/images`。
+- `draft: 'true'` 的文章会被 `readIndex` 过滤，草稿不进入列表、RSS、sitemap 与静态路由。
 - 构建期由 `src/content/image-path.ts` 把 `../images/…` 归一为 `/images/…`，文章首图、
   og:image 和 `<noscript>` 回退都走这条规则。
 
