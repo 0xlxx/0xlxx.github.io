@@ -90,6 +90,9 @@ slug: 可选的-url-slug
 - 每个路由的标题、描述、canonical、Open Graph / Twitter 卡片和 JSON-LD 都由 `src/seo.ts`
   生成：构建期写进静态 HTML（`scripts/generate-seo-html.ts`），客户端换页时由 `src/head.ts`
   同步，爬虫与分享预览拿到的都是当前页面的值。
+- 每个页面在 `<noscript>` 里带一份构建期渲染的正文与站内链接（同样的 Markdown 扩展，
+  公式与代码高亮都在构建期完成），不执行 JS 的读者和爬虫也能读到内容；含公式的页面会在
+  head 里用一个 `<noscript>` 样式表按需加载 KaTeX，启用脚本时不会多请求。
 - canonical 统一指向 `https://bjorn.men`，GitHub Pages 作为镜像不与自己竞争排名；404 页带
   `noindex` 且不输出 canonical。
 - 文章有配图时 og:image 用同名的 PNG（社交平台不认 AVIF），没有配图则用 `/og.jpg`。

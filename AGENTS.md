@@ -48,6 +48,8 @@
 - 404 页带 `noindex` 且不输出 canonical；Cloudflare 用 `not_found_handling: "404-page"`，
   避免未知路径返回 200 的软 404。
 - og:image 优先用正文首图的同名 PNG（社交平台不认 AVIF），否则用 `/og.jpg`。
+- 每个页面在 `<noscript>` 里带构建期渲染的正文与链接，供无 JS 读者/爬虫；含公式的页面
+  在 head 里用 `<noscript>` 样式表加载 KaTeX，脚本启用时不会产生额外请求。
 
 #### 编码风格与命名约定
 

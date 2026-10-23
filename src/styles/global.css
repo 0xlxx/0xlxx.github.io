@@ -85,6 +85,24 @@
     border-radius: 4px;
   }
 
+  /*
+   * 禁用 JavaScript 时显示的静态回退（构建期生成在 <noscript> 里）。
+   * 启用脚本时浏览器根本不渲染它，所以这些规则只影响无 JS 读者与爬虫看到的页面。
+   */
+  noscript {
+    display: block;
+    max-inline-size: var(--measure);
+    margin-inline: auto;
+    padding: var(--space-l) var(--gutter) var(--space-2xl);
+  }
+
+  noscript nav {
+    margin-block-end: var(--space-l);
+    font-family: var(--font-mono);
+    font-size: var(--text-s);
+    color: var(--color-fg-muted);
+  }
+
   ::selection {
     background: color-mix(in oklab, var(--color-accent) 26%, transparent);
   }

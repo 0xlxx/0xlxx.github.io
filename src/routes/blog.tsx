@@ -27,7 +27,7 @@ const s = stylex.create({
     fontSize: 'var(--text-s)',
     /* 提掉 h2 默认的 700——目录里年份只是轻量的分组标签。 */
     fontWeight: 400,
-    color: 'var(--color-fg-subtle)',
+    color: 'var(--color-fg-muted)',
     letterSpacing: '0.08em',
   },
   list: {
@@ -59,7 +59,7 @@ const s = stylex.create({
     flex: '0 0 auto',
     fontFamily: 'var(--font-mono)',
     fontSize: 'var(--text-xs)',
-    color: 'var(--color-fg-subtle)',
+    color: 'var(--color-fg-muted)',
   },
   postTitle: {
     flex: '0 1 auto',

@@ -29,7 +29,7 @@ const s = stylex.create({
     fontFamily: 'var(--font-mono)',
     fontSize: 'var(--text-xs)',
     letterSpacing: '0.08em',
-    color: 'var(--color-fg-subtle)',
+    color: 'var(--color-fg-muted)',
   },
   title: {
     fontFamily: 'var(--font-display)',
@@ -43,10 +43,10 @@ const s = stylex.create({
   meta: {
     fontFamily: 'var(--font-mono)',
     fontSize: 'var(--text-xs)',
-    color: 'var(--color-fg-subtle)',
+    color: 'var(--color-fg-muted)',
   },
   pending: {
-    color: 'var(--color-fg-subtle)',
+    color: 'var(--color-fg-muted)',
     fontSize: 'var(--text-s)',
   },
 })

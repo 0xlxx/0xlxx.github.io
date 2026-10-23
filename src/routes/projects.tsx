@@ -1,4 +1,5 @@
 import * as stylex from '@octanejs/stylex'
+import { PROJECTS } from '../content/projects'
 
 const s = stylex.create({
   root: {
@@ -41,19 +42,6 @@ const s = stylex.create({
   },
 })
 
-/** 项目列表暂时手写，数量少，还不需要数据源。 */
-const PROJECTS = [
-  {
-    name: 'paperfetcher',
-    href: 'https://github.com/0xlxx/paperfetcher',
-    desc: '抓取与检索学术论文的命令行工具，结果以 JSON 输出。',
-  },
-  {
-    name: 'paperreader',
-    href: 'https://github.com/0xlxx/paperreader',
-    desc: '检索并阅读本地 PDF / EPUB / TXT，支持按页或章节提取。',
-  },
-]
 
 export function Projects() {
   return (

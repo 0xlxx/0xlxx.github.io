@@ -13,7 +13,7 @@ const s = stylex.create({
     fontFamily: 'var(--font-mono)',
     fontSize: 'var(--text-xs)',
     letterSpacing: '0.14em',
-    color: 'var(--color-fg-subtle)',
+    color: 'var(--color-fg-muted)',
   },
   title: {
     fontFamily: 'var(--font-display)',

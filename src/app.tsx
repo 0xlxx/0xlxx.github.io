@@ -127,7 +127,7 @@ const s = stylex.create({
     },
   },
   railLink: {
-    color: 'var(--color-fg-subtle)',
+    color: 'var(--color-fg-muted)',
     transitionProperty: 'color',
     transitionDuration: '160ms',
     ':hover': {

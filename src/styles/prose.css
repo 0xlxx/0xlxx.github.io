@@ -67,7 +67,7 @@
 }
 
 .prose li::marker {
-  color: var(--color-fg-subtle);
+  color: var(--color-fg-muted);
 }
 
 .prose blockquote {
