@@ -7,7 +7,11 @@
   font-family: 'Newsreader';
   font-style: normal;
   font-weight: 400 500;
-  font-display: swap;
+  /*
+   * optional 而不是 swap：字体已在 index.html 里 preload，正常网络下能赶在首帧前就绪；
+   * 赶不上时就整页都用系统衬线字体，不会在页面画出来之后再换一次字、把正文顶位移。
+   */
+  font-display: optional;
   src: url('../assets/fonts/newsreader-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
     U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
@@ -17,7 +21,8 @@
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400 500;
-  font-display: swap;
+  /* 同 Newsreader：先 preload，赶不上首帧就用系统等宽字体，不做会引发位移的二次换字。 */
+  font-display: optional;
   src: url('../assets/fonts/jetbrains-mono-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
     U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
