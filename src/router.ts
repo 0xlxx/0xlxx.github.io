@@ -49,8 +49,8 @@ export const routeStore = createStore<string>(readPath())
 const scrollPositions = new Map<string, number>()
 /** 已经渲染出来的路由：popstate 触发时地址栏已经变了，得靠它才知道离开的是哪一页。 */
 let currentPath = routeStore.get()
-/** 本次切换要放回的滚动位置，由 App 在提交后、绘制前取走。 */
-let pendingScrollY: number | null = null
+/** 本次切换要放回的滚动位置，由 App 在提交后、绘制前取走；绑定目标路径，避免落到别的页面。 */
+let pendingScroll: { path: string; y: number } | null = null
 /**
  * 过渡期间施加在正文上的补偿位移（离开位置 − 目标位置）。
  *
@@ -58,25 +58,40 @@ let pendingScrollY: number | null = null
  * 就会被当成「滚了一下」推走——这正是切菜单时右侧内容莫名自动滚动的来源。所以过渡期间
  * 不动滚动，改为给正文挂一段反向位移，让两次截图的元素几何完全一致，只剩模糊淡入淡出。
  */
-let pendingTransitionOffset: number | null = null
-/** 过渡世代号：连着切两次时，前一次遗留的清理不能动到后一次的状态。 */
-let transitionGeneration = 0
+let pendingTransitionOffset: { path: string; offset: number } | null = null
+/**
+ * 导航世代号：每次导航都递增。过渡被下一次导航顶掉时，规范允许两个 update 回调
+ * 乱序执行，旧过渡的清理和提交都必须靠它作废，不能动到新导航的状态。
+ */
+let navigationGeneration = 0
+/**
+ * 仍在「撑高 + 补偿位移」状态的过渡。新导航开始时先把它落回真实位置，
+ * 否则撑高与位移会被下一个页面继承，永久留在 DOM 上。
+ */
+let activeScrollHold: { generation: number; path: string; destinationScrollY: number } | null = null
+/** 当前活动的视图过渡，用于无过渡导航（popstate / reduced motion）时主动跳过它。 */
+let activeViewTransition: ViewTransition | null = null
 
 /** 列表有 `/` 和 `/blog` 两种写法，归一成同一个键，滚动位置才对得上。 */
 function scrollKey(path: string): string {
   return path === '/blog' ? '/' : path
 }
 
-/** 取出并清空本次要放回的滚动位置；不是路由切换时为 null。 */
-export function takePendingScrollY(): number | null {
-  const y = pendingScrollY
-  pendingScrollY = null
+/**
+ * 取出并清空本次要放回的滚动位置；不是这个页面的切换时为 null。
+ * 路径不匹配说明这是上一页残留的值（过渡被顶掉后旧渲染才落地），直接忽略。
+ */
+export function takePendingScrollY(path: string): number | null {
+  if (pendingScroll?.path !== path) return null
+  const y = pendingScroll.y
+  pendingScroll = null
   return y
 }
 
-/** 取出本次要施加的补偿位移并清空；不是过渡切换时为 null。 */
-export function takeTransitionOffset(): number | null {
-  const offset = pendingTransitionOffset
+/** 取出本次要施加的补偿位移并清空；不是这个页面的过渡切换时为 null。 */
+export function takeTransitionOffset(path: string): number | null {
+  if (pendingTransitionOffset?.path !== path) return null
+  const offset = pendingTransitionOffset.offset
   pendingTransitionOffset = null
   return offset
 }
@@ -121,54 +136,107 @@ function releaseScrollHold(): void {
   document.body.style.removeProperty('overflow-anchor')
 }
 
+/**
+ * 过渡还没收尾就又导航了：把上一段过渡的撑高与补偿位移落回真实状态。
+ *
+ * 只有目标页已经提交时才滚到它的目标位置——若旧导航还在加载、根本没画出来，
+ * 用户看到的仍是出发页，此时滚动一下反而会跳。
+ */
+function settleScrollHold(): void {
+  const hold = activeScrollHold
+  if (!hold) return
+  activeScrollHold = null
+  if (routeStore.get() === hold.path) {
+    window.scrollTo({ top: hold.destinationScrollY, behavior: 'instant' })
+  }
+  releaseScrollHold()
+  setTransitionOffset(null)
+}
+
 /** 切换路由：先记住离开时的位置，再把目标页的位置准备好。 */
 function commit(next: string, transition = true): void {
   if (next === currentPath) return
+  const generation = (navigationGeneration += 1)
+
+  /*
+   * 上一次导航可能还在过渡中：先把它的临时滚动状态落回真实位置。
+   * 否则它的撑高和补偿位移会被新页面继承下来，而它的收尾早已因为世代过期而作废。
+   */
+  settleScrollHold()
+
   const sourcePath = currentPath
   const sourceScrollY = window.scrollY
   scrollPositions.set(scrollKey(sourcePath), sourceScrollY)
   currentPath = next
   const destinationScrollY = scrollPositions.get(scrollKey(next)) ?? 0
+
+  // 旧过渡的更新回调可能正挂在这个 Promise 上等一次永远不会到来的提交，先放它走。
+  pendingRouteCommit?.resolve()
+  pendingRouteCommit = null
+
   const useViewTransition =
     transition &&
+    // 过渡期间点了「当前正在显示的这一页」：DOM 不用换，再转一次只会白闪。
+    routeStore.get() !== next &&
     Boolean(document.startViewTransition) &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const update = () => routeStore.set(next)
+  const update = () => {
+    // 被后续导航顶掉时，规范允许旧过渡的 update 回调晚于新回调执行；世代对不上就别写回旧路由。
+    if (generation === navigationGeneration) routeStore.set(next)
+  }
 
   // 没有视图过渡（首屏、reduced motion、浏览器不支持）就照旧直接把滚动放回去。
   if (!useViewTransition || !document.startViewTransition) {
-    pendingScrollY = destinationScrollY
+    activeViewTransition?.skipTransition()
+    pendingTransitionOffset = null
+    pendingScroll = { path: next, y: destinationScrollY }
     update()
     return
   }
 
   const offset = sourceScrollY - destinationScrollY
   const compensateScroll = offset !== 0
-  const generation = (transitionGeneration += 1)
   if (compensateScroll) {
     // 落位改由过渡收尾时一次性完成，App 这次不要自己滚。
-    pendingScrollY = null
-    pendingTransitionOffset = offset
+    pendingScroll = null
+    pendingTransitionOffset = { path: next, offset }
+    activeScrollHold = { generation, path: next, destinationScrollY }
     holdScrollPosition(Math.max(sourceScrollY, destinationScrollY) + window.innerHeight)
   } else {
-    pendingScrollY = destinationScrollY
+    // 上一次导航若留下了位移，绝不能让它落到这个页面上。
+    pendingTransitionOffset = null
+    pendingScroll = { path: next, y: destinationScrollY }
   }
-  pendingRouteCommit?.resolve()
+
   const routeCommitted = new Promise<void>((resolve) => {
     pendingRouteCommit = { path: next, resolve }
   })
   const viewTransition = document.startViewTransition(async () => {
+    if (generation !== navigationGeneration) return
     update()
     // 等 Octane 提交新路由、layout effect 把补偿位移放好，再截取转场的新画面。
     await routeCommitted
   })
+  activeViewTransition = viewTransition
+  // 被下一次导航顶掉时 ready 会以 AbortError 拒绝；没人消费就会在控制台留下未处理异常。
+  void viewTransition.ready.catch(() => {})
+  void viewTransition.finished.then(
+    () => {
+      if (activeViewTransition === viewTransition) activeViewTransition = null
+    },
+    () => {
+      if (activeViewTransition === viewTransition) activeViewTransition = null
+    },
+  )
   if (!compensateScroll) return
 
   const finishScrollTransition = () => {
     // 这一次过渡被跳过时清理已经过期，收尾交给后一次过渡。
-    if (generation !== transitionGeneration) return
+    if (generation !== navigationGeneration) return
     const deadline = performance.now() + 1000
     const settle = () => {
+      // 重试期间又发生了导航：立刻停手，交给新导航收尾。
+      if (generation !== navigationGeneration) return
       releaseScrollHold()
       window.scrollTo({ top: destinationScrollY, behavior: 'instant' })
       // 目标页正文还没长到目标高度（例如文章正文懒加载）：先撑住高度、留着补偿位移，
@@ -179,6 +247,7 @@ function commit(next: string, transition = true): void {
         requestAnimationFrame(settle)
         return
       }
+      activeScrollHold = null
       // 撤销补偿位移与落位在同一帧里完成：滚动位置换了，画面却完全不动。
       setTransitionOffset(null)
     }
@@ -208,7 +277,7 @@ window.addEventListener(
 )
 
 const entryScrollY = (window.history.state as EntryState | null)?.scrollY
-if (typeof entryScrollY === 'number') pendingScrollY = entryScrollY
+if (typeof entryScrollY === 'number') pendingScroll = { path: readPath(), y: entryScrollY }
 
 window.addEventListener('popstate', () => {
   commit(readPath(), false)
@@ -216,7 +285,11 @@ window.addEventListener('popstate', () => {
 
 export function navigate(to: string, options?: { replace?: boolean; transition?: boolean }): void {
   const next = to.startsWith('/') ? to : `/${to}`
-  if (next === routeStore.get()) return
+  /*
+   * 和地址栏比，而不是和已渲染的 routeStore 比：过渡期间新路由还没提交时，
+   * 后者仍是出发页，会把用户在过渡中点的第二次导航当成「已经在这页」直接丢掉。
+   */
+  if (next === readPath()) return
 
   if (options?.replace) window.history.replaceState(null, '', next)
   else window.history.pushState(null, '', next)

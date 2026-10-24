@@ -257,12 +257,12 @@ export function App() {
    */
   useLayoutEffect(() => {
     if (!renderPage && !routeLoadFailed) return
-    const offset = takeTransitionOffset()
+    const offset = takeTransitionOffset(path)
     if (offset !== null) {
       setTransitionOffset(offset)
       return
     }
-    const y = takePendingScrollY()
+    const y = takePendingScrollY(path)
     if (y === null) return
     window.scrollTo({ top: y, behavior: 'instant' })
     // 文章正文是异步载入的，刚回来时页面还不够高，位置会被夹住。等它长起来再放一次；
